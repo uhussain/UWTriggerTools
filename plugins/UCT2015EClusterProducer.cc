@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Sridhara Rao Dasu
 //         Created:  Thu Jun  7 13:29:52 CDT 2012
-// $Id: UCT2015EClusterProducer.cc,v 1.5 2013/01/29 11:58:57 friis Exp $
+// $Id: UCT2015EClusterProducer.cc,v 1.7 2013/02/22 17:08:09 friis Exp $
 //
 //
 
@@ -186,7 +186,9 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
       std::cout << "UCT2015EClusterProducer: Illegal value for ecalCollection->id().ieta() -- should never be zero!" << std::endl;
       return;
     }
-    unsigned int iPhi = (N_TOWER_PHI + 18 - cal_iphi) % N_TOWER_PHI; // transform TOWERS (not regions) into local rct (intuitive) phi bins
+
+    // TPG iPhi starts at 1 and goes to 72.  Let's index starting at zero.
+    unsigned int iPhi = (cal_iphi-1);
     eTowerETCode[iPhi][iEta] = ecalCollection[i].compressedEt();
     eTowerFGVeto[iPhi][iEta] = (bool) ecalCollection[i].fineGrain();     // 0 or 1
   }
@@ -322,7 +324,7 @@ void UCT2015EClusterProducer::makeEClusters() {
 	  neighborNE_et = eTowerETCode[N][E];
 	  neighborSE_et = eTowerETCode[S][E];
 	}
-	else if(iEta == N_TOWER_ETA) {
+	else if(iEta == N_TOWER_ETA - 1) {
 	  unsigned int W = iEta - 1;
 	  neighborN_et = eTowerETCode[N][iEta];
 	  neighborS_et = eTowerETCode[S][iEta];

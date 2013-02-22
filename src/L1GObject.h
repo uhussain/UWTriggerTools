@@ -28,7 +28,7 @@ public:
 
   L1GObject(unsigned int et, unsigned int eta, unsigned int phi, string name = "L1GObject", bool twrGranularity = false)
     : myEt(et), myEta(eta), myPhi(phi), myName(name), myTwrGranularity(twrGranularity) {initialize();}
-    
+
   L1GObject(unsigned int packedObject, string name = "L1GObject", bool twrGranularity = false) {
     myEt = (packedObject & 0xFFFF0000) >> 16;
     myEta = (packedObject & 0x0000FF00) >> 8;
@@ -59,6 +59,9 @@ public:
       myEta = t.myEta;
       myEt = t.myEt;
       associatedRegionEt_ = t.associatedRegionEt_;
+      associatedSecondRegionEt_ = t.associatedSecondRegionEt_;
+      mipsInAnnulus_ = t.mipsInAnnulus_;
+      egFlagsInAnnulus_ = t.egFlagsInAnnulus_;
       associatedJetPt_ = t.associatedJetPt_;
       ellIsolation_ = t.ellIsolation_;
       puLevel_ = t.puLevel_;
@@ -78,6 +81,9 @@ public:
 	  myEta = t.myEta;
 	  myEt = t.myEt;
           associatedRegionEt_ = t.associatedRegionEt_;
+          associatedSecondRegionEt_ = t.associatedSecondRegionEt_;
+          mipsInAnnulus_ = t.mipsInAnnulus_;
+          egFlagsInAnnulus_ = t.egFlagsInAnnulus_;
           associatedJetPt_ = t.associatedJetPt_;
           ellIsolation_ = t.ellIsolation_;
           puLevel_ = t.puLevel_;
@@ -139,14 +145,20 @@ public:
 
   unsigned int etaIndex() const {
     if(myTwrGranularity) {
-      return myEta / 4;
+      // 4 towers per region.  Non-HF regions start at ieta=4 in RCT land.
+      return (myEta / 4) + 4;
     }
     return myEta;
   }
 
   unsigned int phiIndex() const {
     if(myTwrGranularity) {
-      return myPhi / 4;
+      unsigned int phiIdx = (myPhi - 1)/ 4;
+      if (phiIdx == 18) {
+        // 70 and 71 are actually in GCT phi 0
+        phiIdx = 0;
+      }
+      return phiIdx;
     }
     return myPhi;
   }
@@ -155,14 +167,14 @@ public:
     if(myTwrGranularity) {
       return myEta;
     }
-    return myEta * 4 - 2;
+    return (myEta - 4) * 4;
   }
 
   unsigned int phiTwrIndex() const {
     if(myTwrGranularity) {
       return myPhi;
     }
-    return myPhi * 4 - 2;
+    return myPhi * 4 + 1;
   }
 
   bool twrGranularity() const {return myTwrGranularity;}
@@ -275,6 +287,9 @@ public:
   //double puLevelUIC() const { return puLevelUIC_; }
   unsigned int puLevelUIC() const { return puLevelUIC_; }
   double associatedRegionEt() const { return associatedRegionEt_; }
+  double associatedSecondRegionEt() const { return associatedSecondRegionEt_; }
+  unsigned int mipsInAnnulus() const { return mipsInAnnulus_; }
+  unsigned int egFlagsInAnnulus() const { return egFlagsInAnnulus_; }
   bool ellIsolation() const { return ellIsolation_; };
   bool tauVeto() const { return tauVeto_; }
   bool mipBit() const { return mipBit_; }
@@ -284,6 +299,9 @@ public:
   //double puLevelUIC_;
   unsigned int  puLevelUIC_;
   double associatedRegionEt_;
+  double associatedSecondRegionEt_;
+  unsigned int mipsInAnnulus_;
+  unsigned int egFlagsInAnnulus_;
   bool ellIsolation_;
 
   // For the EG objects, don't require this to build the object, just embed it.

@@ -49,8 +49,12 @@ class RateTree : public edm::EDAnalyzer {
     bool isUCT_;
     std::vector<Float_t>* jetPt_;
     std::vector<Float_t>* regionPt_;
+    std::vector<Float_t>* secondRegionPt_;
     std::vector<Int_t>* ellIso_;
     std::vector<Int_t>* pu_;
+    std::vector<Int_t>* puUIC_;
+    std::vector<Int_t>* mipsInAnnulus_;
+    std::vector<Int_t>* egFlagsInAnnulus_;
     std::vector<bool>* taus_;
     std::vector<bool>* mips_;
 
@@ -79,14 +83,22 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   isUCT_ = pset.getParameter<bool>("isUCT");
   jetPt_ = new std::vector<Float_t>();
   regionPt_ = new std::vector<Float_t>();
+  secondRegionPt_ = new std::vector<Float_t>();
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Int_t>();
+  puUIC_ = new std::vector<Int_t>();
+  mipsInAnnulus_ = new std::vector<Int_t>();
+  egFlagsInAnnulus_ = new std::vector<Int_t>();
 
   if (isUCT_) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
     tree->Branch("regionPt", "std::vector<float>", &regionPt_);
+    tree->Branch("secondRegionPt", "std::vector<float>", &secondRegionPt_);
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<int>", &pu_);
+    tree->Branch("puUIC", "std::vector<int>", &puUIC_);
+    tree->Branch("mipsInAnnulus", "std::vector<int>", &mipsInAnnulus_);
+    tree->Branch("egFlagsInAnnulus", "std::vector<int>", &egFlagsInAnnulus_);
     tree->Branch("tauVeto", "std::vector<bool>", &taus_);
     tree->Branch("mipBit", "std::vector<bool>", &mips_);
   }
@@ -104,6 +116,7 @@ RateTree::~RateTree() {
   delete regionPt_;
   delete ellIso_;
   delete pu_;
+  delete puUIC_;
   delete mips_;
   delete taus_;
 }
@@ -154,8 +167,12 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   phis_->clear();
   jetPt_->clear();
   regionPt_->clear();
+  secondRegionPt_->clear();
   ellIso_->clear();
   pu_->clear();
+  puUIC_->clear();
+  mipsInAnnulus_->clear();
+  egFlagsInAnnulus_->clear();
   taus_->clear();
   mips_->clear();
 
@@ -181,8 +198,12 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       assert(l1g);
       jetPt_->push_back(l1g->associatedJetPt());
       regionPt_->push_back(l1g->associatedRegionEt());
+      secondRegionPt_->push_back(l1g->associatedSecondRegionEt());
       ellIso_->push_back(l1g->ellIsolation());
       pu_->push_back(l1g->puLevel());
+      puUIC_->push_back(l1g->puLevelUIC());
+      mipsInAnnulus_->push_back(l1g->mipsInAnnulus());
+      egFlagsInAnnulus_->push_back(l1g->egFlagsInAnnulus());
       mips_->push_back(l1g->mipBit());
       taus_->push_back(l1g->tauVeto());
     }
@@ -194,8 +215,12 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   phis_->push_back(-9999);
   jetPt_->push_back(-9999);
   regionPt_->push_back(-9999);
+  secondRegionPt_->push_back(-9999);
   ellIso_->push_back(-9999);
   pu_->push_back(-9999);
+  puUIC_->push_back(-9999);
+  mipsInAnnulus_->push_back(-9999);
+  egFlagsInAnnulus_->push_back(-9999);
   mips_->push_back(-9999);
   taus_->push_back(-9999);
 

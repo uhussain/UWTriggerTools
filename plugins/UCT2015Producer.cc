@@ -13,7 +13,7 @@
 //
 // Original Author:  Sridhara Rao Dasu
 //         Created:  Thu Jun  7 13:29:52 CDT 2012
-// $Id: UCT2015Producer.cc,v 1.20 2013/01/17 11:57:51 friis Exp $
+// $Id: UCT2015Producer.cc,v 1.22 2013/02/21 13:07:51 friis Exp $
 //
 //
 
@@ -40,17 +40,13 @@
 #include "DataFormats/L1CaloTrigger/interface/L1CaloRegionDetId.h"
 
 #include "L1Trigger/UCT2015/src/L1GObject.h"
+#include "L1Trigger/UCT2015/interface/helpers.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 using namespace std;
 using namespace edm;
-
-//
-// class declaration
-//
-//
 
 // mapping GCT eta to physical eta
 const double _etaValues[11] = {
@@ -94,13 +90,25 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
-  double egPhysicalEt(const L1CaloEmCand& cand) {
+  double egPhysicalEt(const L1CaloEmCand& cand) const {
     return egLSB_*cand.rank();
   }
 
-  double regionPhysicalEt(const L1CaloRegion& cand) {
+  double regionPhysicalEt(const L1CaloRegion& cand) const {
     return regionLSB_*cand.et();
   }
+
+  // Find information about observables in the annulus.  We define the annulus
+  // as all regions around the central region, with the exception of the second
+  // highest in ET, as this could be sharing the 2x1.
+  // MIPS in annulus refers to number of regions in the annulus which have
+  // their MIP bit set.
+  // egFlags is the number where (!tauVeto && !mip)
+  void findAnnulusInfo(int ieta, int iphi,
+      const L1CaloRegionCollection& regions,
+      double* associatedSecondRegionEt,
+      unsigned int* mipsInAnnulus,
+      unsigned int* egFlagsInAnnulus) const;
 
   double jetcorr(const double ptraw, const int ieta, const uint pu) {
 
@@ -683,21 +691,8 @@ void UCT2015Producer::makeSums()
   METSIGObject = L1GObject(significance, 0, iPhi, "MET");
 }
 
-int deltaPhi18(int phi1, int phi2) {
-  // Compute the difference in phi between two towers, wrapping at phi = 18
-  int difference = phi1 - phi2;
-  if (std::abs(phi1 - phi2) == 17) {
-    difference = -difference/std::abs(difference);
-  }
-  return difference;
-}
-
 int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2) {
-  return deltaPhi18(r1.gctPhi(), r2.gctPhi());
-}
-
-void debug(const std::string& dir, const L1CaloRegion& r1, const L1CaloRegion& r2) {
-  //std::cout << "Found " << dir << " neighbor of (" << r1.gctPhi() << "," << r1.gctEta() << ") at (" << r2.gctPhi() << "," << r2.gctEta() << ")" << std::endl;
+  return deltaPhiWrapAtN(18, r1.gctPhi(), r2.gctPhi());
 }
 
 void UCT2015Producer::makeJets() {
@@ -723,56 +718,48 @@ void UCT2015Producer::makeJets() {
 	   (newRegion->gctEta()    ) == neighbor->gctEta()) {
 	  neighborN_et = neighborET;
           nNeighbors++;
-          debug("N", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
 		(newRegion->gctEta()    ) == neighbor->gctEta()) {
 	  neighborS_et = neighborET;
           nNeighbors++;
-          debug("S", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 0 &&
 		(newRegion->gctEta() + 1) == neighbor->gctEta()) {
 	  neighborE_et = neighborET;
           nNeighbors++;
-          debug("E", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 0 &&
 		(newRegion->gctEta() - 1) == neighbor->gctEta()) {
 	  neighborW_et = neighborET;
           nNeighbors++;
-          debug("W", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 1 &&
 		(newRegion->gctEta() + 1) == neighbor->gctEta()) {
 	  neighborNE_et = neighborET;
           nNeighbors++;
-          debug("NE", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
 		(newRegion->gctEta() - 1) == neighbor->gctEta()) {
 	  neighborSW_et = neighborET;
           nNeighbors++;
-          debug("SW", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 1 &&
 		(newRegion->gctEta() - 1) == neighbor->gctEta()) {
 	  neighborNW_et = neighborET;
           nNeighbors++;
-          debug("NW", *newRegion, *neighbor);
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
 		(newRegion->gctEta() + 1) == neighbor->gctEta()) {
 	  neighborSE_et = neighborET;
           nNeighbors++;
-          debug("SE", *newRegion, *neighbor);
 	  continue;
 	}
       }
@@ -872,6 +859,66 @@ list<L1GObject> UCT2015Producer::correctJets(list<L1GObject> jets, string L1ObjN
 
 }
 
+// Given a region at iphi/ieta, find the highest region in the surrounding
+// regions.
+void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
+    const L1CaloRegionCollection& regions,
+    double* associatedSecondRegionEt,
+    unsigned int* mipsInAnnulus,
+    unsigned int* egFlagsInAnnulus) const {
+
+  unsigned int neighborsFound = 0;
+  unsigned int mipsCount = 0;
+  unsigned int egFlagCount = 0;
+  double highestNeighborEt = 0;
+  // We don't want to count the contribution of the highest neighbor, this allows
+  // us to subtract off the highest neighbor at the end, so we only loop once.
+  bool highestNeighborHasMip = false;
+  bool highestNeighborHasEGFlag = false;
+
+  for(L1CaloRegionCollection::const_iterator region = regions.begin();
+      region != regions.end(); region++) {
+    int regionPhi = region->gctPhi();
+    int regionEta = region->gctEta();
+    unsigned int deltaPhi = std::abs(deltaPhiWrapAtN(18, iphi, regionPhi));
+    unsigned int deltaEta = std::abs(ieta - regionEta);
+    if ((deltaPhi + deltaEta) > 0 && deltaPhi < 2 && deltaEta < 2) {
+      double regionET = regionPhysicalEt(*region);
+      if (regionET > highestNeighborEt) {
+        highestNeighborEt = regionET;
+        // Keep track of what flags the highest neighbor has
+        highestNeighborHasMip = region->mip();
+        highestNeighborHasEGFlag = !region->mip() && !region->tauVeto();
+      }
+
+      // count how many neighbors pass the flags.
+      if (region->mip()) {
+        mipsCount++;
+      }
+      if (!region->mip() && !region->tauVeto()) {
+        egFlagCount++;
+      }
+
+      // If we already found all 8 neighbors, we don't need to keep looping
+      // over the regions.
+      neighborsFound++;
+      if (neighborsFound == 8) {
+        break;
+      }
+    }
+  }
+  // check if we need to remove the highest neighbor from the flag count.
+  if (highestNeighborHasMip)
+    mipsCount--;
+  if (highestNeighborHasEGFlag)
+    egFlagCount--;
+
+  // set output
+  *associatedSecondRegionEt = highestNeighborEt;
+  *mipsInAnnulus = mipsCount;
+  *egFlagsInAnnulus = egFlagCount;
+}
+
 void UCT2015Producer::makeEGTaus() {
   rlxTauList.clear();
   isoTauList.clear();
@@ -900,12 +947,25 @@ void UCT2015Producer::makeEGTaus() {
 	    // A 2x1 and 1x2 cluster above egtSeed is always in tau list
 	    rlxTauList.push_back(L1GObject(et, egtCand->regionId().ieta(), egtCand->regionId().iphi(), "Tau"));
 
+            // Find the highest region in the 3x3 annulus around the center
+            // region.
+            double associatedSecondRegionEt = 0;
+            unsigned int mipsInAnnulus = 0;
+            unsigned int egFlagsInAnnulus = 0;
+            findAnnulusInfo(
+                egtCand->regionId().ieta(), egtCand->regionId().iphi(),
+                *newRegions,
+                &associatedSecondRegionEt, &mipsInAnnulus, &egFlagsInAnnulus);
+
             // Embed the isolation information in the L1GObject for later
             // tuning
             rlxTauList.back().associatedJetPt_ = -3; // we haven't found the jet yet.
             rlxTauList.back().puLevel_= puLevel;
 	    rlxTauList.back().puLevelUIC_ = puLevelUIC;
             rlxTauList.back().associatedRegionEt_= regionEt;
+            rlxTauList.back().associatedSecondRegionEt_= associatedSecondRegionEt;
+            rlxTauList.back().mipsInAnnulus_= mipsInAnnulus;
+            rlxTauList.back().egFlagsInAnnulus_= egFlagsInAnnulus;
             rlxTauList.back().ellIsolation_= egtCand->isolated();
 
 	    // Note tauVeto now refers to emActivity pattern veto; Good patterns are from EG candidates
@@ -915,6 +975,9 @@ void UCT2015Producer::makeEGTaus() {
             rlxEGList.back().associatedJetPt_ = -3; // we haven't found the jet yet.
             rlxEGList.back().puLevel_ = puLevel;
             rlxEGList.back().associatedRegionEt_ = regionEt;
+            rlxEGList.back().associatedSecondRegionEt_= associatedSecondRegionEt;
+            rlxEGList.back().mipsInAnnulus_= mipsInAnnulus;
+            rlxEGList.back().egFlagsInAnnulus_= egFlagsInAnnulus;
             rlxEGList.back().ellIsolation_ = egtCand->isolated();
             rlxEGList.back().tauVeto_ = region->tauVeto();
             rlxEGList.back().mipBit_ = region->mip();

@@ -69,7 +69,7 @@ if 'CMSSW_6' in os.environ['CMSSW_VERSION']:
 else:
     if not options.isMC:
         # CMSSW 5 data
-        process.GlobalTag.globaltag = 'GR_H_V28::All'
+        process.GlobalTag.globaltag = 'GR_R_53_V21::All'
     else:
         # CMSSW 5 MC
         process.GlobalTag.globaltag = 'START53_V7B::All'
@@ -149,6 +149,9 @@ common_ntuple_branches = cms.PSet(
     l1gPU = cms.string("? l1gMatch ? l1g.puLevel : -2"),
     l1gPUUIC = cms.string("? l1gMatch ? l1g.puLevelUIC : -2"),
     l1gRegionEt = cms.string("? l1gMatch ? l1g.associatedRegionEt : -2"),
+    l1g2ndRegionEt = cms.string("? l1gMatch ? l1g.associatedSecondRegionEt : -2"),
+    l1gMipsInAnnulus = cms.string("? l1gMatch ? l1g.mipsInAnnulus : -2"),
+    l1gEGFlagsInAnnulus = cms.string("? l1gMatch ? l1g.egFlagsInAnnulus : -2"),
     l1gJetPt = cms.string("? l1gMatch ? l1g.associatedJetPt : -2"),
     l1gEllIso = cms.string("? l1gMatch ? l1g.ellIsolation : -2"),
     l1gTauVeto = cms.string("? l1gMatch ? l1g.tauVeto : -2"),

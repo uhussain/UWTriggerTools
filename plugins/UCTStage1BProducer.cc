@@ -3,18 +3,8 @@
 // Package:    UCTStage1BProducer
 // Class:      UCTStage1BProducer
 //
-/**\class UCTStage1BProducer UCTStage1BProducer.cc L1Trigger/UCT2015/src/UCTStage1BProducer.cc
-
-Description: [one line class summary]
-
-Implementation:
-[Notes on implementation]
-*/
-//
 // Original Author:  Sridhara Rao Dasu
 //         Created:  Thu Jun  7 13:29:52 CDT 2012
-// $Id: UCTStage1BProducer.cc,v 1.2 2013/01/08 16:36:48 friis Exp $
-//
 //
 
 
@@ -40,17 +30,13 @@ Implementation:
 #include "DataFormats/L1CaloTrigger/interface/L1CaloRegionDetId.h"
 
 #include "L1Trigger/UCT2015/src/L1GObject.h"
+#include "L1Trigger/UCT2015/interface/helpers.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 using namespace std;
 using namespace edm;
-
-//
-// class declaration
-//
-//
 
 class UCTStage1BProducer : public edm::EDProducer {
 public:
@@ -104,7 +90,7 @@ private:
 
   Handle<L1CaloRegionCollection> newRegions;
   Handle<L1CaloRegionCollection> newEMRegions;
-  Handle<L1CaloEmCollection> newEMCands;
+  Handle<L1CaloEmCollection> tauCands;
   Handle<L1GObjectCollection> emClusters;
 
   list<L1GObject> rlxEGList;
@@ -166,7 +152,7 @@ UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
   iEvent.getByLabel("uctDigis", newRegions);
-  iEvent.getByLabel("uctDigis", newEMCands);
+  iEvent.getByLabel("uctDigis", tauCands);
   iEvent.getByLabel("UCT2015EClusterProducer", "EClustersUnpacked", emClusters);
   iEvent.getByLabel("UCT2015EClusterProducer", "ERegions", newEMRegions);
 
@@ -283,35 +269,35 @@ void UCTStage1BProducer::makeEGs() {
 	   (region->gctEta() == emClusterRegionIEta)) {
 	  C = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 1) &&
 		(region->gctEta() == (emClusterRegionIEta    ))) {
 	  N = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == -1) &&
 		(region->gctEta() == (emClusterRegionIEta    ))) {
 	  S = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 0) &&
 		(region->gctEta() == (emClusterRegionIEta + 1))) {
 	  E = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 0) &&
 		(region->gctEta() == (emClusterRegionIEta - 1))) {
 	  W = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 1) &&
 		(region->gctEta() == (emClusterRegionIEta + 1))) {
 	  NE = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 1) &&
 		(region->gctEta() == (emClusterRegionIEta - 1))) {
 	  NW = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == -1) &&
 		(region->gctEta() == (emClusterRegionIEta + 1))) {
 	  SE = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == -1) &&
 		(region->gctEta() == (emClusterRegionIEta - 1))) {
 	  SW = region->et();
 	}
@@ -339,35 +325,35 @@ void UCTStage1BProducer::makeEGs() {
 	   (region->gctEta() == emClusterRegionIEta)) {
 	  C = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 1) &&
 		(region->gctEta() == (emClusterRegionIEta    ))) {
 	  N = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == -1) &&
 		(region->gctEta() == (emClusterRegionIEta    ))) {
 	  S = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 0) &&
 		(region->gctEta() == (emClusterRegionIEta + 1))) {
 	  E = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 0) &&
 		(region->gctEta() == (emClusterRegionIEta - 1))) {
 	  W = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 1) &&
 		(region->gctEta() == (emClusterRegionIEta + 1))) {
 	  NE = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == 1) &&
 		(region->gctEta() == (emClusterRegionIEta - 1))) {
 	  NW = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == -1) &&
 		(region->gctEta() == (emClusterRegionIEta + 1))) {
 	  SE = region->et();
 	}
-	else if((region->gctPhi() == (emClusterRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), emClusterRegionIPhi) == -1) &&
 		(region->gctEta() == (emClusterRegionIEta - 1))) {
 	  SW = region->et();
 	}
@@ -407,8 +393,8 @@ void UCTStage1BProducer::makeEGs() {
 void UCTStage1BProducer::makeTaus() {
   rlxTauList.clear();
   isoTauList.clear();
-  for(L1CaloEmCollection::const_iterator tauCand = newEMCands->begin();
-      tauCand != newEMCands->end(); tauCand++){
+  for(L1CaloEmCollection::const_iterator tauCand = tauCands->begin();
+      tauCand != tauCands->end(); tauCand++){
     if(tauCand->rank() > tauSeed) {
       double tauCandEt = tauCand->rank() * tauLSB_;
       unsigned tauCandEtInRegionScale = tauCandEt / regionLSB_;
@@ -433,35 +419,35 @@ void UCTStage1BProducer::makeTaus() {
 	  // we can use the region ET instead as the tauCandEt
 	  if(C > tauCandEtCode) tauCandEtCode = C;
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
 		(region->gctEta() == (tauCandRegionIEta    ))) {
 	  N = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
 		(region->gctEta() == (tauCandRegionIEta    ))) {
 	  S = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
 		(region->gctEta() == (tauCandRegionIEta + 1))) {
 	  E = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
 		(region->gctEta() == (tauCandRegionIEta - 1))) {
 	  W = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
 		(region->gctEta() == (tauCandRegionIEta + 1))) {
 	  NE = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
 		(region->gctEta() == (tauCandRegionIEta - 1))) {
 	  NW = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
 		(region->gctEta() == (tauCandRegionIEta + 1))) {
 	  SE = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
 		(region->gctEta() == (tauCandRegionIEta - 1))) {
 	  SW = region->et();
 	}
@@ -489,35 +475,35 @@ void UCTStage1BProducer::makeTaus() {
 	   (region->gctEta() == tauCandRegionIEta)) {
 	  C = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
 		(region->gctEta() == (tauCandRegionIEta    ))) {
 	  N = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
 		(region->gctEta() == (tauCandRegionIEta    ))) {
 	  S = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
 		(region->gctEta() == (tauCandRegionIEta + 1))) {
 	  E = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi    )) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
 		(region->gctEta() == (tauCandRegionIEta - 1))) {
 	  W = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
 		(region->gctEta() == (tauCandRegionIEta + 1))) {
 	  NE = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi + 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
 		(region->gctEta() == (tauCandRegionIEta - 1))) {
 	  NW = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
 		(region->gctEta() == (tauCandRegionIEta + 1))) {
 	  SE = region->et();
 	}
-	else if((region->gctPhi() == (tauCandRegionIPhi - 1)) &&
+	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
 		(region->gctEta() == (tauCandRegionIEta - 1))) {
 	  SW = region->et();
 	}
@@ -532,8 +518,9 @@ void UCTStage1BProducer::makeTaus() {
       // Use finer grain position resolution if possible using the emClusters
       // with default value being center of the region
       // phi: 0-17 becomes 0-71; eta: 0-13 becomes 0-55;
-      unsigned tauCandIEta = tauCandRegionIEta * 4 + 2;
-      unsigned tauCandIPhi = tauCandRegionIPhi * 4 + 2;
+      unsigned tauCandIEta = (tauCandRegionIEta - 4) * 4;
+      unsigned tauCandIPhi = tauCandRegionIPhi * 4 + 1;
+      // FIXME make this next for loop work.
       for(vector<L1GObject>::const_iterator emCluster = emClusters->begin();
 	  emCluster != emClusters->end();
 	  emCluster++) {

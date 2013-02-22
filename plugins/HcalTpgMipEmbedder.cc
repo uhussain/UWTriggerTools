@@ -49,8 +49,8 @@ void HcalTpgMipEmbedder::produce(edm::Event& evt, const edm::EventSetup& es) {
   es.get<L1CaloHcalScaleRcd>().get(hcalScale);
 
   if (debug_) {
+    std::cout << "==== event ====" << std::endl;
     hcalScale->print(std::cout);
-    throw;
   }
 
   edm::Handle<HcalTrigPrimDigiCollection> tpgs;
@@ -65,6 +65,10 @@ void HcalTpgMipEmbedder::produce(edm::Event& evt, const edm::EventSetup& es) {
     short zside = tpg.id().zside();
     // Get the real energy
     double energy = hcalScale->et(tpg.SOI_compressedEt(), ieta, zside);
+    if (debug_) {
+      std::cout << ieta << " " << energy << std::endl;
+    }
+
     bool setMIP = false;
     if (cutOnRawBits_) {
       if (tpg.SOI_compressedEt() > rawthreshold_)
