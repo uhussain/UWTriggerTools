@@ -26,7 +26,7 @@
 #include "DataFormats/L1CaloTrigger/interface/L1CaloEmCand.h"
 #include "DataFormats/L1CaloTrigger/interface/L1CaloRegionDetId.h"
 
-#include "L1Trigger/UCT2015/src/L1GObject.h"
+#include "L1Trigger/UCT2015/interface/UCTCandidate.h"
 #include "L1Trigger/UCT2015/interface/helpers.h"
 #include "L1Trigger/UCT2015/interface/jetcorrections.h"
 
@@ -44,8 +44,8 @@ public:
   static const unsigned N_JET_ETA;
 
   // Concrete collection of L1Gobjects (with extra tuning information)
-  typedef vector<L1GObject> L1GObjectCollection;
-  typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
+  typedef vector<UCTCandidate> UCTCandidateCollection;
+  typedef std::auto_ptr<UCTCandidateCollection> UCTCandidateCollectionPtr;
 
   explicit UCT2015Producer(const edm::ParameterSet&);
 
@@ -80,7 +80,7 @@ private:
   void makeJets();
   void makeEGTaus();
 
-  list<L1GObject> correctJets(list<L1GObject>,string);
+  list<UCTCandidate> correctJets(list<UCTCandidate>);
 
   // ----------member data ---------------------------
 
@@ -111,21 +111,21 @@ private:
   unsigned int sumExtraHT;
   unsigned int extraMHT;
 
-  L1GObject METObject;
-  L1GObject MHTObject;
-  L1GObject SETObject;
-  L1GObject SHTObject;
+  UCTCandidate METObject;
+  UCTCandidate MHTObject;
+  UCTCandidate SETObject;
+  UCTCandidate SHTObject;
 
   unsigned int jetSeed;
-  list<L1GObject> jetList, corrJetList;
+  list<UCTCandidate> jetList, corrJetList;
 
   unsigned int egtSeed;
   double relativeIsolationCut;
   double relativeJetIsolationCut;
-  list<L1GObject> rlxTauList, corrRlxTauList;
-  list<L1GObject> rlxEGList;
-  list<L1GObject> isoTauList, corrIsoTauList;
-  list<L1GObject> isoEGList;
+  list<UCTCandidate> rlxTauList, corrRlxTauList;
+  list<UCTCandidate> rlxEGList;
+  list<UCTCandidate> isoTauList, corrIsoTauList;
+  list<UCTCandidate> isoEGList;
 
   Handle<L1CaloRegionCollection> newRegions;
   Handle<L1CaloEmCollection> newEMCands;
@@ -163,21 +163,21 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   puLevelUIC = 0.0;
 
   // Also declare we produce unpacked collections (which have more info)
-  produces<L1GObjectCollection>( "JetUnpacked" ) ;
-  produces<L1GObjectCollection>( "CorrJetUnpacked" ) ;
-  produces<L1GObjectCollection>( "RelaxedEGUnpacked" ) ;
-  produces<L1GObjectCollection>( "IsolatedEGUnpacked" ) ;
-  produces<L1GObjectCollection>( "RelaxedTauUnpacked" ) ;
-  produces<L1GObjectCollection>( "IsolatedTauUnpacked" ) ;
-  produces<L1GObjectCollection>( "CorrRelaxedTauUnpacked" ) ;
-  produces<L1GObjectCollection>( "CorrIsolatedTauUnpacked" ) ;
+  produces<UCTCandidateCollection>( "JetUnpacked" ) ;
+  produces<UCTCandidateCollection>( "CorrJetUnpacked" ) ;
+  produces<UCTCandidateCollection>( "RelaxedEGUnpacked" ) ;
+  produces<UCTCandidateCollection>( "IsolatedEGUnpacked" ) ;
+  produces<UCTCandidateCollection>( "RelaxedTauUnpacked" ) ;
+  produces<UCTCandidateCollection>( "IsolatedTauUnpacked" ) ;
+  produces<UCTCandidateCollection>( "CorrRelaxedTauUnpacked" ) ;
+  produces<UCTCandidateCollection>( "CorrIsolatedTauUnpacked" ) ;
 
-  produces<L1GObjectCollection>( "PULevelUnpacked" ) ;
-  produces<L1GObjectCollection>( "PULevelUICUnpacked" ) ;
-  produces<L1GObjectCollection>( "METUnpacked" ) ;
-  produces<L1GObjectCollection>( "MHTUnpacked" ) ;
-  produces<L1GObjectCollection>( "SETUnpacked" ) ;
-  produces<L1GObjectCollection>( "SHTUnpacked" ) ;
+  produces<UCTCandidateCollection>( "PULevelUnpacked" ) ;
+  produces<UCTCandidateCollection>( "PULevelUICUnpacked" ) ;
+  produces<UCTCandidateCollection>( "METUnpacked" ) ;
+  produces<UCTCandidateCollection>( "MHTUnpacked" ) ;
+  produces<UCTCandidateCollection>( "SETUnpacked" ) ;
+  produces<UCTCandidateCollection>( "SHTUnpacked" ) ;
 
   //now do what ever initialization is needed
   for(unsigned int i = 0; i < L1CaloRegionDetId::N_PHI; i++) {
@@ -188,11 +188,11 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
 
 
 // For the single objects, like MET/MHT, etc, convert them into a
-// std::auto_ptr<L1GObjectCollection> suitable for putting into the edm::Event
+// std::auto_ptr<UCTCandidateCollection> suitable for putting into the edm::Event
 // The "collection" contains only 1 object.
-UCT2015Producer::L1GObjectCollectionPtr collectionize(const L1GObject& obj) {
-  return UCT2015Producer::L1GObjectCollectionPtr(
-      new UCT2015Producer::L1GObjectCollection(1, obj));
+UCT2015Producer::UCTCandidateCollectionPtr collectionize(const UCTCandidate& obj) {
+  return UCT2015Producer::UCTCandidateCollectionPtr(
+      new UCT2015Producer::UCTCandidateCollection(1, obj));
 }
 
 // ------------ method called for each event  ------------
@@ -209,66 +209,70 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   makeJets();
   makeEGTaus();
 
-  L1GObjectCollectionPtr unpackedJets(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedRlxTaus(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedIsoTaus(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedCorrJets(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedCorrRlxTaus(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedCorrIsoTaus(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedRlxEGs(new L1GObjectCollection);
-  L1GObjectCollectionPtr unpackedIsoEGs(new L1GObjectCollection);
+  UCTCandidateCollectionPtr unpackedJets(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedRlxTaus(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedIsoTaus(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedCorrJets(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedCorrRlxTaus(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedCorrIsoTaus(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedRlxEGs(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedIsoEGs(new UCTCandidateCollection);
 
   //uncorrected Jet and Tau collections
-  for(list<L1GObject>::iterator jet = jetList.begin();
+  for(list<UCTCandidate>::iterator jet = jetList.begin();
       jet != jetList.end();
       jet++) {
     unpackedJets->push_back(*jet);
   }
-  for(list<L1GObject>::iterator rlxTau = rlxTauList.begin();
+  for(list<UCTCandidate>::iterator rlxTau = rlxTauList.begin();
       rlxTau != rlxTauList.end();
       rlxTau++) {
     unpackedRlxTaus->push_back(*rlxTau);
   }
-  for(list<L1GObject>::iterator isoTau = isoTauList.begin();
+  for(list<UCTCandidate>::iterator isoTau = isoTauList.begin();
       isoTau != isoTauList.end();
       isoTau++) {
     unpackedIsoTaus->push_back(*isoTau);
   }
   //corrected Jet and Tau collections
-  corrJetList=correctJets(jetList,"Jets");
-  corrRlxTauList=correctJets(rlxTauList,"Tau");
-  corrIsoTauList=correctJets(isoTauList,"IsoTau");
+  corrJetList = correctJets(jetList);
+  corrRlxTauList = correctJets(rlxTauList);
+  corrIsoTauList = correctJets(isoTauList);
 
-  for(list<L1GObject>::iterator jet = corrJetList.begin();
+  for(list<UCTCandidate>::iterator jet = corrJetList.begin();
       jet != corrJetList.end();
       jet++) {
     unpackedCorrJets->push_back(*jet);
   }
-  for(list<L1GObject>::iterator rlxTau = corrRlxTauList.begin();
+  for(list<UCTCandidate>::iterator rlxTau = corrRlxTauList.begin();
       rlxTau != corrRlxTauList.end();
       rlxTau++) {
     unpackedCorrRlxTaus->push_back(*rlxTau);
   }
-  for(list<L1GObject>::iterator isoTau = corrIsoTauList.begin();
+  for(list<UCTCandidate>::iterator isoTau = corrIsoTauList.begin();
       isoTau != corrIsoTauList.end();
       isoTau++) {
     unpackedCorrIsoTaus->push_back(*isoTau);
   }
 
   // egamma collections
-  for(list<L1GObject>::iterator rlxEG = rlxEGList.begin();
+  for(list<UCTCandidate>::iterator rlxEG = rlxEGList.begin();
       rlxEG != rlxEGList.end();
       rlxEG++) {
     unpackedRlxEGs->push_back(*rlxEG);
   }
-  for(list<L1GObject>::iterator isoEG = isoEGList.begin();
+  for(list<UCTCandidate>::iterator isoEG = isoEGList.begin();
       isoEG != isoEGList.end();
       isoEG++) {
     unpackedIsoEGs->push_back(*isoEG);
   }
 
-  iEvent.put(collectionize(puLevel), "PULevelUnpacked");
-  iEvent.put(collectionize(puLevelUIC), "PULevelUICUnpacked");
+  // Just store these as cands to make life easier.
+  UCTCandidate puLevelAsCand(puLevel, 0, 0);
+  UCTCandidate puLevelUICAsCand(puLevel, 0, 0);
+
+  iEvent.put(collectionize(puLevelAsCand), "PULevelUnpacked");
+  iEvent.put(collectionize(puLevelUICAsCand), "PULevelUICUnpacked");
   iEvent.put(collectionize(METObject), "METUnpacked");
   iEvent.put(collectionize(MHTObject), "MHTUnpacked");
   iEvent.put(collectionize(SETObject), "SETUnpacked");
@@ -342,12 +346,19 @@ void UCT2015Producer::makeSums()
   }
   MET = ((unsigned int) sqrt(sumEx * sumEx + sumEy * sumEy));
   MHT = ((unsigned int) sqrt(sumHx * sumHx + sumHy * sumHy));
-  unsigned int iPhi = L1CaloRegionDetId::N_PHI * (atan2(sumEy, sumEx) + 3.1415927) / (2 * 3.1415927);
-  METObject = L1GObject(MET, 0, iPhi, "MET");
-  iPhi = L1CaloRegionDetId::N_PHI * (atan2(sumHy, sumHx) + 3.1415927) / (2 * 3.1415927);
-  MHTObject = L1GObject(MHT, 0, iPhi, "MHT");
-  SETObject = L1GObject(sumET, 0, 0, "SumET");
-  SHTObject = L1GObject(sumHT, 0, 0, "SumHT");
+
+  double physicalPhi = atan2(sumEy, sumEx) + 3.1415927;
+  unsigned int iPhi = L1CaloRegionDetId::N_PHI * physicalPhi / (2 * 3.1415927);
+  METObject = UCTCandidate(MET, 0, physicalPhi);
+  METObject.setInt("phiIndex", iPhi);
+
+  double physicalPhiHT = atan2(sumHy, sumHx) + 3.1415927;
+  iPhi = L1CaloRegionDetId::N_PHI * (physicalPhiHT) / (2 * 3.1415927);
+  MHTObject = UCTCandidate(MHT, 0, physicalPhiHT);
+  MHTObject.setInt("phiIndex", iPhi);
+
+  SETObject = UCTCandidate(sumET, 0, 0);
+  SHTObject = UCTCandidate(sumHT, 0, 0);
 }
 
 int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2) {
@@ -462,12 +473,14 @@ void UCT2015Producer::makeJets() {
           std::cout << "phi: " << jetPhi << " eta: " << jetEta << " n: " << nNeighbors << std::endl;
           assert(false);
         }
-	jetList.push_back(L1GObject(jetET, jetEta, jetPhi, "Jet"));
+        UCTCandidate theJet(jetET, convertRegionEta(jetEta), convertRegionPhi(jetPhi));
+        theJet.setInt("rgnEta", jetEta);
+        theJet.setInt("rgnPhi", jetPhi);
         // Embed the puLevel information in the jet object for later tuning
-        jetList.back().puLevel_ = puLevel;
-       jetList.back().puLevelUIC_ = puLevelUIC;
+        theJet.setInt("puLevel", puLevel);
+        theJet.setInt("puLevelUIC", puLevelUIC);
         // Store information about the "core" PT of the jet (central region)
-        jetList.back().associatedRegionEt_ = regionET;
+        theJet.setInt("associatedRegionEt", regionET);
       }
     }
   }
@@ -475,47 +488,41 @@ void UCT2015Producer::makeJets() {
   jetList.reverse();
 }
 
-list<L1GObject> UCT2015Producer::correctJets(list<L1GObject> jets, string L1ObjName) {
-
-  list<L1GObject> corrlist;
-  if ( ! puCorrect ) return corrlist;  // jet corrections only valid if PU density has been calculated
+list<UCTCandidate>
+UCT2015Producer::correctJets(list<UCTCandidate> jets) {
+  // jet corrections only valid if PU density has been calculated
+  list<UCTCandidate> corrlist;
+  if (!puCorrect) return corrlist;
 
   corrlist.clear();
 
-  for(list<L1GObject>::iterator jet = jets.begin(); jet != jets.end(); jet++) {
+  for(list<UCTCandidate>::iterator jet = jets.begin(); jet != jets.end(); jet++) {
 
-    double jetET=jet->ptValue();
-    double jpt;
-    unsigned int corjetET=0;
+    const double jetET=jet->pt();
+    double jpt = 0;
+    unsigned int corjetET = 0;
 
-    //ccla  apply Michael's jet correction function
+    //apply Michael's jet correction function
     if (useUICrho){
-      jpt=jetcorrUIC(jetET,jet->etaIndex(),jet->puLevelUIC());
+      jpt = jetcorrUIC(jetET, jet->getInt("rgnEta"), jet->getInt("puLevelUIC"));
     }else{
-      jpt=jetcorr(jetET,jet->etaIndex(),jet->puLevel());
+      jpt = jetcorr(jetET, jet->getInt("rgnEta"), jet->getInt("puLevel"));
     }
-    if (jpt>0) corjetET = floor (jpt + 0.5);
+    if (jpt>0)
+      corjetET = floor(jpt + 0.5);
 
-    // std::cout << L1ObjName << " " << jetET << " " << jpt << " " << corjetET << std::endl;
-    corrlist.push_back(L1GObject(corjetET, jet->etaIndex(), jet->phiIndex(), L1ObjName));
+    UCTCandidate newJet = *jet;
+    newJet.setP4(reco::LeafCandidate::PolarLorentzVector(
+          corjetET, jet->eta(), jet->phi(), jet->mass()));
+    newJet.setInt("uncorrectedPt", jetET);
 
-    if (useUICrho){ // only store the PU density used for to obtain the JEC. Can be used to let user easily know which correction was used
-      corrlist.back().puLevel_ = 0;
-      corrlist.back().puLevelUIC_ = jet->puLevelUIC();
-    }else{
-      corrlist.back().puLevel_ = jet->puLevel();
-      corrlist.back().puLevelUIC_ = 0;
-    }
-    // Store information about the "core" PT of the jet (central region)
-    corrlist.back().associatedRegionEt_ = jet->associatedRegionEt();
-
+    corrlist.push_back(newJet);
   }
 
   corrlist.sort();
   corrlist.reverse();
 
   return corrlist;
-
 }
 
 // Given a region at iphi/ieta, find the highest region in the surrounding
@@ -594,17 +601,6 @@ void UCT2015Producer::makeEGTaus() {
 	   egtCand->regionId().ieta() == region->gctEta())
 	  {
             double regionEt = regionPhysicalEt(*region);
-            // Debugging
-            if (false && egtCand->rank() > regionEt) {
-              std::cout << "Mismatch!" << std::endl;
-              std::cout << "egPhi = " << egtCand->regionId().iphi() << std::endl;
-              std::cout << "egEta = " << egtCand->regionId().iphi() << std::endl;
-              std::cout << "egRank = " << egtCand->rank() << std::endl;
-              std::cout << "regionEt = " << regionEt << std::endl;
-              std::cout << "ratio = " << egtCand->rank()*1./regionEt << std::endl;
-            }
-	    // A 2x1 and 1x2 cluster above egtSeed is always in tau list
-	    rlxTauList.push_back(L1GObject(et, egtCand->regionId().ieta(), egtCand->regionId().iphi(), "Tau"));
 
             // Find the highest region in the 3x3 annulus around the center
             // region.
@@ -616,53 +612,54 @@ void UCT2015Producer::makeEGTaus() {
                 *newRegions,
                 &associatedSecondRegionEt, &mipsInAnnulus, &egFlagsInAnnulus);
 
-            // Embed the isolation information in the L1GObject for later
-            // tuning
-            rlxTauList.back().associatedJetPt_ = -3; // we haven't found the jet yet.
-            rlxTauList.back().puLevel_= puLevel;
-	    rlxTauList.back().puLevelUIC_ = puLevelUIC;
-            rlxTauList.back().associatedRegionEt_= regionEt;
-            rlxTauList.back().associatedSecondRegionEt_= associatedSecondRegionEt;
-            rlxTauList.back().mipsInAnnulus_= mipsInAnnulus;
-            rlxTauList.back().egFlagsInAnnulus_= egFlagsInAnnulus;
-            rlxTauList.back().ellIsolation_= egtCand->isolated();
+            UCTCandidate egtauCand(
+                et,
+                convertRegionEta(egtCand->regionId().ieta()),
+                convertRegionPhi(egtCand->regionId().iphi()));
 
-	    // Note tauVeto now refers to emActivity pattern veto; Good patterns are from EG candidates
+            // Add extra information to the candidate
+            egtauCand.setInt("rgnEta", egtCand->regionId().ieta());
+            egtauCand.setInt("rgnPhi", egtCand->regionId().iphi());
+            egtauCand.setInt("associatedJetPt", -3);
+            egtauCand.setInt("associatedRegionEt", regionEt);
+            egtauCand.setInt("associatedSecondRegionEt", associatedSecondRegionEt);
+            egtauCand.setInt("puLevel", puLevel);
+            egtauCand.setInt("puLevelUIC", puLevelUIC);
+            egtauCand.setInt("ellIsolation", egtCand->isolated());
+            egtauCand.setInt("tauVeto", region->tauVeto());
+            egtauCand.setInt("mipBit", region->mip());
+
+	    // A 2x1 and 1x2 cluster above egtSeed is always in tau list
+            rlxTauList.push_back(egtauCand);
+
+	    // Note tauVeto now refers to emActivity pattern veto;
+            // Good patterns are from EG candidates
             // EKF - temporarily remove selection, do it at ntuple level.
+
 	    //if(!region->tauVeto() && !region->mip()) {
-            rlxEGList.push_back(L1GObject(et, egtCand->regionId().ieta(), egtCand->regionId().iphi(), "EG"));
-            rlxEGList.back().associatedJetPt_ = -3; // we haven't found the jet yet.
-            rlxEGList.back().puLevel_ = puLevel;
-            rlxEGList.back().associatedRegionEt_ = regionEt;
-            rlxEGList.back().associatedSecondRegionEt_= associatedSecondRegionEt;
-            rlxEGList.back().mipsInAnnulus_= mipsInAnnulus;
-            rlxEGList.back().egFlagsInAnnulus_= egFlagsInAnnulus;
-            rlxEGList.back().ellIsolation_ = egtCand->isolated();
-            rlxEGList.back().tauVeto_ = region->tauVeto();
-            rlxEGList.back().mipBit_ = region->mip();
+            rlxEGList.push_back(egtauCand);
 	    //}
 
 	    // Look for overlapping jet and require that isolation be passed
-	    for(list<L1GObject>::iterator jet = jetList.begin(); jet != jetList.end(); jet++) {
-	      if(egtCand->regionId().iphi() == jet->phiIndex() &&
-		 egtCand->regionId().ieta() == jet->etaIndex()) {
+	    for(list<UCTCandidate>::iterator jet = jetList.begin(); jet != jetList.end(); jet++) {
+	      if((int)egtCand->regionId().iphi() == jet->getInt("rgnPhi") &&
+		 (int)egtCand->regionId().ieta() == jet->getInt("rgnEta")) {
                 // Embed tuning parameters into the relaxed objects
-                rlxTauList.back().associatedJetPt_ = jet->pt();
-                if (!region->tauVeto() && !region->mip())
-                  rlxEGList.back().associatedJetPt_ = jet->pt();
+                rlxTauList.back().setInt("associatedJetPt", jet->pt());
+                // EG ID disabled - EKF
+                //if (!region->tauVeto() && !region->mip())
+                  rlxEGList.back().setInt("associatedJetPt", jet->pt());
 
 		double isolation = regionEt - (regionLSB_*puLevel/9.) - et;   // Core isolation (could go less than zero)
 		double relativeIsolation = isolation / et;
-		double jetIsolation = jet->ptValue() - regionLSB_*puLevel - et;        // Jet isolation
+		double jetIsolation = jet->pt() - regionLSB_*puLevel - et;        // Jet isolation
 		double relativeJetIsolation = jetIsolation / et;
 		// A 2x1 and 1x2 cluster above egtSeed passing relative isolation will be in tau list
 		if(relativeIsolation < relativeIsolationCut && relativeJetIsolation < relativeJetIsolationCut && egtCand->isolated()) {
-		  isoTauList.push_back(L1GObject(et, egtCand->regionId().ieta(), egtCand->regionId().iphi(), "IsoTau"));
-		  isoTauList.back().puLevel_ = puLevel;
-		  isoTauList.back().puLevelUIC_ = puLevelUIC;
+                  isoTauList.push_back(rlxTauList.back());
 		  // Good patterns of EG candidate + relative isolation makes it to IsoEG
 		  if(!region->tauVeto() && !region->mip()) {
-		    isoEGList.push_back(L1GObject(et, egtCand->regionId().ieta(), egtCand->regionId().iphi(), "IsoEG"));
+		    isoEGList.push_back(rlxEGList.back());
 		  }
 		}
 		break;
