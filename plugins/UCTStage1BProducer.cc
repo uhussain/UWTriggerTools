@@ -46,17 +46,9 @@ public:
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
 
   explicit UCTStage1BProducer(const edm::ParameterSet&);
-  ~UCTStage1BProducer();
 
 private:
-  virtual void beginJob() ;
   virtual void produce(edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
   // Helper methods
 
@@ -97,9 +89,6 @@ private:
 
 };
 
-//
-// constructors and destructor
-//
 UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
   egSeed(iConfig.getParameter<unsigned int>("egSeed")),
@@ -117,24 +106,13 @@ UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
   tauLSB_(iConfig.getParameter<double>("tauLSB")),
   regionLSB_(iConfig.getParameter<double>("regionLSB"))
 {
-
   // Also declare we produce unpacked collections (which have more info)
   produces<L1GObjectCollection>( "RelaxedEGUnpacked" ) ;
   produces<L1GObjectCollection>( "IsolatedEGUnpacked" ) ;
   produces<L1GObjectCollection>( "RelaxedTauUnpacked" ) ;
   produces<L1GObjectCollection>( "IsolatedTauUnpacked" ) ;
-
 }
 
-
-UCTStage1BProducer::~UCTStage1BProducer()
-{
-}
-
-
-//
-// member functions
-//
 
 // ------------ method called for each event  ------------
 void
@@ -180,43 +158,6 @@ UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(unpackedRlxEGs, "RelaxedEGUnpacked");
   iEvent.put(unpackedIsoEGs, "IsolatedEGUnpacked");
 
-}
-
-
-// ------------ method called once each job just before starting event loop  ------------
-void
-UCTStage1BProducer::beginJob()
-{
-}
-
-// ------------ method called once each job just after ending the event loop  ------------
-void
-UCTStage1BProducer::endJob()
-{
-}
-
-// ------------ method called when starting to processes a run  ------------
-void
-UCTStage1BProducer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a run  ------------
-void
-UCTStage1BProducer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-void
-UCTStage1BProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-void
-UCTStage1BProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
 }
 
 void UCTStage1BProducer::makeEGs() {
