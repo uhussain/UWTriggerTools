@@ -187,7 +187,10 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
     phis_->push_back(objects[i]->phi());
     if (isUCT_) {
       const UCTCandidate* uct = dynamic_cast<const UCTCandidate*>(objects[i]);
-      assert(uct);
+      if (!uct) {
+        throw cms::Exception("bad input")
+          << "Can't convert input into UCT format!" << std::endl;
+      }
       jetPt_->push_back(uct->getFloat("associatedJetPt", -3));
       regionPt_->push_back(uct->getFloat("associatedRegionEt", -3));
       secondRegionPt_->push_back(uct->getFloat("associatedSecondRegionEt", -3));
