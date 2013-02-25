@@ -36,4 +36,8 @@ double convertRegionEta(int iEta);
 // Get the effective area of a region in a given eta slice.
 double getRegionArea(int gctEta);
 
+// Find GCT index of a given tower.
+int twrPhi2RegionPhi(int iPhi);
+int twrEta2RegionEta(int iEta);
+
 #endif /* end of include guard: HELPERS_W9QK6HND */

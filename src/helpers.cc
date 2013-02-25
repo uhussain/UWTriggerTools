@@ -102,3 +102,17 @@ double getRegionArea(int gctEta) {
   }
   return 0;
 }
+
+int twrPhi2RegionPhi(int iPhi) {
+  unsigned int rgnIdx = (iPhi - 1)/4;
+  // 70 and 71 are actually in GCT phi 0
+  if (rgnIdx == 18)
+    return 0;
+  return rgnIdx;
+}
+
+int twrEta2RegionEta(int iEta) {
+  // 4 towers per region.  Non-HF regions start at ieta=4 in RCT land.
+  unsigned int rgnIdx = (iEta / 4) + 4;
+  return rgnIdx;
+}
