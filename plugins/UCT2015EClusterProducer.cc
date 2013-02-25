@@ -27,7 +27,8 @@
 #include "CondFormats/L1TObjects/interface/L1CaloEcalScale.h"
 #include "CondFormats/DataRecord/interface/L1CaloEcalScaleRcd.h"
 
-#include "L1Trigger/UCT2015/src/L1GObject.h"
+#include "L1Trigger/UCT2015/interface/UCTCandidate.h"
+#include "L1Trigger/UCT2015/interface/helpers.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -43,8 +44,8 @@ public:
   static const unsigned int N_TOWER_ETA;
 
   // Concrete collection of output objects (with extra tuning information)
-  typedef vector<L1GObject> L1GObjectCollection;
-  typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
+  typedef vector<UCTCandidate> UCTCandidateCollection;
+  typedef std::auto_ptr<UCTCandidateCollection> UCTCandidateCollectionPtr;
 
   explicit UCT2015EClusterProducer(const edm::ParameterSet&);
 
@@ -63,7 +64,6 @@ private:
   bool puCorrect;
   unsigned int puETMax;
   unsigned int eClusterSeed;
-  double eLSB_;
 
   std::vector<edm::InputTag> ecalDigis;
 
@@ -72,7 +72,7 @@ private:
 
   unsigned int puLevel;
 
-  list<L1GObject> eClusterList;
+  list<UCTCandidate> eClusterList;
   L1CaloRegionCollection eRegionList;
 
 };
@@ -85,12 +85,11 @@ UCT2015EClusterProducer::UCT2015EClusterProducer(const edm::ParameterSet& iConfi
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
   puETMax(iConfig.getParameter<unsigned int>("puETMax")),
   eClusterSeed(iConfig.getParameter<unsigned int>("eClusterSeed")),
-  eLSB_(iConfig.getParameter<double>("ecalLSB")),
   ecalDigis(iConfig.getParameter<std::vector<edm::InputTag> >("ecalDigis")),
   eTowerETCode(N_TOWER_PHI, vector<unsigned int>(N_TOWER_ETA)),
   eTowerFGVeto(N_TOWER_PHI, vector<bool>(N_TOWER_ETA))
 {
-  produces<L1GObjectCollection>( "EClustersUnpacked" ) ;
+  produces<UCTCandidateCollection>( "EClustersUnpacked" ) ;
   produces<L1CaloRegionCollection>( "ERegions" );
 }
 
@@ -102,7 +101,7 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
   puLevel = 0;
 
-  L1GObjectCollectionPtr unpackedEClusters(new L1GObjectCollection);
+  UCTCandidateCollectionPtr unpackedEClusters(new UCTCandidateCollection);
   std::auto_ptr<L1CaloRegionCollection> ERegions (new L1CaloRegionCollection);
 
   edm::Handle<EcalTrigPrimDigiCollection> ecal;
@@ -139,7 +138,7 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
   makeEClusters();
   if(debug) printEClusters();
 
-  for(list<L1GObject>::iterator eCluster = eClusterList.begin();
+  for(list<UCTCandidate>::iterator eCluster = eClusterList.begin();
       eCluster != eClusterList.end();
       eCluster++) {
     unpackedEClusters->push_back(*eCluster);
@@ -256,9 +255,17 @@ void UCT2015EClusterProducer::makeEClusters() {
 	    neighborN_et + neighborS_et + neighborE_et + neighborW_et +
 	    neighborNE_et + neighborSW_et + neighborSE_et + neighborNW_et;
 	  // Temporarily use the tower (iPhi, iEta) -- todo: convert to half-tower resolution
-	  unsigned int eClusterPhi = iPhi;
-	  unsigned int eClusterEta = iEta;
-	  eClusterList.push_back(L1GObject(eClusterET, eClusterEta, eClusterPhi, "ECluster", true));
+          double realEt = eClusterET;
+          double realPhi = convertTPGPhi(iPhi);
+          double realEta = convertTPGEta(iEta);
+          UCTCandidate theCluster(realEt, realEta, realPhi);
+          theCluster.setInt("twrPhi", iPhi);
+          theCluster.setInt("twrEta", iEta);
+          theCluster.setFloat("centerEt", center_et);
+          theCluster.setInt("rgnPhi", twrPhi2RegionPhi(iPhi));
+          theCluster.setInt("rgnEta", twrEta2RegionEta(iEta));
+
+	  eClusterList.push_back(theCluster);
 	}
       }
     }
@@ -269,7 +276,7 @@ void UCT2015EClusterProducer::makeEClusters() {
 
 void UCT2015EClusterProducer::printEClusters() {
   std::cout << "eClusterList.size() = " << eClusterList.size() << std::endl;
-  for(list<L1GObject>::iterator eCluster = eClusterList.begin();
+  for(list<UCTCandidate>::iterator eCluster = eClusterList.begin();
       eCluster != eClusterList.end();
       eCluster++) {
     std::cout << *eCluster << std::endl;
