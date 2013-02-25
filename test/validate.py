@@ -26,14 +26,25 @@ branch_names = (x.GetName() for x in ntuple1.GetListOfBranches())
 
 entries = ntuple1.GetEntries()
 
+num_errors = 0
+
+num_above_15 = 0
+
 for i in range(entries):
     ntuple1.GetEntry(i)
     ntuple2.GetEntry(i)
+    if ntuple1.l1gPt > 15:
+        num_above_15 += 1
+
     for branch in branch_names:
         res1 = getattr(ntuple1, branch)
         res2 = getattr(ntuple2, branch)
         if res1 != res2:
-            print "mismatch event %i branch %s (%s != %s)" % (
-                i, branch, str(res1), str(res2))
+            print ntuple1.l1gPt
+            print ntuple2.l1gPt
+            print "mismatch event %i branch %s (%s %s != %s %s)" % (
+                i, branch, file1, str(res1), file2, str(res2))
+            num_errors += 1
 
-print "found no errors in %i entries" % entries
+print "found %i errors in %i entries, with %i high-pt events" % (
+    num_errors, entries, num_above_15)
