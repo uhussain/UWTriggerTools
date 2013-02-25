@@ -1,20 +1,7 @@
-// -*- C++ -*-
-//
-// Package:    UCT2015EClusterProducer
 // Class:      UCT2015EClusterProducer
-//
-/**\class UCT2015EClusterProducer UCT2015EClusterProducer.cc L1Trigger/UCT2015/src/UCT2015EClusterProducer.cc
-
-Description: [one line class summary]
-
-Implementation:
-[Notes on implementation]
-*/
 //
 // Original Author:  Sridhara Rao Dasu
 //         Created:  Thu Jun  7 13:29:52 CDT 2012
-// $Id: UCT2015EClusterProducer.cc,v 1.7 2013/02/22 17:08:09 friis Exp $
-//
 //
 
 
@@ -48,10 +35,6 @@ Implementation:
 using namespace std;
 using namespace edm;
 
-//
-// class declaration
-//
-//
 
 class UCT2015EClusterProducer : public edm::EDProducer {
 public:
@@ -64,20 +47,11 @@ public:
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
 
   explicit UCT2015EClusterProducer(const edm::ParameterSet&);
-  ~UCT2015EClusterProducer();
 
 private:
-  virtual void beginJob() ;
   virtual void produce(edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
   // Helper methods
-
   void puSubtraction();
   void makeERegions();
   void makeEClusters();
@@ -103,19 +77,9 @@ private:
 
 };
 
-//
-// constants, enums and typedefs
-//
-
-// static data member definitions
-//
-
 unsigned int const UCT2015EClusterProducer::N_TOWER_PHI = 72;
 unsigned int const UCT2015EClusterProducer::N_TOWER_ETA = 56;
 
-//
-// constructors and destructor
-//
 UCT2015EClusterProducer::UCT2015EClusterProducer(const edm::ParameterSet& iConfig) :
   debug(iConfig.getParameter<bool>("debug")),
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
@@ -130,15 +94,6 @@ UCT2015EClusterProducer::UCT2015EClusterProducer(const edm::ParameterSet& iConfi
   produces<L1CaloRegionCollection>( "ERegions" );
 }
 
-
-UCT2015EClusterProducer::~UCT2015EClusterProducer()
-{
-}
-
-
-//
-// member functions
-//
 
 // ------------ method called for each event  ------------
 void
@@ -192,43 +147,6 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
   iEvent.put(unpackedEClusters, "EClustersUnpacked");
   iEvent.put(ERegions, "ERegions");
-}
-
-
-// ------------ method called once each job just before starting event loop  ------------
-void
-UCT2015EClusterProducer::beginJob()
-{
-}
-
-// ------------ method called once each job just after ending the event loop  ------------
-void
-UCT2015EClusterProducer::endJob()
-{
-}
-
-// ------------ method called when starting to processes a run  ------------
-void
-UCT2015EClusterProducer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a run  ------------
-void
-UCT2015EClusterProducer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-void
-UCT2015EClusterProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-void
-UCT2015EClusterProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
 }
 
 // NB PU is not in the physical scale!!  Needs to be multiplied by regionLSB
