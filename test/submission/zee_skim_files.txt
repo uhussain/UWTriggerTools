@@ -1,4 +1,3 @@
-/store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_10_1_wd2.root
 /store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_11_1_2Z3.root
 /store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_12_1_oNf.root
 /store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_13_1_T29.root
@@ -11,3 +10,4 @@
 /store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_7_1_Jrw.root
 /store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_8_1_MDg.root
 /store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_9_1_vW5.root
+/store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_10_1_wd2.root
