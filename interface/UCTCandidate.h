@@ -18,6 +18,7 @@
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include <map>
 #include <string>
+#include <iostream>
 
 class UCTCandidate : public reco::LeafCandidate {
   public:
@@ -40,10 +41,10 @@ class UCTCandidate : public reco::LeafCandidate {
     void setInt(const std::string& item, int value);
     void setString(const std::string& item, const std::string& value);
 
-    // Sort by PT per default.
-    bool operator < (const UCTCandidate& other) {
-      return this->pt() < other.pt();
-    }
+    // Sort by ascending PT per default.
+    bool operator < (const UCTCandidate& other) const;
+
+    friend std::ostream& operator<<(std::ostream &os, const UCTCandidate& t);
 
   private:
     // data storage

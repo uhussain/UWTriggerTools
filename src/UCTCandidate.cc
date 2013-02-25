@@ -69,3 +69,13 @@ void UCTCandidate::setString(const std::string& item,
     const std::string& value) {
   stringData_[item] = value;
 }
+
+bool UCTCandidate::operator < (const UCTCandidate& other) const {
+  return this->pt() < other.pt();
+}
+
+std::ostream& operator<<(std::ostream &os, const UCTCandidate& t) {
+  os << "UCTCandidate(" << t.pt()
+    << ", " << t.eta() << ", " << t.phi() << ")";
+  return os;
+}
