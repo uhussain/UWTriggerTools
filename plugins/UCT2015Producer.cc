@@ -147,7 +147,6 @@ private:
   unsigned int extraMHT;
 
   L1GObject METObject;
-  L1GObject METSIGObject;
   L1GObject MHTObject;
   L1GObject SETObject;
   L1GObject SHTObject;
@@ -218,7 +217,6 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   produces<L1GObjectCollection>( "PULevelUnpacked" ) ;
   produces<L1GObjectCollection>( "PULevelUICUnpacked" ) ;
   produces<L1GObjectCollection>( "METUnpacked" ) ;
-  produces<L1GObjectCollection>( "METSIGUnpacked" ) ;
   produces<L1GObjectCollection>( "MHTUnpacked" ) ;
   produces<L1GObjectCollection>( "SETUnpacked" ) ;
   produces<L1GObjectCollection>( "SHTUnpacked" ) ;
@@ -326,7 +324,6 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(collectionize(MHTObject), "MHTUnpacked");
   iEvent.put(collectionize(SETObject), "SETUnpacked");
   iEvent.put(collectionize(SHTObject), "SHTUnpacked");
-  iEvent.put(collectionize(METSIGObject), "METSIGUnpacked");
 
   iEvent.put(unpackedJets, "JetUnpacked");
   iEvent.put(unpackedRlxTaus, "RelaxedTauUnpacked");
@@ -428,52 +425,6 @@ void UCT2015Producer::puSubtraction()
 
 }
 
-// Resolutions taken from:
-// http://cmslxr.fnal.gov/lxr/source/RecoMET/METProducers/python/CaloMETSignif_cfi.py
-
-namespace uct_metsig {
-
-double metSigEcalBarrelResolution(double et) {
-  const double par[3] = {0.2,0.03,0.005};
-  return et*sqrt((par[2]*par[2])+(par[1]*par[1]/et)+(par[0]*par[0]/(et*et)));
-}
-
-double metSigEcalEndCapResolution(double et) {
-  const double par[3] = {0.2,0.03,0.005};
-  return et*sqrt((par[2]*par[2])+(par[1]*par[1]/et)+(par[0]*par[0]/(et*et)));
-}
-
-double metSigHcalBarrelResolution(double et) {
-  const double par[3] = {0.,1.22,0.05};
-  return et*sqrt((par[2]*par[2])+(par[1]*par[1]/et)+(par[0]*par[0]/(et*et)));
-}
-
-double metSigHcalEndCapResolution(double et) {
-  const double par[3] = {0.,1.3,0.05};
-  return et*sqrt((par[2]*par[2])+(par[1]*par[1]/et)+(par[0]*par[0]/(et*et)));
-}
-
-double getEtResolution(bool isECAL, double et, int ieta) {
-  if (et == 0)
-    return 0;
-  if (isECAL) {
-    // ECAL like, use ECAL resolution
-    if (std::abs(etaValue(ieta)) > 1.5) {
-      return metSigEcalEndCapResolution(et);
-    } else {
-      return metSigEcalBarrelResolution(et);
-    }
-  } else {
-    if (std::abs(etaValue(ieta)) > 1.5) {
-      return metSigHcalEndCapResolution(et);
-    } else {
-      return metSigHcalBarrelResolution(et);
-    }
-  }
-}
-
-} // end uct_metsig (met significance functions).
-
 void UCT2015Producer::makeSums()
 {
   sumET = 0;
@@ -483,13 +434,6 @@ void UCT2015Producer::makeSums()
   sumHx = 0;
   sumHy = 0;
 
-  const double METSIG_LSB = 1./128.;
-  // The MET covariance matrix.
-  int cov00 = 0;
-  int cov01 = 0;
-  int cov10 = 0;
-  int cov11 = 0;
-
   for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin();
       newRegion != newRegions->end(); newRegion++){
     // Remove forward stuff
@@ -498,27 +442,6 @@ void UCT2015Producer::makeSums()
     }
     //unsigned int regionET = newRegion->et() - puLevel;
     double regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);
-    // Decide if it is ECAL-like or HCAL-like
-    bool isECAL = !newRegion->tauVeto() && !newRegion->mip();
-    double sigma_et = uct_metsig::getEtResolution(isECAL, regionET, newRegion->gctEta());
-    double sigmaPhi = 0.35;
-
-    double sigma0_2=sigma_et*sigma_et;
-    double sigma1_2=sigmaPhi*sigmaPhi*regionET*regionET;
-
-    double cosphi = cosPhi[newRegion->gctPhi()];
-    double sinphi = sinPhi[newRegion->gctPhi()];
-
-//    std::cout << "et: " << regionET << " sigma: " << sigma_et
-//      << " sigma02: " << sigma0_2 << " sigma12: " << sigma1_2
-//      << " cosphi: " << cosphi << " sinphi: " << sinphi << std::endl;
-
-    // Not sure how this will translate to a FPGA.  Lets give it a LSB of
-    // 0.125 GeV - these numbers should be small.
-    cov00 += (int) ((sigma0_2*cosphi*cosphi + sigma1_2*sinphi*sinphi) / METSIG_LSB);
-    cov01 += (int) ((cosphi*sinphi*(sigma0_2 - sigma1_2)) / METSIG_LSB);
-    cov10 += (int) ((cosphi*sinphi*(sigma0_2 - sigma1_2)) / METSIG_LSB);
-    cov11 += (int) ((sigma1_2*cosphi*cosphi + sigma0_2*sinphi*sinphi) / METSIG_LSB);
     if(regionET >= regionETCutForMET){
     	sumET += regionET;
     	sumEx += (int) (((double) regionET) * cosPhi[newRegion->gctPhi()]);
@@ -538,20 +461,6 @@ void UCT2015Producer::makeSums()
   MHTObject = L1GObject(MHT, 0, iPhi, "MHT");
   SETObject = L1GObject(sumET, 0, 0, "SumET");
   SHTObject = L1GObject(sumHT, 0, 0, "SumHT");
-
-  // Significance of MET = Transpose(met).Inverse(metCov).met
-  // One factor of METSIG_LSB cancels out.
-  int significance = (1./METSIG_LSB)*(
-      -(cov11*sumEx*sumEx) + sumEy*((cov01 + cov10)*sumEx - cov00*sumEy)
-      )/(cov01*cov10 - cov00*cov11);
-
-//  std::cout << "covariance:" << std::endl;
-//  std::cout << cov00 << " " << cov01 << std::endl;
-//  std::cout << cov10 << " " << cov11 << std::endl;
-//  std::cout << "ex: " << sumEx << " ey: " << sumEy << std::endl;
-//  std::cout << "sig: " << significance << std::endl;
-
-  METSIGObject = L1GObject(significance, 0, iPhi, "MET");
 }
 
 int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2) {
