@@ -1,20 +1,8 @@
-// -*- C++ -*-
 //
 // Package:    UCT2015Producer
-// Class:      UCT2015Producer
-//
-/**\class UCT2015Producer UCT2015Producer.cc L1Trigger/UCT2015/src/UCT2015Producer.cc
-
-   Description: [one line class summary]
-
-   Implementation:
-   [Notes on implementation]
-*/
 //
 // Original Author:  Sridhara Rao Dasu
 //         Created:  Thu Jun  7 13:29:52 CDT 2012
-// $Id: UCT2015Producer.cc,v 1.22 2013/02/21 13:07:51 friis Exp $
-//
 //
 
 
@@ -31,7 +19,6 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/L1CaloTrigger/interface/L1CaloCollections.h"
