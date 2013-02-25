@@ -18,7 +18,7 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "L1Trigger/UCT2015/src/L1GObject.h"
+#include "L1Trigger/UCT2015/interface/UCTCandidate.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -51,8 +51,8 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* regionPt_;
     std::vector<Float_t>* secondRegionPt_;
     std::vector<Int_t>* ellIso_;
-    std::vector<Int_t>* pu_;
-    std::vector<Int_t>* puUIC_;
+    std::vector<Float_t>* pu_;
+    std::vector<Float_t>* puUIC_;
     std::vector<bool>* taus_;
     std::vector<bool>* mips_;
 
@@ -83,16 +83,16 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   regionPt_ = new std::vector<Float_t>();
   secondRegionPt_ = new std::vector<Float_t>();
   ellIso_ = new std::vector<Int_t>();
-  pu_ = new std::vector<Int_t>();
-  puUIC_ = new std::vector<Int_t>();
+  pu_ = new std::vector<Float_t>();
+  puUIC_ = new std::vector<Float_t>();
 
   if (isUCT_) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
     tree->Branch("regionPt", "std::vector<float>", &regionPt_);
     tree->Branch("secondRegionPt", "std::vector<float>", &secondRegionPt_);
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
-    tree->Branch("pu", "std::vector<int>", &pu_);
-    tree->Branch("puUIC", "std::vector<int>", &puUIC_);
+    tree->Branch("pu", "std::vector<float>", &pu_);
+    tree->Branch("puUIC", "std::vector<float>", &puUIC_);
     tree->Branch("tauVeto", "std::vector<bool>", &taus_);
     tree->Branch("mipBit", "std::vector<bool>", &mips_);
   }
@@ -186,16 +186,16 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
     etas_->push_back(objects[i]->eta());
     phis_->push_back(objects[i]->phi());
     if (isUCT_) {
-      const L1GObject* l1g = dynamic_cast<const L1GObject*>(objects[i]);
-      assert(l1g);
-      jetPt_->push_back(l1g->associatedJetPt());
-      regionPt_->push_back(l1g->associatedRegionEt());
-      secondRegionPt_->push_back(l1g->associatedSecondRegionEt());
-      ellIso_->push_back(l1g->ellIsolation());
-      pu_->push_back(l1g->puLevel());
-      puUIC_->push_back(l1g->puLevelUIC());
-      mips_->push_back(l1g->mipBit());
-      taus_->push_back(l1g->tauVeto());
+      const UCTCandidate* uct = dynamic_cast<const UCTCandidate*>(objects[i]);
+      assert(uct);
+      jetPt_->push_back(uct->getFloat("associatedJetPt", -3));
+      regionPt_->push_back(uct->getFloat("associatedRegionEt", -3));
+      secondRegionPt_->push_back(uct->getFloat("associatedSecondRegionEt", -3));
+      ellIso_->push_back(uct->getInt("ellIsolation", -2));
+      pu_->push_back(uct->getFloat("puLevel"));
+      puUIC_->push_back(uct->getFloat("puLevelUIC"));
+      mips_->push_back(uct->getInt("mipBit", -1));
+      taus_->push_back(uct->getInt("tauVeto", -1));
     }
   }
 
