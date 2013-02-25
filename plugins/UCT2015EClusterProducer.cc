@@ -64,6 +64,7 @@ private:
   bool puCorrect;
   unsigned int puETMax;
   unsigned int eClusterSeed;
+  double eLSB_;
 
   std::vector<edm::InputTag> ecalDigis;
 
@@ -85,6 +86,7 @@ UCT2015EClusterProducer::UCT2015EClusterProducer(const edm::ParameterSet& iConfi
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
   puETMax(iConfig.getParameter<unsigned int>("puETMax")),
   eClusterSeed(iConfig.getParameter<unsigned int>("eClusterSeed")),
+  eLSB_(iConfig.getParameter<double>("ecalLSB")),
   ecalDigis(iConfig.getParameter<std::vector<edm::InputTag> >("ecalDigis")),
   eTowerETCode(N_TOWER_PHI, vector<unsigned int>(N_TOWER_ETA)),
   eTowerFGVeto(N_TOWER_PHI, vector<bool>(N_TOWER_ETA))
@@ -255,7 +257,7 @@ void UCT2015EClusterProducer::makeEClusters() {
 	    neighborN_et + neighborS_et + neighborE_et + neighborW_et +
 	    neighborNE_et + neighborSW_et + neighborSE_et + neighborNW_et;
 	  // Temporarily use the tower (iPhi, iEta) -- todo: convert to half-tower resolution
-          double realEt = eClusterET;
+          double realEt = eLSB_*eClusterET;
           double realPhi = convertTPGPhi(iPhi);
           double realEta = convertTPGEta(iEta);
           UCTCandidate theCluster(realEt, realEta, realPhi);

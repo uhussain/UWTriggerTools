@@ -44,7 +44,7 @@ UCT2015EClusterProducer = cms.EDProducer(
     puCorrect = cms.bool(True),
     puETMax = cms.uint32(7),
     eClusterSeed = cms.uint32(10),
-    ecalLSB = cms.double(0.5),
+    ecalLSB = cms.double(1.0),
     ecalDigis = cms.VInputTag(cms.InputTag("ecalDigis:EcalTriggerPrimitives"))
 )
 
@@ -80,6 +80,7 @@ UCTStage1BProducer = cms.EDProducer(
     tauRelativeJetIsolationCut = cms.double(0.1),
     tauRelativeEMRgnIsolationCut = cms.double(0.1),
     tauRelativeEMJetIsolationCut = cms.double(0.1),
+    egLSB = cms.double(0.5),
     tauLSB = cms.double(1.0),  # This has to correspond with the value from L1CaloEmThresholds
     regionLSB = RCTConfigProducers.jetMETLSB
 )
