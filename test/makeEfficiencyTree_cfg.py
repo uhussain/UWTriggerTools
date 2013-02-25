@@ -146,9 +146,9 @@ common_ntuple_branches = cms.PSet(
     l1gPhi = cms.string("? l1gMatch ? l1g.phi : 0"),
 
     # For tuning isolation and PU subtraction
-    l1gPU = cms.string("? l1gMatch ? l1g.getFloat('puLevel') : -2"),
-    l1gPUUIC = cms.string("? l1gMatch ? l1g.getFloat('puLevelUIC') : -2"),
-    l1gRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEt') : -2"),
+    l1gPU = cms.string("? l1gMatch ? l1g.getFloat('puLevel', -4) : -2"),
+    l1gPUUIC = cms.string("? l1gMatch ? l1g.getFloat('puLevelUIC', -4) : -2"),
+    l1gRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEt', -4) : -2"),
 
     l1gEtaCode = cms.vstring("? l1gMatch ? l1g.getInt('rgnEta') : 0", "I"),
     l1gPhiCode = cms.vstring("? l1gMatch ? l1g.getInt('rgnPhi') : 0", "I"),
@@ -159,11 +159,11 @@ common_ntuple_branches = cms.PSet(
 
 # Specific to EG tau objects
 egtau_branches = cms.PSet(
-    l1gJetPt = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPt') : -2"),
-    l1g2ndRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEt') : -2"),
-    l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation') : -2"),
-    l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto') : -2"),
-    l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit') : -2"),
+    l1gJetPt = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPt', -4) : -2"),
+    l1g2ndRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEt', -4) : -2"),
+    l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation', -4) : -2"),
+    l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto', -4) : -2"),
+    l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit', -4) : -2"),
 )
 
 # Keep track of electron isolation values
