@@ -49,20 +49,6 @@
 using namespace std;
 using namespace edm;
 
-// mapping GCT eta to physical eta
-const double _etaValues[11] = {
- 0.174, 0.522, 0.870, 1.218, 1.566, 1.956, 2.586, 3.250, 3.750, 4.250, 4.750
-};
-
-double etaValue(int myEta) {
-  if(myEta < 11) {
-    return -_etaValues[-(myEta - 10)]; // 0-10 are negative eta values
-  }
-  else if (myEta < 22) {
-    return _etaValues[myEta - 11];     // 11-21 are positive eta values
-  }
-  return 999.;
-}
 
 class UCT2015Producer : public edm::EDProducer {
 public:
