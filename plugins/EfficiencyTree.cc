@@ -4,7 +4,7 @@
  *       Filename:  EfficiencyTree.cc
  *
  *    Description:  Produce a tree for making efficiencies
- *                  Compares a reco object to an L1 object to a L1GObject.
+ *                  Compares a reco object to an L1 object to a UCTObject.
  *
  *         Author:  Evan Friis, evan.friis@cern.ch
  *        Company:  UW Madison
@@ -20,7 +20,6 @@
 
 #include "L1Trigger/UCT2015/interface/ExpressionNtuple.h"
 #include "L1Trigger/UCT2015/interface/L1RecoMatch.h"
-#include "L1Trigger/UCT2015/src/L1GObject.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 
