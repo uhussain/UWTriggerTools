@@ -34,6 +34,11 @@ class UCTCandidate : public reco::LeafCandidate {
     void setInt(const std::string& item, int value);
     void setString(const std::string& item, const std::string& value);
 
+    // Sort by PT per default.
+    bool operator < (const UCTCandidate& other) {
+      return this->pt() < other.pt();
+    }
+
   private:
     // data storage
     std::map<std::string, float> floatData_;
