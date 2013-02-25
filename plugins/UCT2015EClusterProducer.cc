@@ -59,14 +59,11 @@ public:
   static const unsigned int N_TOWER_PHI;
   static const unsigned int N_TOWER_ETA;
 
-  static const unsigned int N_ECLUSTER_PHI;
-  static const unsigned int N_ECLUSTER_ETA;
-
   // A packed uint = pt, eta, and phi packed into 32 bits
   typedef vector<unsigned int> PackedUIntCollection;
   typedef std::auto_ptr<PackedUIntCollection> PackedUIntCollectionPtr;
 
-  // Concrete collection of L1Gobjects (with extra tuning information)
+  // Concrete collection of output objects (with extra tuning information)
   typedef vector<L1GObject> L1GObjectCollection;
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
 
@@ -119,9 +116,6 @@ private:
 
 unsigned int const UCT2015EClusterProducer::N_TOWER_PHI = 72;
 unsigned int const UCT2015EClusterProducer::N_TOWER_ETA = 56;
-
-unsigned int const UCT2015EClusterProducer::N_ECLUSTER_PHI = N_TOWER_PHI * 2;
-unsigned int const UCT2015EClusterProducer::N_ECLUSTER_ETA = N_TOWER_ETA * 2;
 
 //
 // constructors and destructor
