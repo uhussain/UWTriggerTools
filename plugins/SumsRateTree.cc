@@ -38,7 +38,6 @@ class SumsRateTree : public edm::EDAnalyzer {
   private:
     edm::InputTag l1MHTSrc_;
     edm::InputTag l1METSrc_;
-    edm::InputTag l1METSigSrc_;
     edm::InputTag l1SHTSrc_;
     edm::InputTag l1SETSrc_;
 
@@ -46,7 +45,6 @@ class SumsRateTree : public edm::EDAnalyzer {
 
     Float_t l1MHT_;
     Float_t l1MET_;
-    Float_t l1METSig_;
     Float_t l1SHT_;
     Float_t l1SET_;
 
@@ -66,7 +64,6 @@ SumsRateTree::SumsRateTree(const edm::ParameterSet& pset) {
 
   tree->Branch("l1MHT", &l1MHT_, "l1MHT/F");
   tree->Branch("l1MET", &l1MET_, "l1MET/F");
-  tree->Branch("l1METSig", &l1METSig_, "l1METSig/F");
   tree->Branch("l1SHT", &l1SHT_, "l1SHT/F");
   tree->Branch("l1SET", &l1SET_, "l1SET/F");
 
@@ -78,8 +75,6 @@ SumsRateTree::SumsRateTree(const edm::ParameterSet& pset) {
 
   l1MHTSrc_ = pset.getParameter<edm::InputTag>("l1MHTSrc");
   l1METSrc_ = pset.getParameter<edm::InputTag>("l1METSrc");
-  l1METSigSrc_ = pset.exists("l1METSigSrc") ?
-    pset.getParameter<edm::InputTag>("l1METSigSrc") : l1METSrc_;
   l1SHTSrc_ = pset.getParameter<edm::InputTag>("l1SHTSrc");
   l1SETSrc_ = pset.getParameter<edm::InputTag>("l1SETSrc");
 
@@ -116,7 +111,6 @@ void SumsRateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
   l1MHT_ = getValue(evt, l1MHTSrc_);
   l1MET_ = getValue(evt, l1METSrc_);
-  if(getValue(evt, l1METSigSrc_)) l1METSig_=getValue(evt, l1METSigSrc_);
   l1SHT_ = getValue(evt, l1SHTSrc_);
   l1SET_ = getValue(evt, l1SETSrc_);
 
