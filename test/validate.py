@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 # Stupid check to ensure the validation files haven't changed
+#
+# Usage:
+# ./validate.py mt_numEvent200.root validation/mt_numEvent200.root rlxTauEfficiency/Ntuple
 
 import sys
 
