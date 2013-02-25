@@ -61,17 +61,9 @@ public:
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
 
   explicit UCT2015Producer(const edm::ParameterSet&);
-  ~UCT2015Producer();
 
 private:
-  virtual void beginJob() ;
   virtual void produce(edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
   double egPhysicalEt(const L1CaloEmCand& cand) const {
     return egLSB_*cand.rank();
@@ -159,13 +151,6 @@ private:
 
 };
 
-//
-// constants, enums and typedefs
-//
-
-// static data member definitions
-//
-
 unsigned const UCT2015Producer::N_JET_PHI = L1CaloRegionDetId::N_PHI * 4;
 unsigned const UCT2015Producer::N_JET_ETA = L1CaloRegionDetId::N_ETA * 4;
 
@@ -214,15 +199,6 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   }
 }
 
-
-UCT2015Producer::~UCT2015Producer()
-{
-}
-
-
-//
-// member functions
-//
 
 // For the single objects, like MET/MHT, etc, convert them into a
 // std::auto_ptr<L1GObjectCollection> suitable for putting into the edm::Event
@@ -321,46 +297,6 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(unpackedIsoEGs, "IsolatedEGUnpacked");
 
 }
-
-
-// ------------ method called once each job just before starting event loop  ------------
-void
-UCT2015Producer::beginJob()
-{
-}
-
-// ------------ method called once each job just after ending the event loop  ------------
-void
-UCT2015Producer::endJob()
-{
-}
-
-// ------------ method called when starting to processes a run  ------------
-void
-UCT2015Producer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a run  ------------
-void
-UCT2015Producer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-void
-UCT2015Producer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-void
-UCT2015Producer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-
-
 
 // NB PU is not in the physical scale!!  Needs to be multiplied by regionLSB
 void UCT2015Producer::puSubtraction()
