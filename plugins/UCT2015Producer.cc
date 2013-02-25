@@ -80,7 +80,7 @@ private:
   void makeJets();
   void makeEGTaus();
 
-  list<UCTCandidate> correctJets(list<UCTCandidate>);
+  list<UCTCandidate> correctJets(const list<UCTCandidate>&);
 
   // ----------member data ---------------------------
 
@@ -350,12 +350,12 @@ void UCT2015Producer::makeSums()
   double physicalPhi = atan2(sumEy, sumEx) + 3.1415927;
   unsigned int iPhi = L1CaloRegionDetId::N_PHI * physicalPhi / (2 * 3.1415927);
   METObject = UCTCandidate(MET, 0, physicalPhi);
-  METObject.setInt("phiIndex", iPhi);
+  METObject.setInt("rgnPhi", iPhi);
 
   double physicalPhiHT = atan2(sumHy, sumHx) + 3.1415927;
   iPhi = L1CaloRegionDetId::N_PHI * (physicalPhiHT) / (2 * 3.1415927);
   MHTObject = UCTCandidate(MHT, 0, physicalPhiHT);
-  MHTObject.setInt("phiIndex", iPhi);
+  MHTObject.setInt("rgnPhi", iPhi);
 
   SETObject = UCTCandidate(sumET, 0, 0);
   SHTObject = UCTCandidate(sumHT, 0, 0);
@@ -380,7 +380,6 @@ void UCT2015Producer::makeJets() {
       double neighborNW_et = 0;
       double neighborSE_et = 0;
       unsigned int nNeighbors = 0;
-      //std::cout << "Looking for seed @ " << newRegion->gctPhi() << " " << newRegion->gctEta() << std::endl;
       for(L1CaloRegionCollection::const_iterator neighbor = newRegions->begin();
 	  neighbor != newRegions->end(); neighbor++) {
 	double neighborET = regionPhysicalEt(*neighbor);
@@ -477,10 +476,10 @@ void UCT2015Producer::makeJets() {
         theJet.setInt("rgnEta", jetEta);
         theJet.setInt("rgnPhi", jetPhi);
         // Embed the puLevel information in the jet object for later tuning
-        theJet.setInt("puLevel", puLevel);
-        theJet.setInt("puLevelUIC", puLevelUIC);
+        theJet.setFloat("puLevel", puLevel);
+        theJet.setFloat("puLevelUIC", puLevelUIC);
         // Store information about the "core" PT of the jet (central region)
-        theJet.setInt("associatedRegionEt", regionET);
+        theJet.setFloat("associatedRegionEt", regionET);
       }
     }
   }
@@ -489,14 +488,14 @@ void UCT2015Producer::makeJets() {
 }
 
 list<UCTCandidate>
-UCT2015Producer::correctJets(list<UCTCandidate> jets) {
+UCT2015Producer::correctJets(const list<UCTCandidate>& jets) {
   // jet corrections only valid if PU density has been calculated
   list<UCTCandidate> corrlist;
   if (!puCorrect) return corrlist;
 
   corrlist.clear();
 
-  for(list<UCTCandidate>::iterator jet = jets.begin(); jet != jets.end(); jet++) {
+  for(list<UCTCandidate>::const_iterator jet = jets.begin(); jet != jets.end(); jet++) {
 
     const double jetET=jet->pt();
     double jpt = 0;
@@ -514,7 +513,7 @@ UCT2015Producer::correctJets(list<UCTCandidate> jets) {
     UCTCandidate newJet = *jet;
     newJet.setP4(reco::LeafCandidate::PolarLorentzVector(
           corjetET, jet->eta(), jet->phi(), jet->mass()));
-    newJet.setInt("uncorrectedPt", jetET);
+    newJet.setFloat("uncorrectedPt", jetET);
 
     corrlist.push_back(newJet);
   }
@@ -620,11 +619,11 @@ void UCT2015Producer::makeEGTaus() {
             // Add extra information to the candidate
             egtauCand.setInt("rgnEta", egtCand->regionId().ieta());
             egtauCand.setInt("rgnPhi", egtCand->regionId().iphi());
-            egtauCand.setInt("associatedJetPt", -3);
-            egtauCand.setInt("associatedRegionEt", regionEt);
-            egtauCand.setInt("associatedSecondRegionEt", associatedSecondRegionEt);
-            egtauCand.setInt("puLevel", puLevel);
-            egtauCand.setInt("puLevelUIC", puLevelUIC);
+            egtauCand.setFloat("associatedJetPt", -3);
+            egtauCand.setFloat("associatedRegionEt", regionEt);
+            egtauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
+            egtauCand.setFloat("puLevel", puLevel);
+            egtauCand.setFloat("puLevelUIC", puLevelUIC);
             egtauCand.setInt("ellIsolation", egtCand->isolated());
             egtauCand.setInt("tauVeto", region->tauVeto());
             egtauCand.setInt("mipBit", region->mip());
@@ -645,10 +644,10 @@ void UCT2015Producer::makeEGTaus() {
 	      if((int)egtCand->regionId().iphi() == jet->getInt("rgnPhi") &&
 		 (int)egtCand->regionId().ieta() == jet->getInt("rgnEta")) {
                 // Embed tuning parameters into the relaxed objects
-                rlxTauList.back().setInt("associatedJetPt", jet->pt());
+                rlxTauList.back().setFloat("associatedJetPt", jet->pt());
                 // EG ID disabled - EKF
                 //if (!region->tauVeto() && !region->mip())
-                  rlxEGList.back().setInt("associatedJetPt", jet->pt());
+                  rlxEGList.back().setFloat("associatedJetPt", jet->pt());
 
 		double isolation = regionEt - (regionLSB_*puLevel/9.) - et;   // Core isolation (could go less than zero)
 		double relativeIsolation = isolation / et;
