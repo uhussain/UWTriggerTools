@@ -24,10 +24,16 @@ class UCTCandidate : public reco::LeafCandidate {
     UCTCandidate();
     UCTCandidate(double pt, double eta, double phi, double mass=0);
 
-    // Data attribute retrieval
+    // Data attribute retrieval, throwing exceptions if attr is undefined.
     float getFloat(const std::string& item) const;
     int getInt(const std::string& item) const;
     const std::string getString(const std::string& item) const;
+
+    // Data attribute retrieval with a default value if the attr doesn't exist.
+    float getFloat(const std::string& item, float defaultVal) const;
+    int getInt(const std::string& item, int defaultVal) const;
+    const std::string getString(const std::string& item,
+        const std::string& defaultVal) const;
 
     // Data attribute definition
     void setFloat(const std::string& item, float value);
