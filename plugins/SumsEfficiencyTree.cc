@@ -48,12 +48,10 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
   private:
     edm::InputTag l1MHTSrc_;
     edm::InputTag l1METSrc_;
-    edm::InputTag l1METSigSrc_;
     edm::InputTag l1SHTSrc_;
     edm::InputTag l1SETSrc_;
     edm::InputTag recoMHTSrc_;
     edm::InputTag recoMETSrc_;
-    edm::InputTag recoMETSigSrc_;
     edm::InputTag recoSHTSrc_;
     edm::InputTag recoSETSrc_;
     edm::InputTag pvSrc_;
@@ -64,7 +62,6 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     Float_t l1MET_;
     Float_t l1MHTPhi_;
     Float_t l1METPhi_;
-    Float_t l1METSig_;
     Float_t l1SHT_;
     Float_t l1SET_;
 
@@ -72,7 +69,6 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     Float_t recoMET_;
     Float_t recoMHTPhi_;
     Float_t recoMETPhi_;
-    Float_t recoMETSig_;
     Float_t recoSHT_;
     Float_t recoSET_;
 
@@ -94,7 +90,6 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   tree->Branch("l1MET", &l1MET_, "l1MET/F");
   tree->Branch("l1MHTPhi", &l1MHTPhi_, "l1MHTPhi/F");
   tree->Branch("l1METPhi", &l1METPhi_, "l1METPhi/F");
-  tree->Branch("l1METSig", &l1METSig_, "l1METSig/F");
 
   tree->Branch("l1SHT", &l1SHT_, "l1SHT/F");
   tree->Branch("l1SET", &l1SET_, "l1SET/F");
@@ -103,7 +98,6 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   tree->Branch("recoMET", &recoMET_, "recoMET/F");
   tree->Branch("recoMHTPhi", &recoMHTPhi_, "recoMHTPhi/F");
   tree->Branch("recoMETPhi", &recoMETPhi_, "recoMETPhi/F");
-  tree->Branch("recoMETSig", &recoMETSig_, "recoMETSig/F");
 
   tree->Branch("recoSHT", &recoSHT_, "recoSHT/F");
   tree->Branch("recoSET", &recoSET_, "recoSET/F");
@@ -119,13 +113,11 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
 
   l1MHTSrc_ = pset.getParameter<edm::InputTag>("l1MHTSrc");
   l1METSrc_ = pset.getParameter<edm::InputTag>("l1METSrc");
-  l1METSigSrc_ = pset.getParameter<edm::InputTag>("l1METSigSrc");
   l1SHTSrc_ = pset.getParameter<edm::InputTag>("l1SHTSrc");
   l1SETSrc_ = pset.getParameter<edm::InputTag>("l1SETSrc");
 
   recoMHTSrc_ = pset.getParameter<edm::InputTag>("recoMHTSrc");
   recoMETSrc_ = pset.getParameter<edm::InputTag>("recoMETSrc");
-  recoMETSigSrc_ = pset.getParameter<edm::InputTag>("recoMETSigSrc");
   recoSHTSrc_ = pset.getParameter<edm::InputTag>("recoSHTSrc");
   recoSETSrc_ = pset.getParameter<edm::InputTag>("recoSETSrc");
 
@@ -194,11 +186,6 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
   getValue(evt, recoMETSrc_, recoMET_, recoMETPhi_);
 
-  edm::Handle<edm::View<reco::MET> > metForSig;
-  evt.getByLabel(recoMETSigSrc_, metForSig);
-
-  recoMETSig_ = metForSig->at(0).significance();
-
   Float_t dummyPhi;
 
   getValue(evt, recoSHTSrc_, recoSHT_, dummyPhi);
@@ -206,7 +193,6 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   getValue(evt, l1MHTSrc_, l1MHT_, l1MHTPhi_);
   getValue(evt, l1METSrc_, l1MET_, l1METPhi_);
-  getValue(evt, l1METSigSrc_, l1METSig_, dummyPhi);
   getValue(evt, l1SHTSrc_, l1SHT_, dummyPhi);
   getValue(evt, l1SETSrc_, l1SET_, dummyPhi);
 
