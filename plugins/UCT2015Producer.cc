@@ -480,6 +480,7 @@ void UCT2015Producer::makeJets() {
         theJet.setFloat("puLevelUIC", puLevelUIC);
         // Store information about the "core" PT of the jet (central region)
         theJet.setFloat("associatedRegionEt", regionET);
+        jetList.push_back(theJet);
       }
     }
   }
@@ -641,6 +642,7 @@ void UCT2015Producer::makeEGTaus() {
 
 	    // Look for overlapping jet and require that isolation be passed
 	    for(list<UCTCandidate>::iterator jet = jetList.begin(); jet != jetList.end(); jet++) {
+
 	      if((int)egtCand->regionId().iphi() == jet->getInt("rgnPhi") &&
 		 (int)egtCand->regionId().ieta() == jet->getInt("rgnEta")) {
                 // Embed tuning parameters into the relaxed objects
