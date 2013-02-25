@@ -3,9 +3,9 @@
   <class name="L1GObject"/>
   <class name="std::vector<L1GObject>"/>
   <class name="edm::Wrapper<std::vector<L1GObject> >"/>
-  <class name="DictCandidate"/>
-  <class name="std::vector<DictCandidate>"/>
-  <class name="edm::Wrapper<std::vector<DictCandidate> >"/>
+  <class name="UCTCandidate"/>
+  <class name="std::vector<UCTCandidate>"/>
+  <class name="edm::Wrapper<std::vector<UCTCandidate> >"/>
   <class name="L1RecoMatch"/>
 </selection>
 </lcgdict>
