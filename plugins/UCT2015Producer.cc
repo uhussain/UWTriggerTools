@@ -391,33 +391,11 @@ void UCT2015Producer::puSubtraction()
     if(regionPhysicalEt(*newRegion) <= puETMax) {
       puLevel += newRegion->et(); puCount++;
       r_puLevelUIC += newRegion->et();
-      if (newRegion->gctEta()==0) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==1) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==2) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==3) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==4) Rarea += 0.828*0.348;
-      if (newRegion->gctEta()==5) Rarea += 0.432*0.348;
-      if (newRegion->gctEta()==6) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==7) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==8) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==9) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==10) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==21) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==20) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==19) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==18) Rarea += 0.5*0.348;
-      if (newRegion->gctEta()==17) Rarea += 0.828*0.348;
-      if (newRegion->gctEta()==16) Rarea += 0.432*0.348;
-      if (newRegion->gctEta()==15) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==14) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==13) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==12) Rarea += 0.348*0.348;
-      if (newRegion->gctEta()==11) Rarea += 0.348*0.348;
+      Rarea += getRegionArea(newRegion->gctEta());
     }
   }
   // Add a factor of 9, so it corresponds to a jet.  Reduces roundoff error.
   puLevel *= 9;
-  // std::cout << puLevel << " : " << puCount << " : " << puLevel/puCount << std::endl;
   puLevel = puLevel / puCount;
   r_puLevelUIC = r_puLevelUIC / Rarea;
   puLevelUIC=0;

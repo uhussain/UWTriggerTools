@@ -74,3 +74,31 @@ double convertTPGEta(int iEta) {
   else
     return etaValue;
 }
+
+double getRegionArea(int gctEta) {
+  switch (gctEta) {
+    case 0: return 0.5*0.348;
+    case 1: return 0.5*0.348;
+    case 2: return 0.5*0.348;
+    case 3: return 0.5*0.348;
+    case 4: return 0.828*0.348;
+    case 5: return 0.432*0.348;
+    case 6: return 0.348*0.348;
+    case 7: return 0.348*0.348;
+    case 8: return 0.348*0.348;
+    case 9: return 0.348*0.348;
+    case 10: return 0.348*0.348;
+    case 21: return 0.5*0.348;
+    case 20: return 0.5*0.348;
+    case 19: return 0.5*0.348;
+    case 18: return 0.5*0.348;
+    case 17: return 0.828*0.348;
+    case 16: return 0.432*0.348;
+    case 15: return 0.348*0.348;
+    case 14: return 0.348*0.348;
+    case 13: return 0.348*0.348;
+    case 12: return 0.348*0.348;
+    case 11: return 0.348*0.348;
+  }
+  return 0;
+}

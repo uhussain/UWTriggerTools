@@ -33,4 +33,7 @@ double convertRegionPhi(int iPhi);
 // Convert a region index into physical eta (at center of region)
 double convertRegionEta(int iEta);
 
+// Get the effective area of a region in a given eta slice.
+double getRegionArea(int gctEta);
+
 #endif /* end of include guard: HELPERS_W9QK6HND */
