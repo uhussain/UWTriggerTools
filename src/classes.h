@@ -24,4 +24,6 @@ namespace {
   std::vector<UCTCandidate> dummyUCTCandCollection;
   edm::Wrapper<std::vector<UCTCandidate> > dummyUCTCandCollectionWrapper;
 
+  std::map<std::string, float> dummyMap;
+
 }

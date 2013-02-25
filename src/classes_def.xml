@@ -7,5 +7,6 @@
   <class name="std::vector<UCTCandidate>"/>
   <class name="edm::Wrapper<std::vector<UCTCandidate> >"/>
   <class name="L1RecoMatch"/>
+  <class name="std::map<std::string, float>"/> 
 </selection>
 </lcgdict>
