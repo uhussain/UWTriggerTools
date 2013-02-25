@@ -53,8 +53,6 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Int_t>* ellIso_;
     std::vector<Int_t>* pu_;
     std::vector<Int_t>* puUIC_;
-    std::vector<Int_t>* mipsInAnnulus_;
-    std::vector<Int_t>* egFlagsInAnnulus_;
     std::vector<bool>* taus_;
     std::vector<bool>* mips_;
 
@@ -87,8 +85,6 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Int_t>();
   puUIC_ = new std::vector<Int_t>();
-  mipsInAnnulus_ = new std::vector<Int_t>();
-  egFlagsInAnnulus_ = new std::vector<Int_t>();
 
   if (isUCT_) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
@@ -97,8 +93,6 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<int>", &pu_);
     tree->Branch("puUIC", "std::vector<int>", &puUIC_);
-    tree->Branch("mipsInAnnulus", "std::vector<int>", &mipsInAnnulus_);
-    tree->Branch("egFlagsInAnnulus", "std::vector<int>", &egFlagsInAnnulus_);
     tree->Branch("tauVeto", "std::vector<bool>", &taus_);
     tree->Branch("mipBit", "std::vector<bool>", &mips_);
   }
@@ -171,8 +165,6 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   ellIso_->clear();
   pu_->clear();
   puUIC_->clear();
-  mipsInAnnulus_->clear();
-  egFlagsInAnnulus_->clear();
   taus_->clear();
   mips_->clear();
 
@@ -202,8 +194,6 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       ellIso_->push_back(l1g->ellIsolation());
       pu_->push_back(l1g->puLevel());
       puUIC_->push_back(l1g->puLevelUIC());
-      mipsInAnnulus_->push_back(l1g->mipsInAnnulus());
-      egFlagsInAnnulus_->push_back(l1g->egFlagsInAnnulus());
       mips_->push_back(l1g->mipBit());
       taus_->push_back(l1g->tauVeto());
     }
@@ -219,8 +209,6 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   ellIso_->push_back(-9999);
   pu_->push_back(-9999);
   puUIC_->push_back(-9999);
-  mipsInAnnulus_->push_back(-9999);
-  egFlagsInAnnulus_->push_back(-9999);
   mips_->push_back(-9999);
   taus_->push_back(-9999);
 
