@@ -41,10 +41,6 @@ using namespace edm;
 class UCTStage1BProducer : public edm::EDProducer {
 public:
 
-  // A packed uint = pt, eta, and phi packed into 32 bits
-  typedef vector<unsigned int> PackedUIntCollection;
-  typedef std::auto_ptr<PackedUIntCollection> PackedUIntCollectionPtr;
-
   // Concrete collection of L1Gobjects (with extra tuning information)
   typedef vector<L1GObject> L1GObjectCollection;
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
@@ -122,12 +118,6 @@ UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
   regionLSB_(iConfig.getParameter<double>("regionLSB"))
 {
 
-  // Produces packed collections
-  produces<PackedUIntCollection>( "RelaxedEG" ) ;
-  produces<PackedUIntCollection>( "IsolatedEG" ) ;
-  produces<PackedUIntCollection>( "RelaxedTau" ) ;
-  produces<PackedUIntCollection>( "IsolatedTau" ) ;
-
   // Also declare we produce unpacked collections (which have more info)
   produces<L1GObjectCollection>( "RelaxedEGUnpacked" ) ;
   produces<L1GObjectCollection>( "IsolatedEGUnpacked" ) ;
@@ -159,11 +149,6 @@ UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   makeEGs();
   makeTaus();
 
-  PackedUIntCollectionPtr packedRlxTaus(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedIsoTaus(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedRlxEGs(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedIsoEGs(new PackedUIntCollection);
-
   L1GObjectCollectionPtr unpackedRlxTaus(new L1GObjectCollection);
   L1GObjectCollectionPtr unpackedIsoTaus(new L1GObjectCollection);
   L1GObjectCollectionPtr unpackedRlxEGs(new L1GObjectCollection);
@@ -172,32 +157,23 @@ UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(list<L1GObject>::iterator rlxTau = rlxTauList.begin();
       rlxTau != rlxTauList.end();
       rlxTau++) {
-    packedRlxTaus->push_back(rlxTau->packedObject());
     unpackedRlxTaus->push_back(*rlxTau);
   }
   for(list<L1GObject>::iterator isoTau = isoTauList.begin();
       isoTau != isoTauList.end();
       isoTau++) {
-    packedIsoTaus->push_back(isoTau->packedObject());
     unpackedIsoTaus->push_back(*isoTau);
   }
   for(list<L1GObject>::iterator rlxEG = rlxEGList.begin();
       rlxEG != rlxEGList.end();
       rlxEG++) {
-    packedRlxEGs->push_back(rlxEG->packedObject());
     unpackedRlxEGs->push_back(*rlxEG);
   }
   for(list<L1GObject>::iterator isoEG = isoEGList.begin();
       isoEG != isoEGList.end();
       isoEG++) {
-    packedIsoEGs->push_back(isoEG->packedObject());
     unpackedIsoEGs->push_back(*isoEG);
   }
-
-  iEvent.put(packedRlxTaus, "RelaxedTau");
-  iEvent.put(packedIsoTaus, "IsolatedTau");
-  iEvent.put(packedRlxEGs, "RelaxedEG");
-  iEvent.put(packedIsoEGs, "IsolatedEG");
 
   iEvent.put(unpackedRlxTaus, "RelaxedTauUnpacked");
   iEvent.put(unpackedIsoTaus, "IsolatedTauUnpacked");

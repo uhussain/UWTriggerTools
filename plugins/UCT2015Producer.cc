@@ -69,10 +69,6 @@ public:
   static const unsigned N_JET_PHI;
   static const unsigned N_JET_ETA;
 
-  // A packed uint = pt, eta, and phi packed into 32 bits
-  typedef vector<unsigned int> PackedUIntCollection;
-  typedef std::auto_ptr<PackedUIntCollection> PackedUIntCollectionPtr;
-
   // Concrete collection of L1Gobjects (with extra tuning information)
   typedef vector<L1GObject> L1GObjectCollection;
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
@@ -280,20 +276,6 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
 {
   puLevel = 0;
   puLevelUIC = 0.0;
-  produces<PackedUIntCollection>( "PULevel" ) ;
-  produces<PackedUIntCollection>( "PULevelUIC" ) ;
-  produces<PackedUIntCollection>( "MET" ) ;
-  produces<PackedUIntCollection>( "MHT" ) ;
-  produces<PackedUIntCollection>( "SET" ) ;
-  produces<PackedUIntCollection>( "SHT" ) ;
-  produces<PackedUIntCollection>( "Jet" ) ;
-  produces<PackedUIntCollection>( "CorrJet" ) ;
-  produces<PackedUIntCollection>( "RelaxedEG" ) ;
-  produces<PackedUIntCollection>( "IsolatedEG" ) ;
-  produces<PackedUIntCollection>( "RelaxedTau" ) ;
-  produces<PackedUIntCollection>( "IsolatedTau" ) ;
-  produces<PackedUIntCollection>( "CorrRelaxedTau" ) ;
-  produces<PackedUIntCollection>( "CorrIsolatedTau" ) ;
 
   // Also declare we produce unpacked collections (which have more info)
   produces<L1GObjectCollection>( "JetUnpacked" ) ;
@@ -352,23 +334,6 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   makeJets();
   makeEGTaus();
 
-
-  PackedUIntCollectionPtr packedPULevels(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedPULevelsUIC(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedMETs(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedMHTs(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedSETs(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedSHTs(new PackedUIntCollection);
-
-  PackedUIntCollectionPtr packedJets(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedRlxTaus(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedIsoTaus(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedCorrJets(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedCorrRlxTaus(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedCorrIsoTaus(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedRlxEGs(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedIsoEGs(new PackedUIntCollection);
-
   L1GObjectCollectionPtr unpackedJets(new L1GObjectCollection);
   L1GObjectCollectionPtr unpackedRlxTaus(new L1GObjectCollection);
   L1GObjectCollectionPtr unpackedIsoTaus(new L1GObjectCollection);
@@ -378,30 +343,20 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   L1GObjectCollectionPtr unpackedRlxEGs(new L1GObjectCollection);
   L1GObjectCollectionPtr unpackedIsoEGs(new L1GObjectCollection);
 
-  packedPULevels->push_back(puLevel);
-  packedPULevelsUIC->push_back(puLevelUIC);
-  packedMETs->push_back(METObject.packedObject());
-  packedMHTs->push_back(MHTObject.packedObject());
-  packedSETs->push_back(SETObject.packedObject());
-  packedSHTs->push_back(SHTObject.packedObject());
-
   //uncorrected Jet and Tau collections
   for(list<L1GObject>::iterator jet = jetList.begin();
       jet != jetList.end();
       jet++) {
-    packedJets->push_back(jet->packedObject());
     unpackedJets->push_back(*jet);
   }
   for(list<L1GObject>::iterator rlxTau = rlxTauList.begin();
       rlxTau != rlxTauList.end();
       rlxTau++) {
-    packedRlxTaus->push_back(rlxTau->packedObject());
     unpackedRlxTaus->push_back(*rlxTau);
   }
   for(list<L1GObject>::iterator isoTau = isoTauList.begin();
       isoTau != isoTauList.end();
       isoTau++) {
-    packedIsoTaus->push_back(isoTau->packedObject());
     unpackedIsoTaus->push_back(*isoTau);
   }
   //corrected Jet and Tau collections
@@ -412,19 +367,16 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(list<L1GObject>::iterator jet = corrJetList.begin();
       jet != corrJetList.end();
       jet++) {
-    packedCorrJets->push_back(jet->packedObject());
     unpackedCorrJets->push_back(*jet);
   }
   for(list<L1GObject>::iterator rlxTau = corrRlxTauList.begin();
       rlxTau != corrRlxTauList.end();
       rlxTau++) {
-    packedCorrRlxTaus->push_back(rlxTau->packedObject());
     unpackedCorrRlxTaus->push_back(*rlxTau);
   }
   for(list<L1GObject>::iterator isoTau = corrIsoTauList.begin();
       isoTau != corrIsoTauList.end();
       isoTau++) {
-    packedCorrIsoTaus->push_back(isoTau->packedObject());
     unpackedCorrIsoTaus->push_back(*isoTau);
   }
 
@@ -432,13 +384,11 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(list<L1GObject>::iterator rlxEG = rlxEGList.begin();
       rlxEG != rlxEGList.end();
       rlxEG++) {
-    packedRlxEGs->push_back(rlxEG->packedObject());
     unpackedRlxEGs->push_back(*rlxEG);
   }
   for(list<L1GObject>::iterator isoEG = isoEGList.begin();
       isoEG != isoEGList.end();
       isoEG++) {
-    packedIsoEGs->push_back(isoEG->packedObject());
     unpackedIsoEGs->push_back(*isoEG);
   }
 
@@ -450,15 +400,6 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(collectionize(SHTObject), "SHTUnpacked");
   iEvent.put(collectionize(METSIGObject), "METSIGUnpacked");
 
-  iEvent.put(packedJets, "Jet");
-  iEvent.put(packedRlxTaus, "RelaxedTau");
-  iEvent.put(packedIsoTaus, "IsolatedTau");
-  iEvent.put(packedCorrJets, "CorrJet");
-  iEvent.put(packedCorrRlxTaus, "CorrRelaxedTau");
-  iEvent.put(packedCorrIsoTaus, "CorrIsolatedTau");
-  iEvent.put(packedRlxEGs, "RelaxedEG");
-  iEvent.put(packedIsoEGs, "IsolatedEG");
-
   iEvent.put(unpackedJets, "JetUnpacked");
   iEvent.put(unpackedRlxTaus, "RelaxedTauUnpacked");
   iEvent.put(unpackedIsoTaus, "IsolatedTauUnpacked");
@@ -468,12 +409,6 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(unpackedRlxEGs, "RelaxedEGUnpacked");
   iEvent.put(unpackedIsoEGs, "IsolatedEGUnpacked");
 
-  iEvent.put(packedPULevels, "PULevel");
-  iEvent.put(packedPULevelsUIC, "PULevelUIC");
-  iEvent.put(packedMETs, "MET");
-  iEvent.put(packedMHTs, "MHT");
-  iEvent.put(packedSETs, "SET");
-  iEvent.put(packedSHTs, "SHT");
 }
 
 

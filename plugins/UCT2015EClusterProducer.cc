@@ -59,10 +59,6 @@ public:
   static const unsigned int N_TOWER_PHI;
   static const unsigned int N_TOWER_ETA;
 
-  // A packed uint = pt, eta, and phi packed into 32 bits
-  typedef vector<unsigned int> PackedUIntCollection;
-  typedef std::auto_ptr<PackedUIntCollection> PackedUIntCollectionPtr;
-
   // Concrete collection of output objects (with extra tuning information)
   typedef vector<L1GObject> L1GObjectCollection;
   typedef std::auto_ptr<L1GObjectCollection> L1GObjectCollectionPtr;
@@ -130,8 +126,6 @@ UCT2015EClusterProducer::UCT2015EClusterProducer(const edm::ParameterSet& iConfi
   eTowerETCode(N_TOWER_PHI, vector<unsigned int>(N_TOWER_ETA)),
   eTowerFGVeto(N_TOWER_PHI, vector<bool>(N_TOWER_ETA))
 {
-  produces<PackedUIntCollection>( "PULevel" ) ;
-  produces<PackedUIntCollection>( "EClusters" ) ;
   produces<L1GObjectCollection>( "EClustersUnpacked" ) ;
   produces<L1CaloRegionCollection>( "ERegions" );
 }
@@ -153,8 +147,6 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
   puLevel = 0;
 
-  PackedUIntCollectionPtr packedPULevels(new PackedUIntCollection);
-  PackedUIntCollectionPtr packedEClusters(new PackedUIntCollection);
   L1GObjectCollectionPtr unpackedEClusters(new L1GObjectCollection);
   std::auto_ptr<L1CaloRegionCollection> ERegions (new L1CaloRegionCollection);
 
@@ -188,7 +180,6 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
   }
 
   if(puCorrect) puSubtraction();
-  packedPULevels->push_back(puLevel);
   makeERegions();
   makeEClusters();
   if(debug) printEClusters();
@@ -196,12 +187,9 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
   for(list<L1GObject>::iterator eCluster = eClusterList.begin();
       eCluster != eClusterList.end();
       eCluster++) {
-    packedEClusters->push_back(eCluster->packedObject());
     unpackedEClusters->push_back(*eCluster);
   }
 
-  iEvent.put(packedPULevels, "PULevel");
-  iEvent.put(packedEClusters, "EClusters");
   iEvent.put(unpackedEClusters, "EClustersUnpacked");
   iEvent.put(ERegions, "ERegions");
 }
