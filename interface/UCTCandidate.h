@@ -4,7 +4,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  DictCandidate.h
+ *       Filename:  UCTCandidate.h
  *
  *    Description:  A simple candidate which has arbitrary float/int/string
  *                  data attached to it.
@@ -19,10 +19,10 @@
 #include <map>
 #include <string>
 
-class DictCandidate : public reco::LeafCandidate {
+class UCTCandidate : public reco::LeafCandidate {
   public:
-    DictCandidate();
-    DictCandidate(double pt, double eta, double phi, double mass=0);
+    UCTCandidate();
+    UCTCandidate(double pt, double eta, double phi, double mass=0);
 
     // Data attribute retrieval
     float getFloat(const std::string& item) const;

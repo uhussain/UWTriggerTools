@@ -10,7 +10,7 @@
  */
 
 #include "L1Trigger/UCT2015/interface/L1RecoMatch.h"
-#include "L1Trigger/UCT2015/interface/DictCandidate.h"
+#include "L1Trigger/UCT2015/interface/UCTCandidate.h"
 #include "L1Trigger/UCT2015/src/L1GObject.h"
 
 namespace {
@@ -20,8 +20,8 @@ namespace {
   std::vector<L1GObject> dummyL1GCollection;
   edm::Wrapper<std::vector<L1GObject> > dummyL1GWrapper;
 
-  DictCandidate dummytDictC;
-  std::vector<DictCandidate> dummyDictCandCollection;
-  edm::Wrapper<std::vector<DictCandidate> > dummyDictCandCollectionWrapper;
+  UCTCandidate dummytDictC;
+  std::vector<UCTCandidate> dummyUCTCandCollection;
+  edm::Wrapper<std::vector<UCTCandidate> > dummyUCTCandCollectionWrapper;
 
 }
