@@ -503,9 +503,9 @@ UCT2015Producer::correctJets(const list<UCTCandidate>& jets) {
 
     //apply Michael's jet correction function
     if (useUICrho){
-      jpt = jetcorrUIC(jetET, jet->getInt("rgnEta"), jet->getInt("puLevelUIC"));
+      jpt = jetcorrUIC(jetET, jet->getInt("rgnEta"), jet->getFloat("puLevelUIC"));
     }else{
-      jpt = jetcorr(jetET, jet->getInt("rgnEta"), jet->getInt("puLevel"));
+      jpt = jetcorr(jetET, jet->getInt("rgnEta"), jet->getFloat("puLevel"));
     }
     if (jpt>0)
       corjetET = floor(jpt + 0.5);
