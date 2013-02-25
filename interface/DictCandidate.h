@@ -22,8 +22,7 @@
 class DictCandidate : public reco::LeafCandidate {
   public:
     DictCandidate();
-    DictCandidate(int pdgId, int charge, double pt, double eta,
-        double phi, double mass);
+    DictCandidate(double pt, double eta, double phi, double mass=0);
 
     // Data attribute retrieval
     float getFloat(const std::string& item) const;

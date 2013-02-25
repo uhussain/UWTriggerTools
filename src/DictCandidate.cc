@@ -3,11 +3,10 @@
 
 DictCandidate::DictCandidate() : reco::LeafCandidate() {}
 
-DictCandidate::DictCandidate(int pdgId, int charge, double pt, double eta,
-    double phi, double mass) : reco::LeafCandidate(
-      charge,
-      reco::LeafCandidate::PolarLorentzVector(pt, eta, phi, mass),
-      reco::LeafCandidate::Point(0, 0, 0), pdgId) {
+DictCandidate::DictCandidate(double pt, double eta, double phi, double mass) :
+  reco::LeafCandidate(
+      0, reco::LeafCandidate::PolarLorentzVector(pt, eta, phi, mass),
+      reco::LeafCandidate::Point(0, 0, 0), 0) {
 }
 
 // Helper to retrieve an item from a std::map.  Throws exception if the key
