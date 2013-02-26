@@ -167,6 +167,15 @@ egtau_branches = cms.PSet(
     l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit', -4) : -2"),
 )
 
+stage1b_branches = cms.PSet(
+    l1gRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEtEM', -4) : -2"),
+    l1gJetPtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPtEM', -4) : -2"),
+    l1g2ndRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEtEM', -4) : -2"),
+    l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
+    # only defined for taus, EG objects are EM clusters by defintion.
+    l1gEmClusterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterEt', -4) : -2"),
+)
+
 # Keep track of electron isolation values
 electron_branches = cms.PSet(
     dr03TkSumPt  = cms.string("reco.dr03TkSumPt"),
@@ -344,6 +353,9 @@ if options.stage1B:
                              process.rlxEGEfficiencyStage1B,
                              process.rlxUCTisoL1EGEfficiencyStage1B]:
         stage1BTreeMaker.l1GSrc[0].setModuleLabel("UCTStage1BProducer")
+        for branch in stage1b_branches.parameterNames_():
+            setattr(stage1BTreeMaker.ntuple, branch,
+                    getattr(stage1b_branches, branch))
     # add the computation of stage1b trees
     process.p1 += process.leptonEfficienciesStage1B
 

@@ -263,7 +263,7 @@ void UCT2015EClusterProducer::makeEClusters() {
           UCTCandidate theCluster(realEt, realEta, realPhi);
           theCluster.setInt("twrPhi", iPhi);
           theCluster.setInt("twrEta", iEta);
-          theCluster.setFloat("centerEt", center_et);
+          theCluster.setFloat("emClusterCenterEt", center_et);
           theCluster.setInt("rgnPhi", twrPhi2RegionPhi(iPhi));
           theCluster.setInt("rgnEta", twrEta2RegionEta(iEta));
 
