@@ -131,7 +131,7 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
     // TPG iPhi starts at 1 and goes to 72.  Let's index starting at zero.
     unsigned int iPhi = (cal_iphi-1);
-    eTowerETCode[iPhi][iEta] = ecalCollection[i].compressedEt();
+    eTowerETCode[iPhi][iEta] = ecalCollection[i].compressedEt()*eLSB_;
     eTowerFGVeto[iPhi][iEta] = (bool) ecalCollection[i].fineGrain();     // 0 or 1
   }
 
@@ -257,7 +257,7 @@ void UCT2015EClusterProducer::makeEClusters() {
 	    neighborN_et + neighborS_et + neighborE_et + neighborW_et +
 	    neighborNE_et + neighborSW_et + neighborSE_et + neighborNW_et;
 	  // Temporarily use the tower (iPhi, iEta) -- todo: convert to half-tower resolution
-          double realEt = eLSB_*eClusterET;
+          double realEt = eClusterET;
           double realPhi = convertTPGPhi(iPhi);
           double realEta = convertTPGEta(iEta);
           UCTCandidate theCluster(realEt, realEta, realPhi);

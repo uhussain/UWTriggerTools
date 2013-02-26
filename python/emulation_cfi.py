@@ -44,7 +44,7 @@ UCT2015EClusterProducer = cms.EDProducer(
     puCorrect = cms.bool(True),
     puETMax = cms.uint32(7),
     eClusterSeed = cms.uint32(10),
-    ecalLSB = cms.double(1.0),
+    ecalLSB = cms.double(0.5),
     ecalDigis = cms.VInputTag(cms.InputTag("ecalDigis:EcalTriggerPrimitives"))
 )
 
