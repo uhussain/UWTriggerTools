@@ -154,7 +154,7 @@ common_ntuple_branches = cms.PSet(
     l1gPhiCode = cms.vstring("? l1gMatch ? l1g.getInt('rgnPhi') : 0", "I"),
 
     l1gDPhi = cms.string("? l1gMatch ? deltaPhi(l1g.phi, reco.phi) : -1"),
-    l1gDEta = cms.string("? l1gMatch ? l1g.eta - reco.eta) : -10"),
+    l1gDEta = cms.string("? l1gMatch ? l1g.eta - reco.eta : -10"),
     l1gDR = cms.string("? l1gMatch ? deltaR(l1g.eta, l1g.phi, reco.eta, reco.phi) : -1"),
 )
 
