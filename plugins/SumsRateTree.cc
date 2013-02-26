@@ -20,7 +20,6 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "L1Trigger/UCT2015/src/L1GObject.h"
 #include "DataFormats/Scalers/interface/LumiScalers.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"

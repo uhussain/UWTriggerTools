@@ -24,7 +24,6 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "L1Trigger/UCT2015/src/L1GObject.h"
 
 #include "DataFormats/METReco/interface/MET.h"
 
