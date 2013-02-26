@@ -54,6 +54,7 @@ private:
 
   void makeEGs();
   void makeTaus();
+  void puSubtraction();
 
   // ----------member data ---------------------------
 
@@ -75,6 +76,9 @@ private:
   double egLSB_;
   double tauLSB_;
   double regionLSB_;
+
+  double puLevelUIC;
+  double puLevel;
 
   Handle<L1CaloRegionCollection> newRegions;
   Handle<L1CaloRegionCollection> newEMRegions;
@@ -158,6 +162,30 @@ UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(unpackedRlxEGs, "RelaxedEGUnpacked");
   iEvent.put(unpackedIsoEGs, "IsolatedEGUnpacked");
 
+}
+
+void UCTStage1BProducer::puSubtraction()
+{
+  puLevel = 0;
+  puLevelUIC = 0;
+  double r_puLevelUIC=0.0;
+
+  int puCount = 0;
+  double Rarea=0.0;
+
+  for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin();
+      newRegion != newRegions->end(); newRegion++){
+    double regionEt = newRegion->et()*regionLSB_;
+    double puETMax = 10;
+    if(regionEt <= puETMax) {
+      puLevel += regionEt;
+      puCount++;
+      r_puLevelUIC += regionEt;
+      Rarea += getRegionArea(newRegion->gctEta());
+    }
+  }
+  puLevel = puLevel / puCount;
+  r_puLevelUIC = r_puLevelUIC / Rarea;
 }
 
 void UCTStage1BProducer::makeEGs() {
