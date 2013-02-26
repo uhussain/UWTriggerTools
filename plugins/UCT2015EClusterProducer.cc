@@ -263,12 +263,14 @@ void UCT2015EClusterProducer::makeEClusters() {
 	    neighborNE_et + neighborSW_et + neighborSE_et + neighborNW_et;
 	  // Temporarily use the tower (iPhi, iEta) -- todo: convert to half-tower resolution
           double realEt = eClusterET;
+          double stripEt = center_et + neighborS_et + neighborN_et;
           double realPhi = convertTPGPhi(iPhi);
           double realEta = convertTPGEta(iEta);
           UCTCandidate theCluster(realEt, realEta, realPhi);
           theCluster.setInt("twrPhi", iPhi);
           theCluster.setInt("twrEta", iEta);
           theCluster.setFloat("emClusterCenterEt", center_et);
+          theCluster.setFloat("emClusterStripEt", stripEt);
           theCluster.setInt("rgnPhi", twrPhi2RegionPhi(iPhi));
           theCluster.setInt("rgnEta", twrEta2RegionEta(iEta));
 

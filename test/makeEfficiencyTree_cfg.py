@@ -174,6 +174,7 @@ stage1b_branches = cms.PSet(
     l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
     # only defined for taus, EG objects are EM clusters by defintion.
     l1gEmClusterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterEt', -4) : -2"),
+    l1gEmClusterStripEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterStripEt', -4) : -2"),
 )
 
 # Keep track of electron isolation values

@@ -546,7 +546,8 @@ void UCTStage1BProducer::makeTaus() {
       theTau.setFloat("associatedJetPtEM", associatedJetPtEM);
 
       theTau.setFloat("emClusterEt", matchedEmCluster ? matchedEmCluster->et() : -1);
-      theTau.setFloat("emClusterCenterEt", matchedEmCluster ? matchedEmCluster->getFloat("centerEt") : -1);
+      theTau.setFloat("emClusterCenterEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterCenterEt") : -1);
+      theTau.setFloat("emClusterStripEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterStripEt") : -1);
       theTau.setInt("rgnEta", tauCandRegionIEta);
       theTau.setInt("rgnPhi", tauCandRegionIPhi);
 
