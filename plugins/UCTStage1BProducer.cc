@@ -280,8 +280,9 @@ void UCTStage1BProducer::makeEGs() {
       SW = 0;
       for(L1CaloRegionCollection::const_iterator region = newEMRegions->begin();
 	  region != newEMRegions->end(); region++) {
-        // FIXME - double check this is the correct scale.
-        double regionEt = region->et()*regionLSB_;
+        // The region ET is already in the physical scale, from the
+        // ECluster producer.
+        double regionEt = region->et();
 	if((region->gctPhi() == emClusterRegionIPhi) &&
 	   (region->gctEta() == emClusterRegionIEta)) {
 	  C = regionEt;
@@ -458,10 +459,10 @@ void UCTStage1BProducer::makeTaus() {
       SE = 0;
       NW = 0;
       SW = 0;
-      // FIXME - make sure the LSB here is correct.
       for(L1CaloRegionCollection::const_iterator region = newEMRegions->begin();
 	  region != newEMRegions->end(); region++) {
-        double regionEt = region->et()*regionLSB_;
+        // EM regions are already in correct scale from ECluster producer.
+        double regionEt = region->et();
 	if((region->gctPhi() == tauCandRegionIPhi) &&
 	   (region->gctEta() == tauCandRegionIEta)) {
 	  C = regionEt;
