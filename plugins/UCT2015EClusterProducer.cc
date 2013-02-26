@@ -146,6 +146,11 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     unpackedEClusters->push_back(*eCluster);
   }
 
+  for(L1CaloRegionCollection::const_iterator eRegion = eRegionList.begin();
+      eRegion != eRegionList.end(); ++eRegion) {
+    ERegions->push_back(*eRegion);
+  }
+
   iEvent.put(unpackedEClusters, "EClustersUnpacked");
   iEvent.put(ERegions, "ERegions");
 }
