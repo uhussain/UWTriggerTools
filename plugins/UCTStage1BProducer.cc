@@ -332,7 +332,7 @@ void UCTStage1BProducer::makeEGs() {
       double associatedJetPtEM = C + N + S + E + W + NE + NW + SE + SW;
       double jetEMIsolation = C + N + S + E + W + NE + NW + SE + SW - emClusterEt;
       // Every emCluster which passes HoECut is an egObject
-      double h = C - emClusterEt;
+      double h = associatedRegionEt - emClusterEt;
       double e = emClusterEt;
       if((h / e) < regionalHoECut) {
         // make a copy of the candidate
