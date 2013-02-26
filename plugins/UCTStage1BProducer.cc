@@ -351,8 +351,8 @@ void UCTStage1BProducer::makeEGs() {
         egCand.setFloat("associatedSecondRegionEtEM", associatedSecondRegionEtEM);
         egCand.setFloat("associatedJetPtEM", associatedJetPtEM);
 
-        egCand.setFloat("h", h);
-        egCand.setFloat("e", e);
+        egCand.setFloat("associatedRegionH", h);
+        egCand.setFloat("associatedRegionE", e);
 
         egCand.setInt("mipBit", mipBitAtCenter);
         egCand.setInt("tauVeto", tauVetoBitAtCenter);
