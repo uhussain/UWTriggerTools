@@ -104,7 +104,7 @@ double getRegionArea(int gctEta) {
 }
 
 int twrPhi2RegionPhi(int iPhi) {
-  unsigned int rgnIdx = (iPhi - 1)/4;
+  unsigned int rgnIdx = (iPhi + 2)/4;
   // 70 and 71 are actually in GCT phi 0
   if (rgnIdx == 18)
     return 0;
