@@ -195,8 +195,8 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       regionPt_->push_back(uct->getFloat("associatedRegionEt", -3));
       secondRegionPt_->push_back(uct->getFloat("associatedSecondRegionEt", -3));
       ellIso_->push_back(uct->getInt("ellIsolation", -2));
-      pu_->push_back(uct->getFloat("puLevel"));
-      puUIC_->push_back(uct->getFloat("puLevelUIC"));
+      pu_->push_back(uct->getFloat("puLevel", -1));
+      puUIC_->push_back(uct->getFloat("puLevelUIC", -1));
       mips_->push_back(uct->getInt("mipBit", -1));
       taus_->push_back(uct->getInt("tauVeto", -1));
     }
