@@ -50,6 +50,12 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* jetPt_;
     std::vector<Float_t>* regionPt_;
     std::vector<Float_t>* secondRegionPt_;
+
+    // EM versions
+    std::vector<Float_t>* jetPtEM_;
+    std::vector<Float_t>* regionPtEM_;
+    std::vector<Float_t>* secondRegionPtEM_;
+
     std::vector<Int_t>* ellIso_;
     std::vector<Float_t>* pu_;
     std::vector<Float_t>* puUIC_;
@@ -79,9 +85,15 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
 
   // UCT variables
   isUCT_ = pset.getParameter<bool>("isUCT");
+
   jetPt_ = new std::vector<Float_t>();
   regionPt_ = new std::vector<Float_t>();
   secondRegionPt_ = new std::vector<Float_t>();
+
+  jetPtEM_ = new std::vector<Float_t>();
+  regionPtEM_ = new std::vector<Float_t>();
+  secondRegionPtEM_ = new std::vector<Float_t>();
+
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
   puUIC_ = new std::vector<Float_t>();
@@ -90,11 +102,40 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
     tree->Branch("regionPt", "std::vector<float>", &regionPt_);
     tree->Branch("secondRegionPt", "std::vector<float>", &secondRegionPt_);
+
+    tree->Branch("jetPtEM", "std::vector<float>", &jetPtEM_);
+    tree->Branch("regionPtEM", "std::vector<float>", &regionPtEM_);
+    tree->Branch("secondRegionPtEM", "std::vector<float>", &secondRegionPtEM_);
+
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
     tree->Branch("puUIC", "std::vector<float>", &puUIC_);
     tree->Branch("tauVeto", "std::vector<bool>", &taus_);
     tree->Branch("mipBit", "std::vector<bool>", &mips_);
+
+    // Now add nice aliases so the same draw commands work for rate/eff
+    tree->SetAlias("l1gPt", "pt");
+    tree->SetAlias("l1gEta", "eta");
+    tree->SetAlias("l1gPhi", "phi");
+
+    tree->SetAlias("l1gRegionEt", "regionPt");
+    tree->SetAlias("l1g2ndRegionEt", "secondRegionPt");
+    tree->SetAlias("l1gJetPt", "jetPt");
+
+    tree->SetAlias("l1gRegionEtEM", "regionPtEM");
+    tree->SetAlias("l1g2ndRegionEtEM", "secondRegionPtEM");
+    tree->SetAlias("l1gJetPtEM", "jetPtEM");
+
+    tree->SetAlias("l1gEllIso", "ellIso");
+    tree->SetAlias("l1gTauVeto", "tauVeto");
+    tree->SetAlias("l1gMIP", "mipBit");
+
+    tree->SetAlias("l1gPU", "pu");
+    tree->SetAlias("l1gPUUIC", "puUIC");
+  } else {
+    tree->SetAlias("l1Pt", "pt");
+    tree->SetAlias("l1Eta", "eta");
+    tree->SetAlias("l1Phi", "phi");
   }
 
   src_ = pset.getParameter<VInputTag>("src");
@@ -106,8 +147,15 @@ RateTree::~RateTree() {
   delete pts_;
   delete etas_;
   delete phis_;
+
   delete jetPt_;
   delete regionPt_;
+  delete secondRegionPt_;
+
+  delete jetPtEM_;
+  delete regionPtEM_;
+  delete secondRegionPtEM_;
+
   delete ellIso_;
   delete pu_;
   delete puUIC_;
@@ -159,9 +207,15 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   pts_->clear();
   etas_->clear();
   phis_->clear();
+
   jetPt_->clear();
   regionPt_->clear();
   secondRegionPt_->clear();
+
+  jetPtEM_->clear();
+  regionPtEM_->clear();
+  secondRegionPtEM_->clear();
+
   ellIso_->clear();
   pu_->clear();
   puUIC_->clear();
@@ -191,14 +245,20 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
         throw cms::Exception("bad input")
           << "Can't convert input into UCT format!" << std::endl;
       }
-      jetPt_->push_back(uct->getFloat("associatedJetPt", -3));
-      regionPt_->push_back(uct->getFloat("associatedRegionEt", -3));
-      secondRegionPt_->push_back(uct->getFloat("associatedSecondRegionEt", -3));
-      ellIso_->push_back(uct->getInt("ellIsolation", -2));
-      pu_->push_back(uct->getFloat("puLevel", -1));
-      puUIC_->push_back(uct->getFloat("puLevelUIC", -1));
-      mips_->push_back(uct->getInt("mipBit", -1));
-      taus_->push_back(uct->getInt("tauVeto", -1));
+      jetPt_->push_back(uct->getFloat("associatedJetPt", -4));
+      regionPt_->push_back(uct->getFloat("associatedRegionEt", -4));
+      secondRegionPt_->push_back(uct->getFloat("associatedSecondRegionEt", -4));
+
+      // em versions
+      jetPtEM_->push_back(uct->getFloat("associatedJetPtEM", -4));
+      regionPtEM_->push_back(uct->getFloat("associatedRegionEtEM", -4));
+      secondRegionPtEM_->push_back(uct->getFloat("associatedSecondRegionEtEM", -4));
+
+      ellIso_->push_back(uct->getInt("ellIsolation", -4));
+      pu_->push_back(uct->getFloat("puLevel", -4));
+      puUIC_->push_back(uct->getFloat("puLevelUIC", -4));
+      mips_->push_back(uct->getInt("mipBit", -4));
+      taus_->push_back(uct->getInt("tauVeto", -4));
     }
   }
 
@@ -206,9 +266,15 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   pts_->push_back(-9999);
   etas_->push_back(-9999);
   phis_->push_back(-9999);
+
   jetPt_->push_back(-9999);
   regionPt_->push_back(-9999);
   secondRegionPt_->push_back(-9999);
+
+  jetPtEM_->push_back(-9999);
+  regionPtEM_->push_back(-9999);
+  secondRegionPtEM_->push_back(-9999);
+
   ellIso_->push_back(-9999);
   pu_->push_back(-9999);
   puUIC_->push_back(-9999);
