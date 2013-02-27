@@ -109,8 +109,10 @@ calib_map = {
     'CALIB_V4': eg_calib_v4
 }
 
-process.RCTConfigProducers.eGammaECalScaleFactors = calib_map[options.ecalCalib]
-process.RCTConfigProducers.jetMETECalScaleFactors = calib_map[options.ecalCalib]
+ecal_calibration = calib_map[options.ecalCalib]
+process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
+process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
+process.UCT2015EClusterProducer.ecalCalibration = ecal_calibration
 
 # Common branches to add to the ntuple
 common_ntuple_branches = cms.PSet(

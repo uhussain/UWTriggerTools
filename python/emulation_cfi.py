@@ -44,6 +44,9 @@ UCT2015EClusterProducer = cms.EDProducer(
     puCorrect = cms.bool(True),
     puETMax = cms.uint32(7),
     eClusterSeed = cms.uint32(10),
+    # Transparency correction calibration
+    # calib_v4 = 2012 data.  Use calib_v1 (ideal) for MC.
+    ecalCalibration = cms.vdouble(eg_calib_v4),
     ecalLSB = cms.double(0.5),
     ecalDigis = cms.VInputTag(cms.InputTag("ecalDigis:EcalTriggerPrimitives"))
 )

@@ -67,6 +67,7 @@ private:
   double eLSB_;
 
   std::vector<edm::InputTag> ecalDigis;
+  std::vector<double> ecalCalibration;
 
   vector<vector <unsigned int> > eTowerETCode;
   vector<vector <bool> > eTowerFGVeto;
@@ -88,6 +89,7 @@ UCT2015EClusterProducer::UCT2015EClusterProducer(const edm::ParameterSet& iConfi
   eClusterSeed(iConfig.getParameter<unsigned int>("eClusterSeed")),
   eLSB_(iConfig.getParameter<double>("ecalLSB")),
   ecalDigis(iConfig.getParameter<std::vector<edm::InputTag> >("ecalDigis")),
+  ecalCalibration(iConfig.getParameter<std::vector<double> >("ecalCalibration")),
   eTowerETCode(N_TOWER_PHI, vector<unsigned int>(N_TOWER_ETA)),
   eTowerFGVeto(N_TOWER_PHI, vector<bool>(N_TOWER_ETA))
 {
@@ -117,6 +119,8 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     int ieta = ecalCollection[i].id().ieta();
     // Note TPG absIeta counts from 1-28 (not 0-27)
     int cal_iphi = ecalCollection[i].id().iphi();
+    // Get ECAL transparency correction
+    double calibrationFactor = ecalCalibration.at(std::abs(ieta)-1);
     unsigned int iEta;
     // So here, -28 becomes 0.  -1 be comes 27.  +1 becomes 28. +28 becomes 55.
     // And we have mapped [-28, -1], [1, 28] onto [0, 55]

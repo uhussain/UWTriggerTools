@@ -106,8 +106,10 @@ calib_map = {
     'CALIB_V4': eg_calib_v4
 }
 
-process.RCTConfigProducers.eGammaECalScaleFactors = calib_map[options.ecalCalib]
-process.RCTConfigProducers.jetMETECalScaleFactors = calib_map[options.ecalCalib]
+ecal_calibration = calib_map[options.ecalCalib]
+process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
+process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
+process.UCT2015EClusterProducer.ecalCalibration = ecal_calibration
 
 # Read inst. lumi. info from the scalers
 process.load("EventFilter.ScalersRawToDigi.ScalersRawToDigi_cfi")
