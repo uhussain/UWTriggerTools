@@ -190,15 +190,22 @@ void UCT2015EClusterProducer::makeERegions() {
       bool finegrain = false;
       bool mip = false;
       bool quiet = false;
-      for(unsigned int i = 0; i < 4; i++) {
+      for(int i = -2; i < 2; i++) {
 	for(unsigned int j = 0; j < 4; j++) {
-	  et += eTowerETCode[iPhi * 4 + i][iEta * 4 + j];
+          // now we need to get the correct phi indices for this region.
+          // remember that region phi 0 has TPG phi 70, 71, 0, 1
+          // remember that region phi 1 has TPG phi 2, 3, 4, 5
+          int tpgPhi = iPhi * 4 + i;
+          if (tpgPhi < 0)
+            tpgPhi = 72 + tpgPhi;
+	  et += eTowerETCode[tpgPhi][iEta * 4 + j];
 	}
       }
       if(et > 0xFFFF) overflow = true;
       if(et > 0x0001 && et < 0x0004) mip = true;
       if(et < 0x0002) quiet = true;
-      eRegionList.push_back(L1CaloRegion(et, finegrain, overflow, mip, quiet, iEta, iPhi));
+      // we add an offset of four since regions < 4 are HF
+      eRegionList.push_back(L1CaloRegion(et, finegrain, overflow, mip, quiet, iEta + 4, iPhi));
     }
   }
 }
