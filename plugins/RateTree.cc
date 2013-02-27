@@ -56,6 +56,10 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* regionPtEM_;
     std::vector<Float_t>* secondRegionPtEM_;
 
+    std::vector<Float_t>* emClusterEt_;
+    std::vector<Float_t>* emClusterStripEt_;
+    std::vector<Float_t>* emClusterCenterEt_;
+
     std::vector<Int_t>* ellIso_;
     std::vector<Float_t>* pu_;
     std::vector<Float_t>* puUIC_;
@@ -94,6 +98,10 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   regionPtEM_ = new std::vector<Float_t>();
   secondRegionPtEM_ = new std::vector<Float_t>();
 
+  emClusterEt_ = new std::vector<Float_t>();
+  emClusterStripEt_ = new std::vector<Float_t>();
+  emClusterCenterEt_ = new std::vector<Float_t>();
+
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
   puUIC_ = new std::vector<Float_t>();
@@ -106,6 +114,10 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("jetPtEM", "std::vector<float>", &jetPtEM_);
     tree->Branch("regionPtEM", "std::vector<float>", &regionPtEM_);
     tree->Branch("secondRegionPtEM", "std::vector<float>", &secondRegionPtEM_);
+
+    tree->Branch("emClusterEt", "std::vector<float>", emClusterEt_);
+    tree->Branch("emClusterStripEt", "std::vector<float>", emClusterStripEt_);
+    tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
 
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
@@ -125,6 +137,10 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->SetAlias("l1gRegionEtEM", "regionPtEM");
     tree->SetAlias("l1g2ndRegionEtEM", "secondRegionPtEM");
     tree->SetAlias("l1gJetPtEM", "jetPtEM");
+
+    tree->SetAlias("l1gEmClusterEt", "emClusterEt");
+    tree->SetAlias("l1gEmClusterStripEt", "emClusterStripEt");
+    tree->SetAlias("l1gEmClusterCenterEt", "emClusterCenterEt");
 
     tree->SetAlias("l1gEllIso", "ellIso");
     tree->SetAlias("l1gTauVeto", "tauVeto");
@@ -155,6 +171,10 @@ RateTree::~RateTree() {
   delete jetPtEM_;
   delete regionPtEM_;
   delete secondRegionPtEM_;
+
+  delete emClusterEt_;
+  delete emClusterCenterEt_;
+  delete emClusterStripEt_;
 
   delete ellIso_;
   delete pu_;
@@ -216,6 +236,10 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   regionPtEM_->clear();
   secondRegionPtEM_->clear();
 
+  emClusterEt_->clear();
+  emClusterStripEt_->clear();
+  emClusterCenterEt_->clear();
+
   ellIso_->clear();
   pu_->clear();
   puUIC_->clear();
@@ -254,6 +278,11 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       regionPtEM_->push_back(uct->getFloat("associatedRegionEtEM", -4));
       secondRegionPtEM_->push_back(uct->getFloat("associatedSecondRegionEtEM", -4));
 
+      // 3x3 cluster information
+      emClusterEt_->push_back(uct->getFloat("emClusterEt", -4));
+      emClusterCenterEt_->push_back(uct->getFloat("emClusterCenterEt", -4));
+      emClusterStripEt_->push_back(uct->getFloat("emClusterStripEt", -4));
+
       ellIso_->push_back(uct->getInt("ellIsolation", -4));
       pu_->push_back(uct->getFloat("puLevel", -4));
       puUIC_->push_back(uct->getFloat("puLevelUIC", -4));
@@ -274,6 +303,10 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   jetPtEM_->push_back(-9999);
   regionPtEM_->push_back(-9999);
   secondRegionPtEM_->push_back(-9999);
+
+  emClusterEt_->push_back(-9999);
+  emClusterCenterEt_->push_back(-9999);
+  emClusterStripEt_->push_back(-9999);
 
   ellIso_->push_back(-9999);
   pu_->push_back(-9999);
