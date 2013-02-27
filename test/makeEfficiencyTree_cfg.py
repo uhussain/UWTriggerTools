@@ -170,13 +170,17 @@ egtau_branches = cms.PSet(
 )
 
 stage1b_branches = cms.PSet(
+    l1gPUEM = cms.string("? l1gMatch ? l1g.getFloat('puLevelEM', -4) : -2"),
+    l1gPUUICEM = cms.string("? l1gMatch ? l1g.getFloat('puLevelUICEM', -4) : -2"),
+    l1gEffArea = cms.string("? l1gMatch ? l1g.getFloat('effArea', -4) : -2"),
     l1gRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEtEM', -4) : -2"),
     l1gJetPtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPtEM', -4) : -2"),
     l1g2ndRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEtEM', -4) : -2"),
-    l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
     # only defined for taus, EG objects are EM clusters by defintion.
     l1gEmClusterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterEt', -4) : -2"),
+    l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
     l1gEmClusterStripEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterStripEt', -4) : -2"),
+    l1gEmClusterFG = cms.string("? l1gMatch ? l1g.getInt('emClusterCenterFG', -4) : -2"),
 )
 
 # Keep track of electron isolation values

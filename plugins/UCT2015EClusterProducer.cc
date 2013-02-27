@@ -72,7 +72,8 @@ private:
   vector<vector <unsigned int> > eTowerETCode;
   vector<vector <bool> > eTowerFGVeto;
 
-  unsigned int puLevel;
+  double puLevel;
+  double puLevelUIC;
 
   list<UCTCandidate> eClusterList;
   L1CaloRegionCollection eRegionList;
@@ -104,6 +105,7 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 {
 
   puLevel = 0;
+  puLevelUIC = 0;
 
   UCTCandidateCollectionPtr unpackedEClusters(new UCTCandidateCollection);
   std::auto_ptr<L1CaloRegionCollection> ERegions (new L1CaloRegionCollection);
@@ -135,11 +137,12 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
     // TPG iPhi starts at 1 and goes to 72.  Let's index starting at zero.
     unsigned int iPhi = (cal_iphi-1);
-    eTowerETCode[iPhi][iEta] = ecalCollection[i].compressedEt()*eLSB_;
+    eTowerETCode[iPhi][iEta] = ecalCollection[i].compressedEt()*eLSB_*calibrationFactor;
     eTowerFGVeto[iPhi][iEta] = (bool) ecalCollection[i].fineGrain();     // 0 or 1
   }
 
-  if(puCorrect) puSubtraction();
+  if(puCorrect)
+    puSubtraction();
   makeERegions();
   makeEClusters();
   if(debug) printEClusters();
@@ -159,21 +162,23 @@ UCT2015EClusterProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.put(ERegions, "ERegions");
 }
 
-// NB PU is not in the physical scale!!  Needs to be multiplied by regionLSB
 void UCT2015EClusterProducer::puSubtraction()
 {
   puLevel = 0;
+  // effective area of each region.  just assume it's the same for towers.
+  double totalArea = 0;
   unsigned int puCount = 0;
   for(unsigned int iPhi = 0; iPhi < N_TOWER_PHI; iPhi++) {
     for(unsigned int iEta = 0; iEta < N_TOWER_ETA; iEta++) {
       if(eTowerETCode[iPhi][iEta] <= puETMax) {
-	puLevel += eTowerETCode[iPhi][iEta]; puCount++;
+	puLevel += eTowerETCode[iPhi][iEta];
+        puCount++;
+        totalArea += getRegionArea(twrEta2RegionEta(iEta));
       }
     }
   }
-  // Add a factor of 12x12, so it corresponds to a jet.  Reduces roundoff error.
-  puLevel *= 144;
   puLevel = puLevel / puCount;
+  puLevelUIC = puLevel / totalArea;
 }
 
 void UCT2015EClusterProducer::makeERegions() {
@@ -204,7 +209,10 @@ void UCT2015EClusterProducer::makeEClusters() {
     for(unsigned int iEta = 0; iEta < N_TOWER_ETA; iEta++) {
       if(eTowerETCode[iPhi][iEta] > eClusterSeed) {
 	unsigned int center_et = eTowerETCode[iPhi][iEta];
+        bool center_FG = eTowerFGVeto[iPhi][iEta];
 	unsigned int neighborN_et = 0;
+        bool neighborN_fg = false;
+        bool neighborS_fg = false;
 	unsigned int neighborS_et = 0;
 	unsigned int neighborE_et = 0;
 	unsigned int neighborW_et = 0;
@@ -238,6 +246,8 @@ void UCT2015EClusterProducer::makeEClusters() {
 	  unsigned int W = iEta - 1;
 	  neighborN_et = eTowerETCode[N][iEta];
 	  neighborS_et = eTowerETCode[S][iEta];
+          neighborN_fg = eTowerFGVeto[N][iEta];
+	  neighborS_fg = eTowerFGVeto[S][iEta];
 	  neighborW_et = eTowerETCode[iPhi][W];
 	  neighborNW_et = eTowerETCode[N][W];
 	  neighborSW_et = eTowerETCode[S][W];
@@ -247,6 +257,8 @@ void UCT2015EClusterProducer::makeEClusters() {
 	  unsigned int W = iEta - 1;
 	  neighborN_et = eTowerETCode[N][iEta];
 	  neighborS_et = eTowerETCode[S][iEta];
+          neighborN_fg = eTowerFGVeto[N][iEta];
+	  neighborS_fg = eTowerFGVeto[S][iEta];
 	  neighborE_et = eTowerETCode[iPhi][E];
 	  neighborW_et = eTowerETCode[iPhi][W];
 	  neighborNE_et = eTowerETCode[N][E];
@@ -275,8 +287,11 @@ void UCT2015EClusterProducer::makeEClusters() {
           theCluster.setInt("twrEta", iEta);
           theCluster.setFloat("emClusterCenterEt", center_et);
           theCluster.setFloat("emClusterStripEt", stripEt);
+          theCluster.setInt("emClusterCenterFG", center_FG);
           theCluster.setInt("rgnPhi", twrPhi2RegionPhi(iPhi));
           theCluster.setInt("rgnEta", twrEta2RegionEta(iEta));
+          theCluster.setFloat("puLevelEM", puLevel);
+          theCluster.setFloat("puLevelUICEM", puLevelUIC);
 
 	  eClusterList.push_back(theCluster);
 	}

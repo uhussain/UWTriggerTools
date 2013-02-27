@@ -80,8 +80,8 @@ private:
   double puLevelUIC;
   double puLevel;
 
-  Handle<L1CaloRegionCollection> newRegions;
-  Handle<L1CaloRegionCollection> newEMRegions;
+  Handle<L1CaloRegionCollection> stage1Regions;
+  Handle<L1CaloRegionCollection> emRegions;
   Handle<L1CaloEmCollection> tauCands;
   Handle<UCTCandidateCollection> emClusters;
 
@@ -123,10 +123,10 @@ void
 UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-  iEvent.getByLabel("uctDigis", newRegions);
+  iEvent.getByLabel("uctDigis", stage1Regions);
   iEvent.getByLabel("uctDigis", tauCands);
   iEvent.getByLabel("UCT2015EClusterProducer", "EClustersUnpacked", emClusters);
-  iEvent.getByLabel("UCT2015EClusterProducer", "ERegions", newEMRegions);
+  iEvent.getByLabel("UCT2015EClusterProducer", "ERegions", emRegions);
 
   makeEGs();
   makeTaus();
@@ -173,19 +173,19 @@ void UCTStage1BProducer::puSubtraction()
   int puCount = 0;
   double Rarea=0.0;
 
-  for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin();
-      newRegion != newRegions->end(); newRegion++){
-    double regionEt = newRegion->et()*regionLSB_;
+  for(L1CaloRegionCollection::const_iterator stage1Region = stage1Regions->begin();
+      stage1Region != stage1Regions->end(); stage1Region++){
+    double regionEt = stage1Region->et()*regionLSB_;
     double puETMax = 10;
     if(regionEt <= puETMax) {
       puLevel += regionEt;
       puCount++;
       r_puLevelUIC += regionEt;
-      Rarea += getRegionArea(newRegion->gctEta());
+      Rarea += getRegionArea(stage1Region->gctEta());
     }
   }
   puLevel = puLevel / puCount;
-  r_puLevelUIC = r_puLevelUIC / Rarea;
+  puLevelUIC = r_puLevelUIC / Rarea;
 }
 
 void UCTStage1BProducer::makeEGs() {
@@ -211,8 +211,8 @@ void UCTStage1BProducer::makeEGs() {
       int mipBitAtCenter = -1;
       int tauVetoBitAtCenter = -1;
 
-      for(L1CaloRegionCollection::const_iterator region = newRegions->begin();
-	  region != newRegions->end(); region++) {
+      for(L1CaloRegionCollection::const_iterator region = stage1Regions->begin();
+	  region != stage1Regions->end(); region++) {
 
         // in the physical scale.
         double regionEt = region->et()*regionLSB_;
@@ -278,8 +278,8 @@ void UCTStage1BProducer::makeEGs() {
       SE = 0;
       NW = 0;
       SW = 0;
-      for(L1CaloRegionCollection::const_iterator region = newEMRegions->begin();
-	  region != newEMRegions->end(); region++) {
+      for(L1CaloRegionCollection::const_iterator region = emRegions->begin();
+	  region != emRegions->end(); region++) {
         // The region ET is already in the physical scale, from the
         // ECluster producer.
         double regionEt = region->et();
@@ -334,7 +334,7 @@ void UCTStage1BProducer::makeEGs() {
       // Every emCluster which passes HoECut is an egObject
       double h = associatedRegionEt - emClusterEt;
       double e = emClusterEt;
-      if((h / e) < regionalHoECut) {
+      if(true || (h / e) < regionalHoECut) {
         // make a copy of the candidate
         UCTCandidate egCand = *emCluster;
 	// egObject that passes all isolations is an isolated egObject
@@ -343,6 +343,8 @@ void UCTStage1BProducer::makeEGs() {
 	double relativeRgnIsolation = ((double) rgnIsolation) / ((double) emCluster->pt());
 	double relativeJetIsolation = ((double) jetIsolation) / ((double) emCluster->pt());
 
+        // Most of the data is already embedded into the ECluster.
+
         egCand.setFloat("associatedRegionEt", associatedRegionEt);
         egCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
         egCand.setFloat("associatedJetPt", associatedJetPt);
@@ -350,6 +352,10 @@ void UCTStage1BProducer::makeEGs() {
         egCand.setFloat("associatedRegionEtEM", associatedRegionEtEM);
         egCand.setFloat("associatedSecondRegionEtEM", associatedSecondRegionEtEM);
         egCand.setFloat("associatedJetPtEM", associatedJetPtEM);
+
+        egCand.setFloat("effArea", getRegionArea(egCand.getInt("rgnEta")));
+        egCand.setFloat("puLevel", puLevel);
+        egCand.setFloat("puLevelUIC", puLevelUIC);
 
         egCand.setFloat("associatedRegionH", h);
         egCand.setFloat("associatedRegionE", e);
@@ -394,8 +400,8 @@ void UCTStage1BProducer::makeTaus() {
       double SW = 0;
       int tauVetoBitAtCenter = -1;
       int mipBitAtCenter = -1;
-      for(L1CaloRegionCollection::const_iterator region = newRegions->begin();
-	  region != newRegions->end(); region++) {
+      for(L1CaloRegionCollection::const_iterator region = stage1Regions->begin();
+	  region != stage1Regions->end(); region++) {
         double regionEt = region->et()*regionLSB_;
 	if((region->gctPhi() == tauCandRegionIPhi) &&
 	   (region->gctEta() == tauCandRegionIEta)) {
@@ -459,8 +465,8 @@ void UCTStage1BProducer::makeTaus() {
       SE = 0;
       NW = 0;
       SW = 0;
-      for(L1CaloRegionCollection::const_iterator region = newEMRegions->begin();
-	  region != newEMRegions->end(); region++) {
+      for(L1CaloRegionCollection::const_iterator region = emRegions->begin();
+	  region != emRegions->end(); region++) {
         // EM regions are already in correct scale from ECluster producer.
         double regionEt = region->et();
 	if((region->gctPhi() == tauCandRegionIPhi) &&
@@ -547,7 +553,13 @@ void UCTStage1BProducer::makeTaus() {
 
       theTau.setFloat("emClusterEt", matchedEmCluster ? matchedEmCluster->et() : -1);
       theTau.setFloat("emClusterCenterEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterCenterEt") : -1);
+      theTau.setInt("emClusterCenterFG", matchedEmCluster ? matchedEmCluster->getInt("emClusterCenterFG") : -1);
       theTau.setFloat("emClusterStripEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterStripEt") : -1);
+      theTau.setFloat("puLevel", puLevel);
+      theTau.setFloat("puLevelUIC", puLevelUIC);
+      theTau.setFloat("puLevelEM", matchedEmCluster ? matchedEmCluster->getFloat("puLevelEM") : -1);
+      theTau.setFloat("puLevelUICEM", matchedEmCluster ? matchedEmCluster->getFloat("puLevelUICEM") : -1);
+      theTau.setFloat("effArea", getRegionArea(tauCandRegionIEta));
       theTau.setInt("rgnEta", tauCandRegionIEta);
       theTau.setInt("rgnPhi", tauCandRegionIPhi);
 

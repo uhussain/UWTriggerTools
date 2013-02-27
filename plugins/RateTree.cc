@@ -63,6 +63,8 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Int_t>* ellIso_;
     std::vector<Float_t>* pu_;
     std::vector<Float_t>* puUIC_;
+    std::vector<Float_t>* puEM_;
+    std::vector<Float_t>* puUICEM_;
     std::vector<bool>* taus_;
     std::vector<bool>* mips_;
 
@@ -105,6 +107,8 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
   puUIC_ = new std::vector<Float_t>();
+  puEM_ = new std::vector<Float_t>();
+  puUICEM_ = new std::vector<Float_t>();
 
   if (isUCT_) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
@@ -122,6 +126,8 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
     tree->Branch("puUIC", "std::vector<float>", &puUIC_);
+    tree->Branch("puEM", "std::vector<float>", &puEM_);
+    tree->Branch("puUICEM", "std::vector<float>", &puUICEM_);
     tree->Branch("tauVeto", "std::vector<bool>", &taus_);
     tree->Branch("mipBit", "std::vector<bool>", &mips_);
 
@@ -148,6 +154,8 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
 
     tree->SetAlias("l1gPU", "pu");
     tree->SetAlias("l1gPUUIC", "puUIC");
+    tree->SetAlias("l1gPUEM", "puEM");
+    tree->SetAlias("l1gPUUICEM", "puUICEM");
   } else {
     tree->SetAlias("l1Pt", "pt");
     tree->SetAlias("l1Eta", "eta");
@@ -179,6 +187,8 @@ RateTree::~RateTree() {
   delete ellIso_;
   delete pu_;
   delete puUIC_;
+  delete puEM_;
+  delete puUICEM_;
   delete mips_;
   delete taus_;
 }
@@ -243,6 +253,8 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   ellIso_->clear();
   pu_->clear();
   puUIC_->clear();
+  puEM_->clear();
+  puUICEM_->clear();
   taus_->clear();
   mips_->clear();
 
@@ -286,6 +298,8 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       ellIso_->push_back(uct->getInt("ellIsolation", -4));
       pu_->push_back(uct->getFloat("puLevel", -4));
       puUIC_->push_back(uct->getFloat("puLevelUIC", -4));
+      puEM_->push_back(uct->getFloat("puLevelEM", -4));
+      puUICEM_->push_back(uct->getFloat("puLevelUICEM", -4));
       mips_->push_back(uct->getInt("mipBit", -4));
       taus_->push_back(uct->getInt("tauVeto", -4));
     }
@@ -311,6 +325,8 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   ellIso_->push_back(-9999);
   pu_->push_back(-9999);
   puUIC_->push_back(-9999);
+  puEM_->push_back(-9999);
+  puUICEM_->push_back(-9999);
   mips_->push_back(-9999);
   taus_->push_back(-9999);
 
