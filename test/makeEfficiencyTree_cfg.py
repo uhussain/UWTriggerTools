@@ -136,6 +136,7 @@ common_ntuple_branches = cms.PSet(
     l1Pt = cms.string("? l1Match ? l1.pt : 0"),
     l1Eta = cms.string("? l1Match ? l1.eta : 0"),
     l1Phi = cms.string("? l1Match ? l1.phi : 0"),
+    l1Type = cms.string("? l1Match ? l1.type() : -1"),
 
 
     # TODO add L1extra eta/phi indices
@@ -232,6 +233,26 @@ process.rlxTauEfficiency = cms.EDAnalyzer(
     )
 )
 
+# Define the tree producers
+process.rlxTauPlusJetEfficiency = cms.EDAnalyzer(
+    "EfficiencyTree",
+    recoSrc = cms.VInputTag("recoTaus"),
+    l1Src = cms.VInputTag(
+        cms.InputTag("l1extraParticles", "Tau"),
+        cms.InputTag("l1extraParticles", "Central"),
+    ),
+    l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "RelaxedTauUnpacked")),
+    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
+    # Max DR for RECO-trigger matching
+    maxDR = cms.double(0.5),
+    # Ntuple configuration
+    ntuple = cms.PSet(
+        common_ntuple_branches,
+        egtau_branches,
+        tau_branches,
+    )
+)
+
 # Note that the input electron collection is not isolated, this needs to be done
 # at the ntuple level.
 process.isoEGEfficiency = cms.EDAnalyzer(
@@ -293,6 +314,7 @@ process.rlxUCTisoL1EGEfficiency = cms.EDAnalyzer(
 process.leptonEfficiencies = cms.Sequence(
     process.isoTauEfficiency *
     process.rlxTauEfficiency *
+    process.rlxTauPlusJetEfficiency *
     process.isoEGEfficiency *
     process.rlxEGEfficiency *
     process.rlxUCTisoL1EGEfficiency
