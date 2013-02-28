@@ -9,9 +9,7 @@ then
   exit 1
 fi
 
-./submit_rates.sh $1-EIC4-Rates 4
 ./submit_rates.sh $1-EIC3-Rates 3
-./submit_eg_efficiency.sh $1-EIC4-EGEfficiency 4 
 ./submit_eg_efficiency.sh $1-EIC3-EGEfficiency 3
 ./submit_tau_efficiency.sh $1-TauEfficiency
 ./submit_jet_efficiency.sh $1-JetEfficiency
