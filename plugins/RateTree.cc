@@ -19,6 +19,8 @@
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "L1Trigger/UCT2015/interface/UCTCandidate.h"
+#include "DataFormats/L1Trigger/interface/L1JetParticle.h"
+#include "DataFormats/L1Trigger/interface/L1EmParticle.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -61,6 +63,7 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* emClusterCenterEt_;
     std::vector<Int_t>* emClusterCenterFG_;
 
+    std::vector<Int_t>* type_;
     std::vector<Int_t>* ellIso_;
     std::vector<Float_t>* pu_;
     std::vector<Float_t>* puUIC_;
@@ -106,6 +109,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterCenterEt_ = new std::vector<Float_t>();
   emClusterCenterFG_ = new std::vector<Int_t>();
 
+  type_ = new std::vector<Int_t>();
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
   puUIC_ = new std::vector<Float_t>();
@@ -126,6 +130,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
     tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
 
+    tree->Branch("type", "std::vector<int>", &type_);
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
     tree->Branch("puUIC", "std::vector<float>", &puUIC_);
@@ -163,6 +168,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->SetAlias("l1Pt", "pt");
     tree->SetAlias("l1Eta", "eta");
     tree->SetAlias("l1Phi", "phi");
+    tree->SetAlias("l1Type", "type");
   }
 
   src_ = pset.getParameter<VInputTag>("src");
@@ -188,6 +194,7 @@ RateTree::~RateTree() {
   delete emClusterCenterFG_;
   delete emClusterStripEt_;
 
+  delete type_;
   delete ellIso_;
   delete pu_;
   delete puUIC_;
@@ -255,6 +262,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterCenterEt_->clear();
   emClusterCenterFG_->clear();
 
+  type_->clear();
   ellIso_->clear();
   pu_->clear();
   puUIC_->clear();
@@ -308,6 +316,22 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       puUICEM_->push_back(uct->getFloat("puLevelUICEM", -4));
       mips_->push_back(uct->getInt("mipBit", -4));
       taus_->push_back(uct->getInt("tauVeto", -4));
+      // UCT doesn't have a type
+      type_->push_back(-1);
+    } else {
+      // For L1 we need to get the type
+      const l1extra::L1JetParticle* jetParticle =
+        dynamic_cast<const l1extra::L1JetParticle*>(objects[i]);
+      const l1extra::L1EmParticle* emParticle =
+        dynamic_cast<const l1extra::L1EmParticle*>(objects[i]);
+      if (jetParticle) {
+        type_->push_back(jetParticle->type());
+      } else if (emParticle) {
+        type_->push_back(emParticle->type());
+      } else {
+        throw cms::Exception("bad input") << "Can't case L1 candidate to "
+          << "either Jet or EmParticle" << std::endl;
+      }
     }
   }
 
