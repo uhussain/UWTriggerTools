@@ -197,17 +197,6 @@ if options.tauDecayModes:
         select = cms.vstring(
             [x.strip() for x in options.tauDecayModes.split(',')])
     )
-    process.dumpGenJets = cms.EDAnalyzer(
-        "TauGenJetDumper",
-        src = cms.InputTag('tauGenJets')
-    )
-    process.printTree1 = cms.EDAnalyzer(
-        "ParticleListDrawer",
-        src = cms.InputTag("genParticles"),
-        maxEventsToPrint  = cms.untracked.int32(1)
-    )
-    process.generation_step += process.printTree1
-    process.generation_step += process.dumpGenJets
     print "selecting only: %s" % repr(process.selectOneProngs.select)
     process.generation_step += process.selectOneProngs
 
