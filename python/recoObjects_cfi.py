@@ -97,6 +97,35 @@ cleanJets=cms.Sequence(
 )
 
 # Select good taus
+dmTaus = cms.EDFilter(
+    "PFTauSelector",
+    src = cms.InputTag("hpsPFTauProducer"),
+    cut = cms.string("pt > 10 & abs(eta) < 2.5"),
+    discriminators = cms.VPSet(
+        cms.PSet(
+            discriminator=cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
+            selectionCut=cms.double(0.5)
+        ),
+    ),
+    filter = cms.bool(False)
+)
+
+isoTaus = cms.EDFilter(
+    "PFTauSelector",
+    src = cms.InputTag("hpsPFTauProducer"),
+    cut = cms.string("pt > 10 & abs(eta) < 2.5"),
+    discriminators = cms.VPSet(
+        cms.PSet(
+            discriminator=cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
+            selectionCut=cms.double(0.5)
+        ),
+        cms.PSet(
+            discriminator=cms.InputTag("hpsPFTauDiscriminationByLooseIsolationDBSumPtCorr"),
+            selectionCut=cms.double(0.5)
+        ),
+    ),
+    filter = cms.bool(False)
+)
 
 recoTaus = cms.EDFilter(
     "PFTauSelector",
@@ -125,5 +154,7 @@ recoTaus = cms.EDFilter(
 
 recoObjects = cms.Sequence(
     cleanJets *
+    dmTaus *
+    isoTaus*
     recoTaus
 )
