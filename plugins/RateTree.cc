@@ -59,6 +59,7 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* emClusterEt_;
     std::vector<Float_t>* emClusterStripEt_;
     std::vector<Float_t>* emClusterCenterEt_;
+    std::vector<Int_t>* emClusterCenterFG_;
 
     std::vector<Int_t>* ellIso_;
     std::vector<Float_t>* pu_;
@@ -103,6 +104,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterEt_ = new std::vector<Float_t>();
   emClusterStripEt_ = new std::vector<Float_t>();
   emClusterCenterEt_ = new std::vector<Float_t>();
+  emClusterCenterFG_ = new std::vector<Int_t>();
 
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
@@ -122,6 +124,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterEt", "std::vector<float>", emClusterEt_);
     tree->Branch("emClusterStripEt", "std::vector<float>", emClusterStripEt_);
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
+    tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
 
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
@@ -182,6 +185,7 @@ RateTree::~RateTree() {
 
   delete emClusterEt_;
   delete emClusterCenterEt_;
+  delete emClusterCenterFG_;
   delete emClusterStripEt_;
 
   delete ellIso_;
@@ -249,6 +253,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterEt_->clear();
   emClusterStripEt_->clear();
   emClusterCenterEt_->clear();
+  emClusterCenterFG_->clear();
 
   ellIso_->clear();
   pu_->clear();
@@ -293,6 +298,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       // 3x3 cluster information
       emClusterEt_->push_back(uct->getFloat("emClusterEt", -4));
       emClusterCenterEt_->push_back(uct->getFloat("emClusterCenterEt", -4));
+      emClusterCenterFG_->push_back(uct->getInt("emClusterCenterFG", -4));
       emClusterStripEt_->push_back(uct->getFloat("emClusterStripEt", -4));
 
       ellIso_->push_back(uct->getInt("ellIsolation", -4));
