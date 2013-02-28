@@ -3,9 +3,14 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+
+#include "L1Trigger/UCT2015/interface/helpers.h"
 
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
+#include "CondFormats/L1TObjects/interface/L1CaloHcalScale.h"
+#include "CondFormats/DataRecord/interface/L1CaloHcalScaleRcd.h"
 
 class TPGDebugger : public edm::EDFilter {
   public:
@@ -27,6 +32,22 @@ TPGDebugger::TPGDebugger(const edm::ParameterSet& pset) {
   hcalSrc_ = pset.getParameter<edm::InputTag>("hcalSrc");
 }
 
+double getEta(int ieta) {
+  unsigned int iEta = 0;
+  // So here, -28 becomes 0.  -1 be comes 27.  +1 becomes 28. +28 becomes 55.
+  // And we have mapped [-28, -1], [1, 28] onto [0, 55]
+  if(ieta < 0)
+    iEta = ieta + 28;
+  else if(ieta > 0)
+    iEta = ieta + 27;
+  return convertTPGEta(iEta);
+}
+
+double getPhi(int iPhi) {
+  // TPG iPhi starts at 1 and goes to 72.  Let's index starting at zero.
+  return convertTPGPhi(iPhi-1);
+}
+
 bool TPGDebugger::filter(edm::Event& evt, const edm::EventSetup& es) {
 
   edm::Handle<EcalTrigPrimDigiCollection> ecal;
@@ -36,12 +57,15 @@ bool TPGDebugger::filter(edm::Event& evt, const edm::EventSetup& es) {
 
   for (size_t i = 0; i < toPrint_.size(); ++i) {
     const edm::ParameterSet& pset = toPrint_[i];
-    if (pset.getParameter<unsigned int>("run") != evt.run())
-      break;
-    if (pset.getParameter<unsigned int>("ls") != evt.id().luminosityBlock())
-      break;
-    if (pset.getParameter<unsigned int>("event") != evt.id().event())
-      break;
+    // if run=0 take anything
+    if (pset.getParameter<unsigned int>("run") != 0) {
+      if (pset.getParameter<unsigned int>("run") != evt.run())
+        break;
+      if (pset.getParameter<unsigned int>("ls") != evt.id().luminosityBlock())
+        break;
+      if (pset.getParameter<unsigned int>("event") != evt.id().event())
+        break;
+    }
     matchedPSet = &pset;
     break;
   }
@@ -74,22 +98,36 @@ bool TPGDebugger::filter(edm::Event& evt, const edm::EventSetup& es) {
 
     if (ieta >= minIEta && ieta <= maxIEta &&
         iphi >= minIPhi && ieta <= maxIPhi) {
-      std::cout << "ecal eta/phi=" << ieta << "/" << iphi << "et="
-        << (*ecal)[i].compressedEt() << " fg=" << (*ecal)[i].fineGrain()
-        << std::endl;
+      if ((*ecal)[i].compressedEt() > 5) {
+        std::cout << "ecal eta/phi=" << ieta << "/" << iphi
+          << " = (" << getEta(ieta) << "/" << getPhi(iphi) << ") "
+          << " et="<< (*ecal)[i].compressedEt() << " fg=" << (*ecal)[i].fineGrain()
+          << std::endl;
+      }
     }
   }
+
+  edm::ESHandle<L1CaloHcalScale> hcalScale;
+  es.get<L1CaloHcalScaleRcd>().get(hcalScale);
 
   std::cout << "HCAL TPGS" << std::endl;
   for (size_t i = 0; i < hcal->size(); ++i) {
     int ieta = (*hcal)[i].id().ieta();
     int iphi = (*hcal)[i].id().iphi();
+    short absieta = std::abs((*hcal)[i].id().ieta());
+    short zside = (*hcal)[i].id().zside();
 
     if (ieta >= minIEta && ieta <= maxIEta &&
         iphi >= minIPhi && ieta <= maxIPhi) {
-      std::cout << "hcal eta/phi=" << ieta << "/" << iphi << "et="
-        << (*hcal)[i].SOI_compressedEt()
-        << " fg=" << (*hcal)[i].SOI_fineGrain() << std::endl;
+      double energy = hcalScale->et(
+          (*hcal)[i].SOI_compressedEt(), absieta, zside);
+      if (energy > 5) {
+        std::cout << "hcal eta/phi=" << ieta << "/" << iphi
+          << " = (" << getEta(ieta) << "/" << getPhi(iphi) << ") "
+          << " et=" << (*hcal)[i].SOI_compressedEt()
+          << " energy=" << energy
+          << " fg=" << (*hcal)[i].SOI_fineGrain() << std::endl;
+      }
     }
   }
   return true;
