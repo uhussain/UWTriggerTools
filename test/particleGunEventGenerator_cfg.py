@@ -20,13 +20,13 @@ options.register(
     VarParsing.varType.int,
     'PDG of simulated particle')
 options.register(
-    'minE',
+    'minEt',
     45,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     'Minimum energy of simulated particle')
 options.register(
-    'maxE',
+    'maxEt',
     46,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
@@ -45,15 +45,15 @@ options.register(
     'Maximum eta of simulated particle')
 options.register(
     'minPhi',
-    -3.14159265359,
+    0,
     VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    'Minimum phi of simulated particle')
+    VarParsing.varType.int,
+    'Minimum phi (degrees) of simulated particle')
 options.register(
     'maxPhi',
-    3.14159265359,
+    360,
     VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
+    VarParsing.varType.int,
     'Maximum phi of simulated particle')
 options.register(
     'seed',
@@ -61,6 +61,12 @@ options.register(
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     'Random seed')
+options.register(
+    'tauDecayModes',
+    '',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    'Select only these tau decay modes (optional)')
 
 options.parseArguments()
 
@@ -104,7 +110,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.1 $'),
+    version = cms.untracked.string(''),
     annotation = cms.untracked.string('Configuration/Generator/python/SingleElectronE120EHCAL_cfi.py nevts:100'),
     name = cms.untracked.string('PyReleaseValidation')
 )
@@ -132,37 +138,102 @@ process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:mc', '')
 
-process.generator = cms.EDProducer("FlatRandomEGunProducer",
+#process.generator = cms.EDProducer("FlatRandomEGunProducer",
+    #PGunParameters = cms.PSet(
+        #PartID = cms.vint32(options.pdgId),
+        #MaxEta = cms.double(options.maxEta),
+        #MaxPhi = cms.double(options.maxPhi),
+        #MinEta = cms.double(options.minEta),
+        #MinE = cms.double(options.minE),
+        #MinPhi = cms.double(options.minPhi),
+        #MaxE = cms.double(options.maxE)
+    #),
+    #Verbosity = cms.untracked.int32(1),
+    #psethack = cms.string('single electron E 120 EHCAL'),
+    #AddAntiParticle = cms.bool(False),
+    #firstRun = cms.untracked.uint32(1)
+#)
+
+
+from Configuration.Generator.PythiaUESettings_cfi import pythiaUESettingsBlock
+process.generator = cms.EDProducer(
+    "Pythia6PtGun",
     PGunParameters = cms.PSet(
-        PartID = cms.vint32(options.pdgId),
-        MaxEta = cms.double(options.maxEta),
+        ParticleID = cms.vint32(options.pdgId),
+        MinPhi = cms.double(options.minPhi),
         MaxPhi = cms.double(options.maxPhi),
         MinEta = cms.double(options.minEta),
-        MinE = cms.double(options.minE),
-        MinPhi = cms.double(options.minPhi),
-        MaxE = cms.double(options.maxE)
+        MaxEta = cms.double(options.maxEta),
+        MinPt = cms.double(options.minEt),
+        MaxPt = cms.double(options.maxEt),
+        AddAntiParticle = cms.bool(False)
     ),
-    Verbosity = cms.untracked.int32(0),
-    psethack = cms.string('single electron E 120 EHCAL'),
-    AddAntiParticle = cms.bool(False),
-    firstRun = cms.untracked.uint32(1)
+    pythiaVerbosity = cms.untracked.bool(False),
+    PythiaParameters = cms.PSet(
+        pythiaUESettingsBlock,
+        pythiaTauJets = cms.vstring(
+            'MDME(89,1)=0      ! no tau->electron',
+            'MDME(90,1)=0      ! no tau->muon'
+        ),
+        # This is a vector of ParameterSet names to be read, in this order
+        parameterSets = cms.vstring(
+            'pythiaUESettings',
+            'pythiaTauJets'
+        )
+    )
 )
 
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
-process.simulation_step = cms.Path(process.psim)
-process.digitisation_step = cms.Path(process.pdigi)
-process.L1simulation_step = cms.Path(process.SimL1Emulator)
-process.digi2raw_step = cms.Path(process.DigiToRaw)
-process.raw2digi_step = cms.Path(process.RawToDigi)
-process.reconstruction_step = cms.Path(process.reconstruction)
+
+if options.tauDecayModes:
+    process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
+    process.generation_step += process.tauGenJets
+    process.load(
+        "PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
+    process.selectOneProngs = process.tauGenJetsSelectorAllHadrons.clone(
+        filter = cms.bool(True),
+        select = cms.vstring(
+            [x.strip() for x in options.tauDecayModes.split(',')])
+    )
+    process.dumpGenJets = cms.EDAnalyzer(
+        "TauGenJetDumper",
+        src = cms.InputTag('tauGenJets')
+    )
+    process.printTree1 = cms.EDAnalyzer(
+        "ParticleListDrawer",
+        src = cms.InputTag("genParticles"),
+        maxEventsToPrint  = cms.untracked.int32(1)
+    )
+    process.generation_step += process.printTree1
+    process.generation_step += process.dumpGenJets
+    print "selecting only: %s" % repr(process.selectOneProngs.select)
+    process.generation_step += process.selectOneProngs
+
+#process.simulation_step = cms.Path(process.psim)
+#process.digitisation_step = cms.Path(process.pdigi)
+#process.L1simulation_step = cms.Path(process.SimL1Emulator)
+#process.digi2raw_step = cms.Path(process.DigiToRaw)
+#process.raw2digi_step = cms.Path(process.RawToDigi)
+#process.reconstruction_step = cms.Path(process.reconstruction)
+
+process.generation_step += process.psim
+process.generation_step += process.pdigi
+process.generation_step += process.SimL1Emulator
+process.generation_step += process.DigiToRaw
+process.generation_step += process.RawToDigi
+process.generation_step += process.reconstruction
+
 process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVToutput_step = cms.EndPath(process.FEVToutput)
 
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+
 # Schedule definition
-process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.FEVToutput_step)
+#process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.FEVToutput_step)
+process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.endjob_step,process.FEVToutput_step)
 # filter all path with the production filter sequence
 for path in process.paths:
 	getattr(process,path)._seq = process.generator * getattr(process,path)._seq
