@@ -2,13 +2,13 @@
 //
 // Package:    UCT2015L1ExtraProducer
 // Class:      UCT2015L1ExtraProducer
-// 
+//
 /**\class UCT2015L1ExtraProducer \file UCT2015L1ExtraProducer.cc src/UCT2015L1ExtraProducer/src/UCT2015L1ExtraProducer.cc
 */
 //
 // Original Author:  Werner Sun
 //         Created:  Mon Oct  2 22:45:32 EDT 2006
-// $Id: UCT2015L1ExtraProducer.cc,v 1.3 2013/01/15 17:50:58 jbrooke Exp $
+// $Id: UCT2015L1ExtraProducer.cc,v 1.4 2013/03/02 09:19:11 friis Exp $
 //
 //
 
@@ -98,7 +98,9 @@ UCT2015L1ExtraProducer::UCT2015L1ExtraProducer(const edm::ParameterSet& iConfig)
    produces< L1JetParticleCollection >( "Jets" ) ;
    produces< L1JetParticleCollection >( "FwdJets" ) ;
    produces< L1JetParticleCollection >( "IsolatedTau" ) ;
+   produces< L1JetParticleCollection >( "IsolatedTauLeadTrk" ) ;
    produces< L1JetParticleCollection >( "RelaxedTau" ) ;
+   produces< L1JetParticleCollection >( "RelaxedTauLeadTrk" ) ;
    produces< L1MuonParticleCollection >( "" ) ;
    //   produces< L1MuonParticleCollection >( "Isolated" ) ;
    produces< L1EtMissParticleCollection >( "MET" ) ;
@@ -110,7 +112,7 @@ UCT2015L1ExtraProducer::UCT2015L1ExtraProducer(const edm::ParameterSet& iConfig)
 
 UCT2015L1ExtraProducer::~UCT2015L1ExtraProducer()
 {
- 
+
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 
@@ -155,7 +157,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
       // for isolation
       edm::Handle<L1CaloRegionCollection> regions;
       iEvent.getByLabel(regionSource_, regions);
-      
+
       ESHandle< L1CaloGeometry > caloGeomESH ;
       iSetup.get< L1CaloGeometryRecord >().get( caloGeomESH ) ;
       const L1CaloGeometry* caloGeom = &( *caloGeomESH ) ;
@@ -229,7 +231,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 		  // calculate isolation
 		  bool isolated = false;
 
-		  L1CaloRegionCollection::const_iterator matchedRegion = 
+		  L1CaloRegionCollection::const_iterator matchedRegion =
 		    matchObjectToRegion(caloGeom,
 					regions,
 					eta,
@@ -247,7 +249,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 					       muItr->bx() );
 
 		  muonParticle.setIsolated(isolated);
-		    
+
 		  // push to collection
 		  //if (isolated) isoMuColl->push_back( muonParticle );
 		  muColl->push_back( muonParticle );
@@ -256,7 +258,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	    }
 	}
    }
-   
+
    OrphanHandle< L1MuonParticleCollection > muHandle =
      iEvent.put( muColl );
 
@@ -277,7 +279,13 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
    auto_ptr< L1JetParticleCollection > isoTauColl(
       new L1JetParticleCollection );
 
+   auto_ptr< L1JetParticleCollection > isoTauLdTrkColl(
+      new L1JetParticleCollection );
+
    auto_ptr< L1JetParticleCollection > relTauColl(
+      new L1JetParticleCollection );
+
+   auto_ptr< L1JetParticleCollection > relTauLdTrkColl(
       new L1JetParticleCollection );
 
    auto_ptr< L1JetParticleCollection > jetColl(
@@ -306,7 +314,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	  << std::endl;
       }
       else {
-	
+
 	std::vector<L1GObject>::const_iterator itr = egObjs->begin() ;
 	std::vector<L1GObject>::const_iterator end = egObjs->end() ;
 	for( int i = 0 ; itr != end ; ++itr, ++i ) {
@@ -324,13 +332,13 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	  if ( (!itr->tauVeto() && !itr->mipBit()) || pt > 62) {
 
 	    relEGColl->push_back( L1EmParticle( p4,
-						Ref< L1GctEmCandCollection >(), 
+						Ref< L1GctEmCandCollection >(),
 						0 ) );
 
 	  // check isolated
 	    if ( (jetPt - pt)/pt < egIso_ ) {
 	      isoEGColl->push_back( L1EmParticle( p4,
-						  Ref< L1GctEmCandCollection >(), 
+						  Ref< L1GctEmCandCollection >(),
 						  0 ) );
 	    }
 
@@ -338,7 +346,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 
 	}
       }
-      
+
 
       // tau
       Handle< std::vector<L1GObject> > tauObjs ;
@@ -351,10 +359,11 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	  << std::endl;
       }
       else {
-	
+
 	std::vector<L1GObject>::const_iterator itr = tauObjs->begin() ;
 	std::vector<L1GObject>::const_iterator end = tauObjs->end() ;
 	for( int i = 0 ; itr != end ; ++itr, ++i ) {
+	  double ldTrkPt = itr->pt();
 	  double pt = max(itr->pt(), itr->associatedRegionEt());
 	  double jetPt = itr->associatedJetPt();
 	  double phi = itr->phiValue();
@@ -367,15 +376,25 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	  // check relaxed
 	  if ( true ) {  // take any tau as relaxed !
 
-	    relTauColl->push_back( L1JetParticle( p4, 
-						  Ref< L1GctJetCandCollection >(), 
+	    relTauColl->push_back( L1JetParticle( p4,
+						  Ref< L1GctJetCandCollection >(),
 						  0 ) );
+
+            // check if the leading 2x1 carries at least 70% of the energy.
+            if ((ldTrkPt/pt) > 0.7) {
+              relTauLdTrkColl->push_back(
+                  L1JetParticle( p4, Ref< L1GctJetCandCollection >(), 0 ));
+            }
 
 	  // check isolated
 	    if ( (jetPt - pt)/pt < tauIso_ ) {
-	      isoTauColl->push_back( L1JetParticle( p4, 
-						    Ref< L1GctJetCandCollection >(), 
+	      isoTauColl->push_back( L1JetParticle( p4,
+						    Ref< L1GctJetCandCollection >(),
 						    0 ) );
+              if ((ldTrkPt/pt) > 0.7) {
+                isoTauLdTrkColl->push_back(
+                    L1JetParticle( p4, Ref< L1GctJetCandCollection >(), 0 ));
+              }
 	    }
 
 	  }
@@ -386,7 +405,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
       // jet
       Handle< std::vector<L1GObject> > jetObjs ;
       iEvent.getByLabel( jetSource_, jetObjs ) ;
-      
+
       if( !jetObjs.isValid() ) {
 	LogDebug("UCT2015L1ExtraProducer")
 	  << "\nWarning: std::vector<L1GObject> with " << jetSource_
@@ -394,7 +413,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	  << std::endl;
       }
       else {
-	
+
 	std::vector<L1GObject>::const_iterator itr = jetObjs->begin() ;
 	std::vector<L1GObject>::const_iterator end = jetObjs->end() ;
 	for( int i = 0 ; itr != end ; ++itr, ++i ) {
@@ -405,14 +424,14 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 					   eta,
 					   phi,
 					   0. );
-	  
-	  jetColl->push_back( L1JetParticle( p4, 
-					     Ref< L1GctJetCandCollection >(), 
+
+	  jetColl->push_back( L1JetParticle( p4,
+					     Ref< L1GctJetCandCollection >(),
 					     0 ) );
-	  
+
 	}
       }
-      
+
       /// sums
       Handle< std::vector<L1GObject> > metObjs ;
       iEvent.getByLabel( etMissSource_, metObjs ) ;
@@ -460,7 +479,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 
       Handle< std::vector<L1GObject> > mhtObjs ;
       iEvent.getByLabel( htMissSource_, mhtObjs ) ;
-      
+
       Handle< std::vector<L1GObject> > shtObjs ;
       iEvent.getByLabel( htTotSource_, shtObjs ) ;
 
@@ -513,8 +532,14 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
    OrphanHandle< L1JetParticleCollection > isoTauHandle =
      iEvent.put( isoTauColl, "IsolatedTau" ) ;
 
+   OrphanHandle< L1JetParticleCollection > isoTauLdTrkHandle =
+     iEvent.put( isoTauLdTrkColl, "IsolatedTauLeadTrk" ) ;
+
    OrphanHandle< L1JetParticleCollection > relTauHandle =
      iEvent.put( relTauColl, "RelaxedTau" ) ;
+
+   OrphanHandle< L1JetParticleCollection > relTauLeadTrkHandle =
+     iEvent.put( relTauLdTrkColl, "RelaxedTauLeadTrk" ) ;
 
    OrphanHandle< L1JetParticleCollection > jetHandle =
      iEvent.put( jetColl, "Jets" ) ;
@@ -531,32 +556,32 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 }
 
 // ------------ method called once each job just before starting event loop  ------------
-void 
+void
 UCT2015L1ExtraProducer::beginJob() {
 
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void 
+void
 UCT2015L1ExtraProducer::endJob() {
 
 }
 
 int UCT2015L1ExtraProducer::deltaPhi18(int phi1, int phi2)
-{   
+{
     // Compute the difference in phi between two towers, wrapping at phi = 18
     int difference = phi1 - phi2;
     if (std::abs(phi1 - phi2) == 17) {
         difference = -difference/std::abs(difference);
     }
     return difference;
-}   
+}
 
 
 int UCT2015L1ExtraProducer::deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2)
 {
     return deltaPhi18(r1.gctPhi(), r2.gctPhi());
-}   
+}
 
 
 L1CaloRegionCollection::const_iterator UCT2015L1ExtraProducer::matchObjectToRegion(const L1CaloGeometry* geom,
@@ -571,7 +596,7 @@ L1CaloRegionCollection::const_iterator UCT2015L1ExtraProducer::matchObjectToRegi
   for(L1CaloRegionCollection::const_iterator region = regions->begin();
       region != regions->end(); region++)
     {
-      
+
       double regionEta = geom->etaBinCenter( region->id() ) ;
       double regionPhi = geom->emJetPhiBinCenter( region->id() ) ;
       float dEta = (eta - regionEta);
@@ -581,20 +606,20 @@ L1CaloRegionCollection::const_iterator UCT2015L1ExtraProducer::matchObjectToRegi
       matchedRegion = region;
       dRMin = dR;
     }
-  
+
   return matchedRegion;
-  
+
 }
 
 
 L1GObject UCT2015L1ExtraProducer::buildJetAtIndex(const edm::Handle<L1CaloRegionCollection> &newRegions,
-						  const L1CaloRegionCollection::const_iterator &newRegion, 
-						  const float &regionLSB_, 
+						  const L1CaloRegionCollection::const_iterator &newRegion,
+						  const float &regionLSB_,
 						  float threshold) {
 
   double regionET = newRegion->et() * regionLSB_;
   if (regionET < threshold) regionET = 0.0;
-  
+
   double neighborN_et = 0;
   double neighborS_et = 0;
   double neighborE_et = 0;
@@ -604,16 +629,16 @@ L1GObject UCT2015L1ExtraProducer::buildJetAtIndex(const edm::Handle<L1CaloRegion
   double neighborNW_et = 0;
   double neighborSE_et = 0;
   unsigned int nNeighbors = 0;
-  
+
   //std::cout << "Looking for seed @ " << newRegion->gctPhi() << " " << newRegion->gctEta() << std::endl;
-  
+
   for(L1CaloRegionCollection::const_iterator neighbor = newRegions->begin();
       neighbor != newRegions->end(); neighbor++)
     {
-      
+
       double neighborET = neighbor->et() * regionLSB_;
       if (neighborET < threshold) neighborET = 0.0;
-      
+
       if(deltaGctPhi(*newRegion, *neighbor) == 1 &&
 	 (newRegion->gctEta()    ) == neighbor->gctEta()) {
 	neighborN_et = neighborET;
@@ -671,9 +696,9 @@ L1GObject UCT2015L1ExtraProducer::buildJetAtIndex(const edm::Handle<L1CaloRegion
 	continue;
       }
     }
-  
+
   //   ---- this should probably be removed for constructing "isolation" jets
-  
+
   //    if(regionET > neighborN_et &&
   //            regionET > neighborNW_et &&
   //            regionET > neighborW_et &&
@@ -681,17 +706,17 @@ L1GObject UCT2015L1ExtraProducer::buildJetAtIndex(const edm::Handle<L1CaloRegion
   //            regionET >= neighborNE_et &&
   //            regionET >= neighborE_et &&
   //            regionET >= neighborSE_et &&
-  //            regionET >= neighborS_et) 
+  //            regionET >= neighborS_et)
   //    {
 
   unsigned int jetET = regionET +
     neighborN_et + neighborS_et + neighborE_et + neighborW_et +
     neighborNE_et + neighborSW_et + neighborSE_et + neighborNW_et;
-  
+
   // Temporarily use the region granularity -- we will try to improve as above when code is debugged
   int jetPhi = newRegion->gctPhi();
   int jetEta = newRegion->gctEta();
-  
+
   bool neighborCheck = (nNeighbors == 8);
   // On the eta edge we only expect 5 neighbors
   if (!neighborCheck && (jetEta == 0 || jetEta == 21) && nNeighbors == 5)
@@ -700,15 +725,15 @@ L1GObject UCT2015L1ExtraProducer::buildJetAtIndex(const edm::Handle<L1CaloRegion
     std::cout << "phi: " << jetPhi << " eta: " << jetEta << " n: " << nNeighbors << std::endl;
     assert(false);
   }
-  
+
   L1GObject jet(jetET, jetEta, jetPhi, "MuonSeededJet");
   jet.associatedRegionEt_ = regionET;
   return jet;
   //    }
-  
+
   std::cout << "it's all gone a little bit wrong" << std::endl;
   assert(false);
-  
+
 }
 
 
