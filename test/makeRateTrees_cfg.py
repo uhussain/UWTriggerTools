@@ -168,6 +168,7 @@ process.jetL1Rate = cms.EDAnalyzer(
     src = cms.VInputTag(
         # Combine central and forward
         cms.InputTag("l1extraParticles", "Central"),
+        cms.InputTag("l1extraParticles", "Tau"),
         cms.InputTag("l1extraParticles", "Forward"),
     ),
     isUCT = cms.bool(False),
