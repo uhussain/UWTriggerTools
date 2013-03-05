@@ -358,11 +358,38 @@ process.corrjetEfficiency = cms.EDAnalyzer(
     )
 )
 
-process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+process.printTaus = cms.EDAnalyzer(
+    "CandInfoPrinter",
+    src = cms.InputTag("recoTaus"),
+    printHeader=cms.bool(True),
+    pt = cms.string("pt"),
+    eta = cms.string("eta"),
+    phi = cms.string("phi"),
+    dm = cms.string("decayMode"),
+)
+
+process.printTPGs = cms.EDFilter(
+    "TPGDebugger",
+    ecalSrc = cms.InputTag("ecalDigis:EcalTriggerPrimitives"),
+    hcalSrc = cms.InputTag("hackHCALMIPs"),
+    toPrint = cms.VPSet(
+        # everything in all events
+        cms.PSet(
+            run = cms.uint32(0),
+            minIEta = cms.int32(-1000),
+            maxIEta = cms.int32(1000),
+            maxIPhi = cms.int32(1000),
+            minIPhi = cms.int32(-1000),
+        )
+    )
+)
+
 
 process.p1 = cms.Path(
     process.recoObjects *
     process.emulationSequence *
+    #process.printTaus *
+    #process.printTPGs *
     #process.dump *
     process.leptonEfficiencies *
     process.jetEfficiency *
