@@ -109,12 +109,15 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterCenterEt_ = new std::vector<Float_t>();
   emClusterCenterFG_ = new std::vector<Int_t>();
 
-  type_ = new std::vector<Int_t>();
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
   puUIC_ = new std::vector<Float_t>();
   puEM_ = new std::vector<Float_t>();
   puUICEM_ = new std::vector<Float_t>();
+
+  // L1 variables
+  type_ = new std::vector<Int_t>();
+  tree->Branch("type", "std::vector<int>", &type_);
 
   if (isUCT_) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
@@ -130,7 +133,6 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
     tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
 
-    tree->Branch("type", "std::vector<int>", &type_);
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
     tree->Branch("puUIC", "std::vector<float>", &puUIC_);
@@ -359,6 +361,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   puUICEM_->push_back(-9999);
   mips_->push_back(-9999);
   taus_->push_back(-9999);
+  type_->push_back(-9999);
 
   tree->Fill();
 }
