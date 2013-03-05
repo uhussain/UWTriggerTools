@@ -1,8 +1,6 @@
 /.cvsignore/1.1/Mon Feb 25 08:36:45 2013//
 /EG_fit.py/1.1/Mon Feb 25 08:36:45 2013//
 /EG_rateVreco.py/1.1/Mon Feb 25 08:36:45 2013//
-/Tau_fit.py/1.1/Mon Feb 25 08:36:45 2013//
-/Tau_rateVreco.py/1.1/Mon Feb 25 08:36:45 2013//
 /iso_study.py/1.1/Mon Feb 25 08:36:45 2013//
 /iso_wrapup.py/1.2/Mon Feb 25 08:36:45 2013//
 /jetEfficiencyPlot.py/1.5/Mon Feb 25 08:36:45 2013//
@@ -11,4 +9,7 @@
 /sumsRates.py/1.1/Mon Feb 25 08:36:45 2013//
 /allEG.py/1.7/Tue Feb 26 17:09:58 2013//
 /allTau.py/1.5/Tue Feb 26 17:09:58 2013//
+/Tau_fit.py/1.2/Tue Mar  5 09:53:44 2013//
+/Tau_fitVals.py/1.1/Sat Mar  2 16:34:45 2013//
+/Tau_rateVreco.py/1.2/Tue Mar  5 09:53:45 2013//
 D

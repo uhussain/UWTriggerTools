@@ -1,17 +1,27 @@
 '''
 Find the rate at an array of pT
-Authors: T.M.Perry, M.Cepeda
+Authors: T.M.Perry, M.Cepeda, E.K.Friis
 '''
 import ROOT
 from ROOT import *
 from array import array
+import Tau_fitVals as fv
+
+FixPlat=False
+VarBins=True
 
 LIso=3
 LSB=50
 ISOTHRESHOLD=0.20
 #ZEROBIAS_RATE=15000000.00 #1e34
 ZEROBIAS_RATE=30000000.00 #2e34
-saveWhere='../plots/Tau_rateVreco'
+thresh=0.85
+saveWhere='../plots/Tau%i'%(100*thresh)
+if FixPlat:
+ saveWhere+='_FixPlat'
+if VarBins:
+ saveWhere+='_BinVar'
+
 extraName=''
 
 cColor=ROOT.EColor.kRed
@@ -38,8 +48,7 @@ curNtuple = rate_rlx_l1_tau_ntuple
 scale = ZEROBIAS_RATE/rate_rlx_l1g_tau_ntuple.GetEntries()
 
 log = open(saveWhere+extraName+'.log','w')
-log.write('LIso: '+str(LIso)+'\n')
-log.write('LSB: '+str(LSB)+'\n')
+log.write('File: %s'%rate_file)
 log.write('ISOTHRESHOLD: '+str(ISOTHRESHOLD)+'\n')
 log.write('ZEROBIAS_RATE: '+str(ZEROBIAS_RATE)+'\n')
 log.write('Scale: '+str(scale)+'  = total entries / ZEROBIAS_RATE\n\n')
@@ -49,33 +58,18 @@ tex.SetNDC(True)
 tex.SetTextAlign(11)
 tex.SetTextSize(0.03)
 
-
-#### WHICH ISOLATION + ID CUT ON UCT ####
-# Iso w/o switch at 63 + ID w/o switch
+# Cut Strings
 uctCutStringIso='((jetPt[0] - max(regionPt[0], pt[0]))/max(regionPt[0], pt[0])<'+str(ISOTHRESHOLD)+')'
-
-# ID w/o switch (No Iso)
 uctCutString='(2>1)'
-
-#### CURRENT CUT STRING ###
-# No Cut
 curCutString='(2>1)'
 
-# values for extrapolation
-#From fitTau.py
-mUIso=0.846
-bUIso=34.2
-mU=1.14
-bU=22.9
-mC=1.81
-bC=6.98
-# From Jim
-#mUIso = 0.8
-#bUIso = 46
-#mU = 1.2
-#bU = 4.5
-#mC = 1.07
-#bC = 11
+mUIso,bUIso,mU,bU,mC,bC=fv.getVals(thresh,FixPlat,VarBins)
+log.write('mUIso: %s\n'%mUIso)
+log.write('bUIso: %s\n'%bUIso)
+log.write('mU: %s\n'%mU)
+log.write('bU: %s\n'%bU)
+log.write('mC: %s\n'%mC)
+log.write('bC: %s\n\n'%bC)
 
 # y = m x + b
 def extrapolate(pT95,m,b):
@@ -105,7 +99,7 @@ log.write('Current (no Iso):  L1pT = (pt95 - '+str(bC)+')/'+str(mC)+'\n')
 uctIsoRate=array('d',[]) 
 uctRate=array('d',[]) 
 curRate=array('d',[])
-
+#
 log.write('-----------------------\n')
 log.write('For UCT:  '+str(uctNtuple.GetDirectory().GetName())+'\n\n')
 log.write('UCT CutIso: '+uctCutStringIso+'\n\n')
@@ -116,7 +110,7 @@ for pt in uctL1IsoPt:
  uctIsoRate.append(int(uIsoRate))
  log.write('At pT = '+str(pt)+'\n')
  log.write('Rate Iso = '+str(uIsoRate)+'\n\n')
- 
+# 
 log.write('-----------------------\n')
 log.write('For UCT:  '+str(uctNtuple.GetDirectory().GetName())+'\n\n')
 log.write('UCT Cut (no Iso): '+uctCutString+'\n\n')
@@ -127,7 +121,7 @@ for pt in uctL1Pt:
  uctRate.append(int(uRate))
  log.write('At pT = '+str(pt)+'\n')
  log.write('Rate (no Iso) = '+str(uRate)+'\n\n')
- 
+# 
 log.write('-----------------------\n')
 log.write('For Current:  '+str(curNtuple.GetDirectory().GetName())+'\n\n')
 log.write('Current Cut: '+curCutString+'\n\n')
@@ -139,7 +133,7 @@ for pt in curL1Pt:
  log.write('At pT = '+str(pt)+'\n')
  log.write('Rate = '+str(cRate)+'\n\n')
 
-### PLOT pT95 vs Rate at L1 Cut###
+# Drawing the plot: pT95 vs Rate at L1 Cut
 can = ROOT.TCanvas('can','can',800,800)
 can.SetLogy(True)
 
@@ -152,7 +146,8 @@ frame = TH1F('frame','',1,xmin,xmax)
 frame.SetMaximum(ymax)
 frame.SetMinimum(100)
 frame.SetStats(False)
-frame.GetXaxis().SetTitle('L1 threshold [GeV]')
+frame.GetXaxis().SetTitle('Reco p_{T} Cut [GeV]')
+#frame.GetXaxis().SetTitle('L1 threshold [GeV]')
 frame.GetYaxis().SetTitleOffset(1.3)
 frame.GetYaxis().SetTitle('Rate [Hz]')
 frame.SetTitle('')
@@ -252,8 +247,8 @@ tex.SetTextAlign(31) # align right
 tex.DrawLatex(0.9,0.91,'L=2e34 cm^{-2}s^{-1}')
 save2 = raw_input ('Press Enter to Exit (type save to save)\n')
 if save2 == 'save':
- can.SaveAs(saveWhere+'_pT95_L1rate2.png')
- can.SaveAs(saveWhere+'_pT95_L1rate2.pdf')
+ can.SaveAs(saveWhere+'_rateVreco.png')
+# can.SaveAs(saveWhere+'rateVreco.pdf')
 
 #
 #### PLOT offline pT vs Rate ###
