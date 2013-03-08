@@ -2,74 +2,77 @@
 '''
 Values for L1pT vs recoPt from fitTau.py
 '''
-def getVals(thresh,FixPlat,VarBins):
+def getVals(thresh,FixPlat,VarBins,AbsEff):
  if thresh ==0.85:
   if not FixPlat and VarBins:
    mUIso=0.752941
    bUIso=28.8971
    mU=1.07279
    bU=21.1397
-   mC=1.64265
-   bC=6.63235
+   mC=0.692308 
+   bC=2.92308
+   pUIso=0.702131383694
+   pU=0.977643518384
+   pC=0.691563180805
 
  if thresh == 0.9:
-  if FixPlat and not VarBins:
-   mUIso=0.691
-   bUIso=39.0
-   mU=1.25
-   bU=20.5
-   mC=1.48
-   bC=13.4
-  if not FixPlat and not VarBins:
-   mUIso=0.846
-   bUIso=34.2
-   mU=1.14
-   bU=22.9
-   mC=1.81
-   bC=6.98
   if not FixPlat and VarBins:
-#   mUIso=0.688971
-#   bUIso=35.8235
-#   mU=1.20221
-#   bU=20.3603
-#   mC=1.74706
-#   bC=8.47794
-   mUIso=1.29412
-   bUIso=18.7059
+   mUIso=1.25368
+   bUIso=19.8088
    mU=1.14559
    bU=22.4044
-   mC=1.74706
-   bC=8.47794
+   mC=0.736364 
+   bC=2.85455
+   pUIso=0.73991148688
+   pU=0.974768978201
+   pC=0.626672832606
 
  if thresh==0.95:
-  if FixPlat and not VarBins:
-   mUIso=0.692
-   bUIso=42.6
-   mU=1.51
-   bU=19.1
-   mC=1.38
-   bC=22.7
-  if not FixPlat and not VarBins:
-   mUIso=0.792
-   bUIso=37.7
-   mU=1.25
-   bU=24.4
-   mC=2.00
-   bC=2.72
   if not FixPlat and VarBins:
-   mUIso=0.721324
-   bUIso=39.9412
-   mU=1.35368
-   bU=21.1838
-   mC=2.00147
-   bC=5.07353
+   mUIso=0.695588
+   bUIso=39.7794
+   mU=1.28382
+   bU=23.4412
+   mC=0.745455 
+   bC=4.25455
+   pUIso=0.704664365692
+   pU=0.971301127603
+   pC=0.691563180805
 
- return mUIso,bUIso,mU,bU,mC,bC
- 
-# From Jim
-#mUIso = 0.8
-#bUIso = 46
-#mU = 1.2
-#bU = 4.5
-#mC = 1.07
-#bC = 11
+ if thresh==0.4 and AbsEff:
+  if not FixPlat:
+   mUIso=0.738235
+   bUIso=18.6618
+   mU=0.697059
+   bU=15.8529
+   mC=0.739011 
+   bC=-1.6978
+   pUIso=0.71131612275
+   pU=0.969063841137
+   pC=0.691563180805
+  
+ if thresh==0.5 and AbsEff:
+  if not FixPlat:
+   mUIso=0.752941
+   bUIso=23.0221
+   mU=0.773529
+   bU=16.6765
+   mC=0.81044
+   bC=-2.1044
+   pUIso=0.71131612275
+   pU=0.969063841137
+   pC=0.691563180805
+  
+ if thresh==0.6 and AbsEff:
+  if not FixPlat:
+   mUIso=0.738971
+   bUIso=29.6985
+   mU=0.85
+   bU=17.5
+   mC=1.36667 
+   bC=-15.6889
+   pUIso=0.71131612275
+   pU=0.969063841137
+   pC=0.691563180805
+  
+ return mUIso,bUIso,pUIso,mU,bU,pU,mC,bC,pC
