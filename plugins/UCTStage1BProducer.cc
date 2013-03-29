@@ -260,7 +260,7 @@ void UCTStage1BProducer::makeEGs() {
       // Since the emCluster is found including the neighbor EM energy,
       // whereas the regions do not include neighbors, one has to take
       // care to ignore negative rgnIsolation
-      double rgnIsolation = std::min(0., C - emClusterEt);
+      double rgnIsolation = std::max(0., C - emClusterEt);
       double associatedRegionEt = C;
       double annulusRegions[] = {N, S, E, W, NE, NW, SE, SW};
       double associatedSecondRegionEt = *std::max_element(
@@ -324,7 +324,7 @@ void UCTStage1BProducer::makeEGs() {
       // Since the emCluster is found including the neighbor EM energy,
       // whereas the regions do not include neighbors, one has to take
       // care to ignore negative rgnEMIsolation
-      double rgnEMIsolation = std::min(0., C - emClusterEt);
+      double rgnEMIsolation = std::max(0., C - emClusterEt);
       double associatedRegionEtEM = C;
       double annulusRegionsEM[] = {N, S, E, W, NE, NW, SE, SW};
       double associatedSecondRegionEtEM = *std::max_element(
@@ -452,7 +452,7 @@ void UCTStage1BProducer::makeTaus() {
       double associatedSecondRegionEt = *std::max_element(
           annulusRegions, annulusRegions+8);
 
-      double rgnIsolation = std::min(0., C - tauCandEt);
+      double rgnIsolation = std::max(0., C - tauCandEt);
       double jetIsolation = C + N + S + E + W + NE + NW + SE + SW - tauCandEt;
 
       // Now compute EM only isolations
@@ -516,7 +516,7 @@ void UCTStage1BProducer::makeTaus() {
       double associatedSecondRegionEtEM = *std::max_element(
           annulusRegionsEM, annulusRegionsEM+8);
 
-      double rgnEMIsolation = std::min(0., C - tauCandEt);
+      double rgnEMIsolation = std::max(0., C - tauCandEt);
       unsigned jetEMIsolation = C + N + S + E + W + NE + NW + SE + SW - tauCandEt;
       // Use finer grain position resolution if possible using the emClusters
       // with default value being center of the region

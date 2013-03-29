@@ -165,6 +165,7 @@ common_ntuple_branches = cms.PSet(
 egtau_branches = cms.PSet(
     l1gJetPt = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPt', -4) : -2"),
     l1g2ndRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEt', -4) : -2"),
+    l1g2ndRegionMIP = cms.string("? l1gMatch ? l1g.getInt('associatedSecondRegionMIP', -4) : -2"),
     l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation', -4) : -2"),
     l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto', -4) : -2"),
     l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit', -4) : -2"),

@@ -25,7 +25,7 @@ ntuple1 = f1.Get(ntuple)
 ntuple2 = f2.Get(ntuple)
 
 branch_names = [x.GetName() for x in ntuple1.GetListOfBranches()]
-eff_mode = 'l1gPt' in branch_names
+eff_mode = any('l1' in x for x in branch_names)
 
 entries = ntuple1.GetEntries()
 
@@ -62,6 +62,8 @@ for i in range(entries):
             num_above_15 += 1
 
     for branch in branch_names:
+        if branch == 'type':
+            continue
         results1 = getattr(ntuple1, branch)
         results2 = getattr(ntuple2, branch)
 

@@ -70,7 +70,8 @@ private:
       const L1CaloRegionCollection& regions,
       double* associatedSecondRegionEt,
       unsigned int* mipsInAnnulus,
-      unsigned int* egFlagsInAnnulus) const;
+      unsigned int* egFlagsInAnnulus,
+      unsigned int* mipInSecondRegion) const;
 
   // Helper methods
 
@@ -531,7 +532,8 @@ void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
     const L1CaloRegionCollection& regions,
     double* associatedSecondRegionEt,
     unsigned int* mipsInAnnulus,
-    unsigned int* egFlagsInAnnulus) const {
+    unsigned int* egFlagsInAnnulus,
+    unsigned int* mipInSecondRegion) const {
 
   unsigned int neighborsFound = 0;
   unsigned int mipsCount = 0;
@@ -582,6 +584,7 @@ void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
   // set output
   *associatedSecondRegionEt = highestNeighborEt;
   *mipsInAnnulus = mipsCount;
+  *mipInSecondRegion = highestNeighborHasMip;
   *egFlagsInAnnulus = egFlagCount;
 }
 
@@ -607,10 +610,12 @@ void UCT2015Producer::makeEGTaus() {
             double associatedSecondRegionEt = 0;
             unsigned int mipsInAnnulus = 0;
             unsigned int egFlagsInAnnulus = 0;
+            unsigned int mipInSecondRegion = 0;
             findAnnulusInfo(
                 egtCand->regionId().ieta(), egtCand->regionId().iphi(),
                 *newRegions,
-                &associatedSecondRegionEt, &mipsInAnnulus, &egFlagsInAnnulus);
+                &associatedSecondRegionEt, &mipsInAnnulus, &egFlagsInAnnulus,
+                &mipInSecondRegion);
 
             UCTCandidate egtauCand(
                 et,
@@ -623,6 +628,7 @@ void UCT2015Producer::makeEGTaus() {
             egtauCand.setFloat("associatedJetPt", -3);
             egtauCand.setFloat("associatedRegionEt", regionEt);
             egtauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
+            egtauCand.setInt("associatedSecondRegionMIP", mipInSecondRegion);
             egtauCand.setFloat("puLevel", puLevel);
             egtauCand.setFloat("puLevelUIC", puLevelUIC);
             egtauCand.setInt("ellIsolation", egtCand->isolated());
