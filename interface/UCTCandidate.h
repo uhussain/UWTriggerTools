@@ -59,6 +59,8 @@ class UCTCandidate : public reco::LeafCandidate {
     // Get a region.
     const UCTRegion& getRegion(int etaPos, int phiPos) const;
     const std::vector<UCTRegion>& regions() const;
+    // Set the regions
+    void setRegions(const std::vector<UCTRegion>&  in);
 
     friend std::ostream& operator<<(std::ostream &os, const UCTCandidate& t);
 

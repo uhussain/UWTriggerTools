@@ -99,6 +99,11 @@ const std::vector<UCTRegion>& UCTCandidate::regions() const {
   return regions_;
 }
 
+// Set the regions
+void UCTCandidate::setRegions(const std::vector<UCTRegion>& in) {
+  regions_ = in;
+}
+
 std::ostream& operator<<(std::ostream &os, const UCTCandidate& t) {
   os << "UCTCandidate(" << t.pt()
     << ", " << t.eta() << ", " << t.phi() << ")";

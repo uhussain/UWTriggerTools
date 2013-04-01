@@ -109,8 +109,10 @@ void UCTStage1BProducer::fillRegionInfo(
   // Region position, relative to iphi, ieta.
   typedef std::pair<int, int> RegionPosition;
 
+  typedef std::map<RegionPosition, UCTRegion> RegionsInfo;
+
   // keep track of regions at all positions
-  std::map<RegionPosition, UCTRegion> regions;
+  RegionsInfo regions;
 
   // First fill information about the classic regions which have E+H energy,
   // and MIP/tauVeto information.
@@ -144,6 +146,12 @@ void UCTStage1BProducer::fillRegionInfo(
     }
   }
 
+  std::vector<UCTRegion> flatRegions;
+  for (RegionsInfo::const_iterator regionInfo = regions.begin();
+      regionInfo != regions.end(); ++regionInfo) {
+    flatRegions.push_back(regionInfo->second);
+  }
+  toFill.setRegions(flatRegions);
 }
 
 UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
