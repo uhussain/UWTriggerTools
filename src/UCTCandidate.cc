@@ -3,10 +3,18 @@
 
 UCTCandidate::UCTCandidate() : reco::LeafCandidate() {}
 
-UCTCandidate::UCTCandidate(double pt, double eta, double phi, double mass) :
+UCTCandidate::UCTCandidate(double pt, double eta, double phi, double mass,
+    const std::vector<UCTRegion>& regions) :
   reco::LeafCandidate(
       0, reco::LeafCandidate::PolarLorentzVector(pt, eta, phi, mass),
       reco::LeafCandidate::Point(0, 0, 0), 0) {
+    // copy over the region information.
+    if (regions.size()) {
+      hasRegions_ = true;
+      std::copy(regions.begin(), regions.end(), std::back_inserter(regions_));
+    } else {
+      hasRegions_ = false;
+    }
 }
 
 // Helper to retrieve an item from a std::map.  Throws exception if the key
@@ -72,6 +80,23 @@ void UCTCandidate::setString(const std::string& item,
 
 bool UCTCandidate::operator < (const UCTCandidate& other) const {
   return this->pt() < other.pt();
+}
+
+// Get a region
+const UCTRegion& UCTCandidate::getRegion(int etaPos, int phiPos) const {
+  if (hasRegions_) {
+    for (size_t i = 0; i < regions_.size(); ++i) {
+      if (etaPos == regions_[i].etaPos && phiPos == regions_[i].phiPos)
+        return regions_[i];
+    }
+  }
+  throw cms::Exception("Region missing") << "The UCT candidate does not have"
+    << " a region at (" << etaPos << ", " << phiPos << "), wtf";
+}
+
+// Get all regions
+const std::vector<UCTRegion>& UCTCandidate::regions() const {
+  return regions_;
 }
 
 std::ostream& operator<<(std::ostream &os, const UCTCandidate& t) {

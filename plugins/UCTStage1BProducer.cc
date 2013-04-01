@@ -56,6 +56,11 @@ private:
   void makeTaus();
   void puSubtraction();
 
+  // Adds information about matched regions into a UCTCandidate
+  void fillRegionInfo(UCTCandidate& toFill,
+      const L1CaloRegionCollection& oldRegions,
+      const L1CaloRegionCollection& ecalRegions) const;
+
   // ----------member data ---------------------------
 
   bool puCorrect;
@@ -92,6 +97,54 @@ private:
   list<UCTCandidate> isoTauList;
 
 };
+
+void UCTStage1BProducer::fillRegionInfo(
+    UCTCandidate& toFill,
+    const L1CaloRegionCollection& stage1Regions,
+    const L1CaloRegionCollection& emRegions) const {
+
+  unsigned iphi = toFill.getInt("rgnPhi");
+  unsigned ieta = toFill.getInt("rgnEta");
+
+  // Region position, relative to iphi, ieta.
+  typedef std::pair<int, int> RegionPosition;
+
+  // keep track of regions at all positions
+  std::map<RegionPosition, UCTRegion> regions;
+
+  // First fill information about the classic regions which have E+H energy,
+  // and MIP/tauVeto information.
+  for(L1CaloRegionCollection::const_iterator region = stage1Regions.begin();
+      region != stage1Regions.end(); region++) {
+    int regionEta = region->gctEta();
+    int regionPhi = region->gctPhi();
+    int deltaEta = regionEta - ieta;
+    int deltaPhi = deltaPhiWrapAtN(18, regionPhi, iphi);
+    if (std::abs(deltaEta) < 2 && std::abs(deltaPhi) < 2) {
+      UCTRegion uctRegion;
+      uctRegion.etaPos = deltaEta;
+      uctRegion.phiPos = deltaPhi;
+      uctRegion.mip = region->mip();
+      uctRegion.tauVeto = region->tauVeto();
+      uctRegion.et = region->et()*regionLSB_;
+      regions[std::make_pair(deltaEta, deltaPhi)] = uctRegion;
+    }
+  }
+
+  // Now fill the ECAL only information from the CTP regions
+  for(L1CaloRegionCollection::const_iterator region = emRegions.begin();
+      region != emRegions.end(); region++) {
+    int regionEta = region->gctEta();
+    int regionPhi = region->gctPhi();
+    int deltaEta = regionEta - ieta;
+    int deltaPhi = deltaPhiWrapAtN(18, regionPhi, iphi);
+    if (std::abs(deltaEta) < 2 && std::abs(deltaPhi) < 2) {
+
+      regions[std::make_pair(deltaEta, deltaPhi)].ecalEt = region->et();
+    }
+  }
+
+}
 
 UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
@@ -198,6 +251,7 @@ void UCTStage1BProducer::makeEGs() {
       double emClusterEt = emCluster->et();
       unsigned emClusterRegionIPhi = emCluster->getInt("rgnPhi");
       unsigned emClusterRegionIEta = emCluster->getInt("rgnEta");
+
       double C = 0;
       double N = 0;
       double S = 0;

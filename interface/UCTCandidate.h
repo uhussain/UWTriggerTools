@@ -20,10 +20,22 @@
 #include <string>
 #include <iostream>
 
+// a simple data format to hold region about the associated regions.
+struct UCTRegion {
+  int etaPos;
+  int phiPos;
+  double ecalEt;
+  double et;
+  bool mip;
+  bool tauVeto;
+};
+
 class UCTCandidate : public reco::LeafCandidate {
   public:
     UCTCandidate();
-    UCTCandidate(double pt, double eta, double phi, double mass=0);
+    UCTCandidate(double pt, double eta, double phi, double mass=0,
+        const std::vector<UCTRegion>& regions=std::vector<UCTRegion>());
+
 
     // Data attribute retrieval, throwing exceptions if attr is undefined.
     float getFloat(const std::string& item) const;
@@ -44,6 +56,10 @@ class UCTCandidate : public reco::LeafCandidate {
     // Sort by ascending PT per default.
     bool operator < (const UCTCandidate& other) const;
 
+    // Get a region.
+    const UCTRegion& getRegion(int etaPos, int phiPos) const;
+    const std::vector<UCTRegion>& regions() const;
+
     friend std::ostream& operator<<(std::ostream &os, const UCTCandidate& t);
 
   private:
@@ -51,6 +67,10 @@ class UCTCandidate : public reco::LeafCandidate {
     std::map<std::string, float> floatData_;
     std::map<std::string, int> intData_;
     std::map<std::string, std::string> stringData_;
+
+    // an array of the associated regions.
+    bool hasRegions_;
+    std::vector<UCTRegion> regions_;
 };
 
 #endif /* end of include guard: DICTCANDIDATE_GNUPVDDA */
