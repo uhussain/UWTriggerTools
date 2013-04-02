@@ -26,6 +26,8 @@ namespace {
 
   UCTRegion dummytRegion;
   std::vector<UCTRegion> dummyUCTRegionCollection;
+  RegionDiscriminantInfo dummyDiscInfo;
+  std::vector<RegionDiscriminantInfo> dummyDiscInfoVector;
 
   std::map<std::string, float> dummyMap;
 

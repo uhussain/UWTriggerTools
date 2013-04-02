@@ -8,6 +8,8 @@
   <class name="edm::Wrapper<std::vector<UCTCandidate> >"/>
   <class name="UCTRegion"/>
   <class name="std::vector<UCTRegion>"/>
+  <class name="RegionDiscriminantInfo"/>
+  <class name="std::vector<RegionDiscriminantInfo>"/>
   <class name="L1RecoMatch"/>
   <class name="std::map<std::string, float>"/> 
 </selection>

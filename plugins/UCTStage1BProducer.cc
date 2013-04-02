@@ -628,6 +628,8 @@ void UCTStage1BProducer::makeTaus() {
       theTau.setInt("mipBit", mipBitAtCenter);
       theTau.setInt("tauVeto", tauVetoBitAtCenter);
 
+      fillRegionInfo(theTau, *stage1Regions, *emRegions);
+
       rlxTauList.push_back(theTau);
 
       if(relativeRgnIsolation < tauRelativeRgnIsolationCut &&

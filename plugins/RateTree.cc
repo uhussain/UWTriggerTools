@@ -63,6 +63,10 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* emClusterCenterEt_;
     std::vector<Int_t>* emClusterCenterFG_;
 
+    std::vector<RegionDiscriminantInfo>* region2Disc;
+    std::vector<RegionDiscriminantInfo>* region3Disc;
+    std::vector<RegionDiscriminantInfo>* region4Disc;
+
     std::vector<Int_t>* type_;
     std::vector<Int_t>* ellIso_;
     std::vector<Float_t>* pu_;
@@ -109,6 +113,10 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterCenterEt_ = new std::vector<Float_t>();
   emClusterCenterFG_ = new std::vector<Int_t>();
 
+  region2Disc = new std::vector<RegionDiscriminantInfo>();
+  region3Disc = new std::vector<RegionDiscriminantInfo>();
+  region4Disc = new std::vector<RegionDiscriminantInfo>();
+
   ellIso_ = new std::vector<Int_t>();
   pu_ = new std::vector<Float_t>();
   puUIC_ = new std::vector<Float_t>();
@@ -132,6 +140,11 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterStripEt", "std::vector<float>", emClusterStripEt_);
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
     tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
+
+    tree->Branch("region2Disc", "std::vector<RegionDiscriminantInfo>", region2Disc);
+    tree->Branch("region3Disc", "std::vector<RegionDiscriminantInfo>", region3Disc);
+    tree->Branch("region4Disc", "std::vector<RegionDiscriminantInfo>", region4Disc);
+
 
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
@@ -264,6 +277,10 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterCenterEt_->clear();
   emClusterCenterFG_->clear();
 
+  region2Disc->clear();
+  region3Disc->clear();
+  region4Disc->clear();
+
   type_->clear();
   ellIso_->clear();
   pu_->clear();
@@ -311,6 +328,11 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       emClusterCenterFG_->push_back(uct->getInt("emClusterCenterFG", -4));
       emClusterStripEt_->push_back(uct->getFloat("emClusterStripEt", -4));
 
+      // isolation region info
+      region2Disc->push_back(uct->regionDiscriminant(2));
+      region3Disc->push_back(uct->regionDiscriminant(3));
+      region4Disc->push_back(uct->regionDiscriminant(4));
+
       ellIso_->push_back(uct->getInt("ellIsolation", -4));
       pu_->push_back(uct->getFloat("puLevel", -4));
       puUIC_->push_back(uct->getFloat("puLevelUIC", -4));
@@ -353,6 +375,10 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterEt_->push_back(-9999);
   emClusterCenterEt_->push_back(-9999);
   emClusterStripEt_->push_back(-9999);
+
+  region2Disc->push_back(RegionDiscriminantInfo());
+  region3Disc->push_back(RegionDiscriminantInfo());
+  region4Disc->push_back(RegionDiscriminantInfo());
 
   ellIso_->push_back(-9999);
   pu_->push_back(-9999);

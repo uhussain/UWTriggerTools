@@ -183,6 +183,30 @@ stage1b_branches = cms.PSet(
     l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
     l1gEmClusterStripEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterStripEt', -4) : -2"),
     l1gEmClusterFG = cms.string("? l1gMatch ? l1g.getInt('emClusterCenterFG', -4) : -2"),
+
+    l1g4RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).totalEt : -2"),
+    l1g4RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).totalEtEcal : -2"),
+    l1g4RegionPattern = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).patternPass : -2"),
+    l1g4RegionMips = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).numberOfMips : -2"),
+    l1g4RegionLowestEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).lowestRegionEt : -2"),
+    l1g4RegionLowestEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).lowestRegionEtEcal : -2"),
+    l1g4RegionNumRegions = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).numberOfRegions : -2"),
+
+    l1g3RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).totalEt : -2"),
+    l1g3RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).totalEtEcal : -2"),
+    l1g3RegionPattern = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).patternPass : -2"),
+    l1g3RegionMips = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).numberOfMips : -2"),
+    l1g3RegionLowestEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).lowestRegionEt : -2"),
+    l1g3RegionLowestEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).lowestRegionEtEcal : -2"),
+    l1g3RegionNumRegions = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).numberOfRegions : -2"),
+
+    l1g2RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).totalEt : -2"),
+    l1g2RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).totalEtEcal : -2"),
+    l1g2RegionPattern = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).patternPass : -2"),
+    l1g2RegionMips = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).numberOfMips : -2"),
+    l1g2RegionLowestEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).lowestRegionEt : -2"),
+    l1g2RegionLowestEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).lowestRegionEtEcal : -2"),
+    l1g2RegionNumRegions = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).numberOfRegions : -2"),
 )
 
 # Keep track of electron isolation values

@@ -20,15 +20,8 @@
 #include <string>
 #include <iostream>
 
-// a simple data format to hold region about the associated regions.
-struct UCTRegion {
-  int etaPos;
-  int phiPos;
-  double ecalEt;
-  double et;
-  bool mip;
-  bool tauVeto;
-};
+#include "L1Trigger/UCT2015/interface/UCTRegion.h"
+#include "L1Trigger/UCT2015/interface/RegionAlgos.h"
 
 class UCTCandidate : public reco::LeafCandidate {
   public:
@@ -61,6 +54,9 @@ class UCTCandidate : public reco::LeafCandidate {
     const std::vector<UCTRegion>& regions() const;
     // Set the regions
     void setRegions(const std::vector<UCTRegion>&  in);
+
+    // Get discriminant into for patterns with N objects
+    RegionDiscriminantInfo regionDiscriminant(unsigned int N) const;
 
     friend std::ostream& operator<<(std::ostream &os, const UCTCandidate& t);
 

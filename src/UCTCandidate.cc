@@ -1,4 +1,5 @@
 #include "../interface/UCTCandidate.h"
+#include "L1Trigger/UCT2015/interface/RegionAlgos.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
 UCTCandidate::UCTCandidate() : reco::LeafCandidate() {}
@@ -102,6 +103,12 @@ const std::vector<UCTRegion>& UCTCandidate::regions() const {
 // Set the regions
 void UCTCandidate::setRegions(const std::vector<UCTRegion>& in) {
   regions_ = in;
+  // sort in ascending PT
+  std::sort(regions_.begin(), regions_.end());
+}
+
+RegionDiscriminantInfo UCTCandidate::regionDiscriminant(unsigned int N) const {
+  return makeDiscriminant(N, regions_);
 }
 
 std::ostream& operator<<(std::ostream &os, const UCTCandidate& t) {
