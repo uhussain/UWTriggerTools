@@ -52,6 +52,12 @@ options.register(
     VarParsing.varType.string,
     'Can be CALIB_V1, CALIB_V3, or CALIB_V4')
 options.register(
+    'eicCardHcalOnly',
+    '0',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.int,
+    'If 1, turn off the ECAL for the stage1 EGTau path.')
+options.register(
     'isMC',
     0,
     VarParsing.multiplicity.singleton,
@@ -120,6 +126,12 @@ ecal_calibration = calib_map[options.ecalCalib]
 process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
 process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
 process.UCT2015EClusterProducer.ecalCalibration = ecal_calibration
+
+if options.eicCardHcalOnly:
+    print "Disabling ECAL in Stage1 EGTau path"
+    # Set all scale factors to 0.
+    process.RCTConfigProducers.eGammaECalScaleFactors = [
+        0.0 for _ in eg_calib_v1]
 
 # Common branches to add to the ntuple
 common_ntuple_branches = cms.PSet(
