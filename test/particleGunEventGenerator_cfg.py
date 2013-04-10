@@ -12,7 +12,7 @@ import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
 # Set useful defaults
-options.outputFile = "uct_efficiency_tree.root"
+options.outputFile = "particle_gun.root"
 options.register(
     'pdgId',
     11,
