@@ -39,6 +39,13 @@ options.register(
     "If 1, enable production of Stage1B trees"
 )
 options.register(
+    "stage1",
+    1,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.int,
+    "If 0, *disable* production of Stage1 trees"
+)
+options.register(
     'ecalCalib',
     'CALIB_V4',
     VarParsing.multiplicity.singleton,
@@ -416,10 +423,13 @@ process.p1 = cms.Path(
     #process.printTaus *
     #process.printTPGs *
     #process.dump *
-    process.leptonEfficiencies *
     process.jetEfficiency *
     process.corrjetEfficiency
 )
+
+if options.stage1:
+    print "Building Stage1 trees"
+    process.p1 += process.leptonEfficiencies
 
 if options.stage1B:
     print "Building Stage1B trees"
