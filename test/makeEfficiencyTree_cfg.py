@@ -53,7 +53,7 @@ options.register(
     'Can be CALIB_V1, CALIB_V3, or CALIB_V4')
 options.register(
     'eicCardHcalOnly',
-    '0',
+    0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     'If 1, turn off the ECAL for the stage1 EGTau path.')
