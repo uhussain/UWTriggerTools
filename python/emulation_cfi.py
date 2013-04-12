@@ -43,7 +43,7 @@ UCT2015EClusterProducer = cms.EDProducer(
     debug = cms.bool(False),
     puCorrect = cms.bool(True),
     puETMax = cms.uint32(7),
-    eClusterSeed = cms.uint32(10),
+    eClusterSeed = cms.uint32(5),
     # Transparency correction calibration
     # calib_v4 = 2012 data.  Use calib_v1 (ideal) for MC.
     ecalCalibration = cms.vdouble(eg_calib_v4),
