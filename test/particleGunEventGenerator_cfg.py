@@ -116,6 +116,9 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # Output definition
+process.FEVTEventContent.outputCommands.append(
+    "keep *_simHcalTriggerPrimitiveDigis_*_*"
+)
 
 process.FEVToutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
