@@ -591,11 +591,13 @@ void UCTStage1BProducer::makeTaus() {
       for(vector<UCTCandidate>::const_iterator emCluster = emClusters->begin();
 	  emCluster != emClusters->end();
 	  emCluster++) {
-	if(emCluster->getInt("rgnPhi") == (int)tauCandRegionIPhi && emCluster->getInt("rgnEta") == (int)tauCandRegionIEta) {
-	  tauCandEta = emCluster->eta();
-	  tauCandPhi = emCluster->phi();
-          matchedEmCluster = &(*emCluster);
-          break;
+	if(std::abs(deltaPhiWrapAtN(18, emCluster->getInt("rgnPhi"), (int)tauCandRegionIPhi)) < 2
+            && std::abs(emCluster->getInt("rgnEta") - (int)tauCandRegionIEta) < 2) {
+          if (!matchedEmCluster || matchedEmCluster->pt() < emCluster->pt()) {
+            tauCandEta = emCluster->eta();
+            tauCandPhi = emCluster->phi();
+            matchedEmCluster = &(*emCluster);
+          }
 	}
       }
       UCTCandidate theTau(tauCandEt, tauCandEta, tauCandPhi);
