@@ -182,6 +182,12 @@ process.uctLeptonRates = cms.Sequence(
     process.isoEGUCTRate
 )
 
+process.uctHadronicRates = cms.Sequence(
+    process.jetUCTRate *
+    process.corrjetUCTRate *
+    process.sumsUCTRates
+)
+
 process.jetL1Rate = cms.EDAnalyzer(
     "RateTree",
     src = cms.VInputTag(
@@ -236,15 +242,14 @@ process.p1 = cms.Path(
     process.isoEGL1Rate *
     process.rlxEGL1Rate *
     process.jetL1Rate *
-    process.jetUCTRate *
-    process.corrjetUCTRate *
-    process.sumsL1Rates *
-    process.sumsUCTRates
+    process.sumsL1Rates
 )
 
 if options.stage1:
     print "Building stage1 trees"
     process.p1 += process.uctLeptonRates
+    process.p1 += process.uctHadronicRates
+
 
 if options.stage1B:
     print "Building Stage1B trees"
