@@ -14,8 +14,12 @@
 #ifndef HELPERS_W9QK6HND
 #define HELPERS_W9QK6HND
 
+class L1CaloRegion;
+
 // Compute the difference in phi between two towers, wrapping at phi = N
 int deltaPhiWrapAtN(unsigned int N, int phi1, int phi2);
+
+int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2);
 
 // Calo detector mapping.
 //

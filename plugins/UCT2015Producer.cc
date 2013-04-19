@@ -362,10 +362,6 @@ void UCT2015Producer::makeSums()
   SHTObject = UCTCandidate(sumHT, 0, 0);
 }
 
-int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2) {
-  return deltaPhiWrapAtN(18, r1.gctPhi(), r2.gctPhi());
-}
-
 void UCT2015Producer::makeJets() {
   jetList.clear();
   for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin();

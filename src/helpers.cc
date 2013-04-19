@@ -1,4 +1,5 @@
 #include "L1Trigger/UCT2015/interface/helpers.h"
+#include "DataFormats/L1CaloTrigger/interface/L1CaloRegion.h"
 #include <cmath>
 #include <math.h>
 
@@ -8,6 +9,10 @@ int deltaPhiWrapAtN(unsigned int N, int phi1, int phi2) {
     difference = -difference/std::abs(difference);
   }
   return difference;
+}
+
+int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2) {
+  return deltaPhiWrapAtN(18, r1.gctPhi(), r2.gctPhi());
 }
 
 double convertRegionPhi(int iPhi) {
