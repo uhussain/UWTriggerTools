@@ -181,13 +181,6 @@ process.uctLeptonRates = cms.Sequence(
     process.rlxEGUCTRate *
     process.isoEGUCTRate
 )
-
-process.uctHadronicRates = cms.Sequence(
-    process.jetUCTRate *
-    process.corrjetUCTRate *
-    process.sumsUCTRates
-)
-
 process.jetL1Rate = cms.EDAnalyzer(
     "RateTree",
     src = cms.VInputTag(
@@ -234,6 +227,13 @@ process.sumsUCTRates = cms.EDAnalyzer(
     l1SHTSrc = cms.InputTag("UCT2015Producer", "MHTUnpacked"),
     l1SETSrc = cms.InputTag("UCT2015Producer", "METUnpacked"),
 )
+
+process.uctHadronicRates = cms.Sequence(
+    process.jetUCTRate *
+    process.corrjetUCTRate *
+    process.sumsUCTRates
+)
+
 
 process.p1 = cms.Path(
     process.emulationSequence *
