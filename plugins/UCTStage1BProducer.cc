@@ -60,7 +60,8 @@ private:
   // Adds information about matched regions into a UCTCandidate
   void fillRegionInfo(UCTCandidate& toFill,
       const L1CaloRegionCollection& oldRegions,
-      const L1CaloRegionCollection& ecalRegions) const;
+      const L1CaloRegionCollection& ecalRegions,
+      const L1CaloEmCollection& clusters2x1) const;
 
   // ----------member data ---------------------------
 
@@ -104,7 +105,8 @@ private:
 void UCTStage1BProducer::fillRegionInfo(
     UCTCandidate& toFill,
     const L1CaloRegionCollection& stage1Regions,
-    const L1CaloRegionCollection& emRegions) const {
+    const L1CaloRegionCollection& emRegions,
+    const L1CaloEmCollection& clusters2x1) const {
 
   unsigned iphi = toFill.getInt("rgnPhi");
   unsigned ieta = toFill.getInt("rgnEta");
@@ -117,6 +119,9 @@ void UCTStage1BProducer::fillRegionInfo(
   // keep track of regions at all positions
   RegionsInfo regions;
 
+  double jetEt = 0;
+  double jetEtEm = 0;
+
   // First fill information about the classic regions which have E+H energy,
   // and MIP/tauVeto information.
   for(L1CaloRegionCollection::const_iterator region = stage1Regions.begin();
@@ -126,6 +131,7 @@ void UCTStage1BProducer::fillRegionInfo(
     int deltaEta = regionEta - ieta;
     int deltaPhi = deltaPhiWrapAtN(18, regionPhi, iphi);
     if (std::abs(deltaEta) < 2 && std::abs(deltaPhi) < 2) {
+      jetEt += region->et()*regionLSB_;
       UCTRegion uctRegion;
       uctRegion.etaPos = deltaEta;
       uctRegion.phiPos = deltaPhi;
@@ -144,10 +150,39 @@ void UCTStage1BProducer::fillRegionInfo(
     int deltaEta = regionEta - ieta;
     int deltaPhi = deltaPhiWrapAtN(18, regionPhi, iphi);
     if (std::abs(deltaEta) < 2 && std::abs(deltaPhi) < 2) {
-
+      jetEtEm += region->et();
       regions[std::make_pair(deltaEta, deltaPhi)].ecalEt = region->et();
     }
   }
+
+  // Get the Et's of the highest 2x1 in the center region and a neighboring
+  // region.
+  double highestCenter2x1Et = 0;
+  double highestNeighbor2x1Et = 0;
+
+  // Now fill information about 2x1 cands
+  for(L1CaloEmCollection::const_iterator tauCand = clusters2x1.begin();
+      tauCand != clusters2x1.end(); tauCand++){
+    double tauCandEt = tauCand->rank() * tauLSB_;
+    unsigned tauCandRegionIPhi = tauCand->regionId().iphi();
+    unsigned tauCandRegionIEta = tauCand->regionId().ieta();
+    int deltaEta = std::abs(tauCandRegionIEta - ieta);
+    int deltaPhi = std::abs(deltaPhiWrapAtN(18, tauCandRegionIPhi, iphi));
+    // on center region
+    if (deltaEta == 0 && deltaPhi == 0) {
+      if (tauCandEt > highestCenter2x1Et) {
+        highestCenter2x1Et = tauCandEt;
+      }
+    }
+    // annular neighbor
+    else if (deltaEta < 2 && deltaPhi < 2 && deltaPhi + deltaEta > 0) {
+      if (tauCandEt > highestNeighbor2x1Et) {
+        highestNeighbor2x1Et = tauCandEt;
+      }
+    }
+  }
+  toFill.setFloat("highestCenter2x1Et", highestCenter2x1Et);
+  toFill.setFloat("highestNeighbor2x1Et", highestNeighbor2x1Et);
 
   std::vector<UCTRegion> flatRegions;
   for (RegionsInfo::const_iterator regionInfo = regions.begin();
@@ -155,6 +190,9 @@ void UCTStage1BProducer::fillRegionInfo(
     flatRegions.push_back(regionInfo->second);
   }
   toFill.setRegions(flatRegions);
+
+  toFill.setFloat("associatedJetPt", jetEt);
+  toFill.setFloat("associatedJetPtEM", jetEtEm);
 }
 
 UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
@@ -179,7 +217,7 @@ UCTStage1BProducer::UCTStage1BProducer(const edm::ParameterSet& iConfig) :
   produces<UCTCandidateCollection>( "IsolatedEGUnpacked" ) ;
   produces<UCTCandidateCollection>( "RelaxedTauUnpacked" ) ;
   produces<UCTCandidateCollection>( "IsolatedTauUnpacked" ) ;
-  produces<UCTCandidateCollection>( "JetUnpacked" ) ;
+  produces<UCTCandidateCollection>( "JetsUnpacked" ) ;
 }
 
 
@@ -553,6 +591,15 @@ void UCTStage1BProducer::makeJets() {
         theJet.setFloat("puLevelUIC", puLevelUIC);
         // Store information about the "core" PT of the jet (central region)
         theJet.setFloat("associatedRegionEt", regionET);
+        // set info about the neighbors
+        theJet.setFloat("N", neighborN_et);
+        theJet.setFloat("S", neighborS_et);
+        theJet.setFloat("W", neighborW_et);
+        theJet.setFloat("E", neighborE_et);
+        theJet.setFloat("NW", neighborNW_et);
+        theJet.setFloat("NE", neighborNE_et);
+        theJet.setFloat("SW", neighborSW_et);
+        theJet.setFloat("SE", neighborSE_et);
         jetList.push_back(theJet);
       }
     }
@@ -564,179 +611,40 @@ void UCTStage1BProducer::makeJets() {
 void UCTStage1BProducer::makeTaus() {
   rlxTauList.clear();
   isoTauList.clear();
-  for(L1CaloEmCollection::const_iterator tauCand = tauCands->begin();
-      tauCand != tauCands->end(); tauCand++){
-    double tauCandEt = tauCand->rank() * tauLSB_;
-    if(tauCandEt > tauSeed) {
-      unsigned tauCandRegionIPhi = tauCand->regionId().iphi();
-      unsigned tauCandRegionIEta = tauCand->regionId().ieta();
-      double C = 0;
-      double N = 0;
-      double S = 0;
-      double E = 0;
-      double W = 0;
-      double NE = 0;
-      double SE = 0;
-      double NW = 0;
-      double SW = 0;
-      int tauVetoBitAtCenter = -1;
-      int mipBitAtCenter = -1;
-      for(L1CaloRegionCollection::const_iterator region = stage1Regions->begin();
-	  region != stage1Regions->end(); region++) {
 
-        double regionEt = region->et()*regionLSB_;
-
-
-	if((region->gctPhi() == tauCandRegionIPhi) &&
-	   (region->gctEta() == tauCandRegionIEta)) {
-	  C = regionEt;
-          tauVetoBitAtCenter = region->tauVeto();
-          mipBitAtCenter = region->mip();
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
-		(region->gctEta() == (tauCandRegionIEta    ))) {
-	  N = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
-		(region->gctEta() == (tauCandRegionIEta    ))) {
-	  S = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
-		(region->gctEta() == (tauCandRegionIEta + 1))) {
-	  E = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
-		(region->gctEta() == (tauCandRegionIEta - 1))) {
-	  W = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
-		(region->gctEta() == (tauCandRegionIEta + 1))) {
-	  NE = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
-		(region->gctEta() == (tauCandRegionIEta - 1))) {
-	  NW = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
-		(region->gctEta() == (tauCandRegionIEta + 1))) {
-	  SE = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
-		(region->gctEta() == (tauCandRegionIEta - 1))) {
-	  SW = regionEt;
-	}
-      }
-      // Compare tauCand to the total E+H within the region to define rgnIsolation
-      // Since the tauCand is found including the neighbor EM energy,
-      // whereas the regions do not include neighbors, one has to take
-      // care to ignore negative rgnIsolation
-      double associatedJetPt = C + N + S + E + W + NE + NW + SE + SW;
-      double associatedRegionEt = C;
-      double annulusRegions[] = {N, S, E, W, NE, NW, SE, SW};
-      double associatedSecondRegionEt = *std::max_element(
-          annulusRegions, annulusRegions+8);
-
-      double rgnIsolation = std::max(0., C - tauCandEt);
-      double jetIsolation = C + N + S + E + W + NE + NW + SE + SW - tauCandEt;
-
-      // Now compute EM only isolations
-      C = 0;
-      N = 0;
-      S = 0;
-      E = 0;
-      W = 0;
-      NE = 0;
-      SE = 0;
-      NW = 0;
-      SW = 0;
-      for(L1CaloRegionCollection::const_iterator region = emRegions->begin();
-	  region != emRegions->end(); region++) {
-        // EM regions are already in correct scale from ECluster producer.
-        double regionEt = region->et();
-	if((region->gctPhi() == tauCandRegionIPhi) &&
-	   (region->gctEta() == tauCandRegionIEta)) {
-	  C = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
-		(region->gctEta() == (tauCandRegionIEta    ))) {
-	  N = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
-		(region->gctEta() == (tauCandRegionIEta    ))) {
-	  S = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
-		(region->gctEta() == (tauCandRegionIEta + 1))) {
-	  E = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == 0) &&
-		(region->gctEta() == (tauCandRegionIEta - 1))) {
-	  W = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
-		(region->gctEta() == (tauCandRegionIEta + 1))) {
-	  NE = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == +1) &&
-		(region->gctEta() == (tauCandRegionIEta - 1))) {
-	  NW = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
-		(region->gctEta() == (tauCandRegionIEta + 1))) {
-	  SE = regionEt;
-	}
-	else if((deltaPhiWrapAtN(18, region->gctPhi(), tauCandRegionIPhi) == -1) &&
-		(region->gctEta() == (tauCandRegionIEta - 1))) {
-	  SW = regionEt;
-	}
-      }
-      // Compare tauCand to the total E within the region to define rgnEMIsolation
-      // Since the tauCand is found including the neighbor EM energy,
-      // whereas the regions do not include neighbors, one has to take
-      // care to ignore negative rgnEMIsolation
-      double associatedJetPtEM = C + N + S + E + W + NE + NW + SE + SW;
-      double associatedRegionEtEM = C;
-      double annulusRegionsEM[] = {N, S, E, W, NE, NW, SE, SW};
-      double associatedSecondRegionEtEM = *std::max_element(
-          annulusRegionsEM, annulusRegionsEM+8);
-
-      double rgnEMIsolation = std::max(0., C - tauCandEt);
-      unsigned jetEMIsolation = C + N + S + E + W + NE + NW + SE + SW - tauCandEt;
-      // Use finer grain position resolution if possible using the emClusters
-      // with default value being center of the region
-      // phi: 0-17 becomes 0-71; eta: 0-13 becomes 0-55;
-      double tauCandEta = convertRegionEta(tauCandRegionIEta);
-      double tauCandPhi = convertRegionPhi(tauCandRegionIPhi);
+  // seed using 4x4H + 3x3E
+  for(L1CaloRegionCollection::const_iterator region = stage1Regions->begin();
+      region != stage1Regions->end(); region++) {
+      int ieta = region->gctEta();
+      int iphi = region->gctPhi();
 
       const UCTCandidate* matchedEmCluster = NULL;
-
+      // Find the highest matching 3x3
       for(vector<UCTCandidate>::const_iterator emCluster = emClusters->begin();
 	  emCluster != emClusters->end();
 	  emCluster++) {
-	if(std::abs(deltaPhiWrapAtN(18, emCluster->getInt("rgnPhi"), (int)tauCandRegionIPhi)) < 2
-            && std::abs(emCluster->getInt("rgnEta") - (int)tauCandRegionIEta) < 2) {
-          if (!matchedEmCluster || matchedEmCluster->pt() < emCluster->pt()) {
-            tauCandEta = emCluster->eta();
-            tauCandPhi = emCluster->phi();
-            matchedEmCluster = &(*emCluster);
+        if (ieta == emCluster->getInt("rgnEta") &&
+            iphi == emCluster->getInt("rgnPhi")) {
+          if (!matchedEmCluster || emCluster->et() > matchedEmCluster->et()) {
+            matchedEmCluster = &*emCluster;
           }
-	}
+        }
       }
-      UCTCandidate theTau(tauCandEt, tauCandEta, tauCandPhi);
-      // tauObject that passes all isolations is an isolated tauObject
-      double relativeRgnEMIsolation = ((double) rgnEMIsolation) / ((double) tauCandEt);
-      double relativeJetEMIsolation = ((double) jetEMIsolation) / ((double) tauCandEt);
-      double relativeRgnIsolation = ((double) rgnIsolation) / ((double) tauCandEt);
-      double relativeJetIsolation = ((double) jetIsolation) / ((double) tauCandEt);
+      double seedEnergy = region->et() * regionLSB_;
+      if (matchedEmCluster) {
+        seedEnergy += matchedEmCluster->et();
+      }
+      if (seedEnergy < tauSeed)
+        continue;
 
-      theTau.setFloat("associatedRegionEt", associatedRegionEt);
-      theTau.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
-      theTau.setFloat("associatedJetPt", associatedJetPt);
+      // now populate information about the tau. we are interested in:
+      //
+      // neighboring 2x1s.
+      double tauCandEta = convertRegionEta(ieta);
+      double tauCandPhi = convertRegionPhi(iphi);
+      UCTCandidate theTau(seedEnergy, tauCandEta, tauCandPhi);
 
-      theTau.setFloat("associatedRegionEtEM", associatedRegionEtEM);
-      theTau.setFloat("associatedSecondRegionEtEM", associatedSecondRegionEtEM);
-      theTau.setFloat("associatedJetPtEM", associatedJetPtEM);
-
+      // add some metadata
       theTau.setFloat("emClusterEt", matchedEmCluster ? matchedEmCluster->et() : -1);
       theTau.setFloat("emClusterCenterEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterCenterEt") : -1);
       theTau.setInt("emClusterCenterFG", matchedEmCluster ? matchedEmCluster->getInt("emClusterCenterFG") : -1);
@@ -745,24 +653,11 @@ void UCTStage1BProducer::makeTaus() {
       theTau.setFloat("puLevelUIC", puLevelUIC);
       theTau.setFloat("puLevelEM", matchedEmCluster ? matchedEmCluster->getFloat("puLevelEM") : -1);
       theTau.setFloat("puLevelUICEM", matchedEmCluster ? matchedEmCluster->getFloat("puLevelUICEM") : -1);
-      theTau.setFloat("effArea", getRegionArea(tauCandRegionIEta));
-      theTau.setInt("rgnEta", tauCandRegionIEta);
-      theTau.setInt("rgnPhi", tauCandRegionIPhi);
-
-      theTau.setInt("mipBit", mipBitAtCenter);
-      theTau.setInt("tauVeto", tauVetoBitAtCenter);
-
-      fillRegionInfo(theTau, *stage1Regions, *emRegions);
-
+      theTau.setFloat("effArea", getRegionArea(ieta));
+      theTau.setInt("rgnEta", ieta);
+      theTau.setInt("rgnPhi", iphi);
+      fillRegionInfo(theTau, *stage1Regions, *emRegions, *tauCands);
       rlxTauList.push_back(theTau);
-
-      if(relativeRgnIsolation < tauRelativeRgnIsolationCut &&
-	 relativeJetIsolation < tauRelativeJetIsolationCut &&
-	 relativeRgnEMIsolation < tauRelativeEMRgnIsolationCut &&
-	 relativeJetEMIsolation < tauRelativeEMJetIsolationCut) {
-	isoTauList.push_back(rlxTauList.back());
-      }
-    }
   }
   rlxTauList.sort();
   isoTauList.sort();
