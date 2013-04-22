@@ -183,8 +183,6 @@ common_ntuple_branches = cms.PSet(
 # Specific to EG tau objects
 egtau_branches = cms.PSet(
     l1gJetPt = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPt', -4) : -2"),
-    l1g2ndRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEt', -4) : -2"),
-    l1g2ndRegionMIP = cms.string("? l1gMatch ? l1g.getInt('associatedSecondRegionMIP', -4) : -2"),
     l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation', -4) : -2"),
     l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto', -4) : -2"),
     l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit', -4) : -2"),
@@ -196,12 +194,14 @@ stage1b_branches = cms.PSet(
     l1gEffArea = cms.string("? l1gMatch ? l1g.getFloat('effArea', -4) : -2"),
     l1gRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEtEM', -4) : -2"),
     l1gJetPtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPtEM', -4) : -2"),
-    l1g2ndRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEtEM', -4) : -2"),
     # only defined for taus, EG objects are EM clusters by defintion.
     l1gEmClusterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterEt', -4) : -2"),
     l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
     l1gEmClusterStripEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterStripEt', -4) : -2"),
     l1gEmClusterFG = cms.string("? l1gMatch ? l1g.getInt('emClusterCenterFG', -4) : -2"),
+
+    l1gHighestCenter2x1 = cms.string("? l1gMatch ? l1g.getFloat('highestCenter2x1Et', -4) : -2"),
+    l1gHighestNeighbor2x1 = cms.string("? l1gMatch ? l1g.getFloat('highestNeighbor2x1Et', -4) : -2"),
 
     l1g4RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).totalEt : -2"),
     l1g4RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).totalEtEcal : -2"),
