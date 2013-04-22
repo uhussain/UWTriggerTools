@@ -177,9 +177,9 @@ process.rlxEGUCTRate = cms.EDAnalyzer(
 
 process.uctLeptonRates = cms.Sequence(
     process.rlxTauUCTRate *
-    process.isoTauUCTRate *
+    #process.isoTauUCTRate *
     process.rlxEGUCTRate *
-    process.isoEGUCTRate
+    #process.isoEGUCTRate
 )
 process.jetL1Rate = cms.EDAnalyzer(
     "RateTree",
@@ -229,7 +229,7 @@ process.sumsUCTRates = cms.EDAnalyzer(
 )
 
 process.uctHadronicRates = cms.Sequence(
-    process.jetUCTRate *
+    #process.jetUCTRate *
     process.corrjetUCTRate *
     process.sumsUCTRates
 )
@@ -259,9 +259,10 @@ if options.stage1B:
         process, process.uctLeptonRates, 'Stage1B')
     # Update input tags to the stage 1B producer
     for stage1BTreeMaker in [process.rlxTauUCTRateStage1B,
-                             process.isoTauUCTRateStage1B,
+                             #process.isoTauUCTRateStage1B,
                              process.rlxEGUCTRateStage1B,
-                             process.isoEGUCTRateStage1B]:
+                             #process.isoEGUCTRateStage1B
+                            ]:
         stage1BTreeMaker.src[0].setModuleLabel("UCTStage1BProducer")
     # add the computation of stage1b trees
     process.p1 += process.uctLeptonRatesStage1B
