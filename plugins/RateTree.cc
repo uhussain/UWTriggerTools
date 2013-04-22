@@ -61,6 +61,9 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* emClusterCenterEt_;
     std::vector<Int_t>* emClusterCenterFG_;
 
+    std::vector<Float_t>* highestCenter2x1Et_;
+    std::vector<Float_t>* highestNeighbor2x1Et_;
+
     std::vector<RegionDiscriminantInfo>* region2Disc;
     std::vector<RegionDiscriminantInfo>* region3Disc;
     std::vector<RegionDiscriminantInfo>* region4Disc;
@@ -109,6 +112,9 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterCenterEt_ = new std::vector<Float_t>();
   emClusterCenterFG_ = new std::vector<Int_t>();
 
+  highestCenter2x1Et_ = new std::vector<Float_t>();
+  highestNeighbor2x1Et_ = new std::vector<Float_t>();
+
   region2Disc = new std::vector<RegionDiscriminantInfo>();
   region3Disc = new std::vector<RegionDiscriminantInfo>();
   region4Disc = new std::vector<RegionDiscriminantInfo>();
@@ -134,6 +140,9 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterStripEt", "std::vector<float>", emClusterStripEt_);
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
     tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
+
+    tree->Branch("highestCenter2x1Et", "std::vector<float>", highestCenter2x1Et_);
+    tree->Branch("highestNeighbor2x1Et", "std::vector<float>", highestNeighbor2x1Et_);
 
     tree->Branch("region2Disc", "std::vector<RegionDiscriminantInfo>", region2Disc);
     tree->Branch("region3Disc", "std::vector<RegionDiscriminantInfo>", region3Disc);
@@ -313,6 +322,9 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       emClusterCenterFG_->push_back(uct->getInt("emClusterCenterFG", -4));
       emClusterStripEt_->push_back(uct->getFloat("emClusterStripEt", -4));
 
+      highestCenter2x1Et_->push_back(uct->getFloat("highestCenter2x1Et", -4));
+      highestNeighbor2x1Et_->push_back(uct->getFloat("highestNeighbor2x1Et", -4));
+
       // isolation region info
       region2Disc->push_back(uct->regionDiscriminant(2));
       region3Disc->push_back(uct->regionDiscriminant(3));
@@ -358,6 +370,9 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterEt_->push_back(-9999);
   emClusterCenterEt_->push_back(-9999);
   emClusterStripEt_->push_back(-9999);
+
+  highestCenter2x1Et_->push_back(-9999);
+  highestNeighbor2x1Et_->push_back(-9999);
 
   region2Disc->push_back(RegionDiscriminantInfo());
   region3Disc->push_back(RegionDiscriminantInfo());
