@@ -51,12 +51,10 @@ class RateTree : public edm::EDAnalyzer {
     bool isUCT_;
     std::vector<Float_t>* jetPt_;
     std::vector<Float_t>* regionPt_;
-    std::vector<Float_t>* secondRegionPt_;
 
     // EM versions
     std::vector<Float_t>* jetPtEM_;
     std::vector<Float_t>* regionPtEM_;
-    std::vector<Float_t>* secondRegionPtEM_;
 
     std::vector<Float_t>* emClusterEt_;
     std::vector<Float_t>* emClusterStripEt_;
@@ -102,11 +100,9 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
 
   jetPt_ = new std::vector<Float_t>();
   regionPt_ = new std::vector<Float_t>();
-  secondRegionPt_ = new std::vector<Float_t>();
 
   jetPtEM_ = new std::vector<Float_t>();
   regionPtEM_ = new std::vector<Float_t>();
-  secondRegionPtEM_ = new std::vector<Float_t>();
 
   emClusterEt_ = new std::vector<Float_t>();
   emClusterStripEt_ = new std::vector<Float_t>();
@@ -130,11 +126,9 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   if (isUCT_) {
     tree->Branch("jetPt", "std::vector<float>", &jetPt_);
     tree->Branch("regionPt", "std::vector<float>", &regionPt_);
-    tree->Branch("secondRegionPt", "std::vector<float>", &secondRegionPt_);
 
     tree->Branch("jetPtEM", "std::vector<float>", &jetPtEM_);
     tree->Branch("regionPtEM", "std::vector<float>", &regionPtEM_);
-    tree->Branch("secondRegionPtEM", "std::vector<float>", &secondRegionPtEM_);
 
     tree->Branch("emClusterEt", "std::vector<float>", emClusterEt_);
     tree->Branch("emClusterStripEt", "std::vector<float>", emClusterStripEt_);
@@ -144,7 +138,6 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("region2Disc", "std::vector<RegionDiscriminantInfo>", region2Disc);
     tree->Branch("region3Disc", "std::vector<RegionDiscriminantInfo>", region3Disc);
     tree->Branch("region4Disc", "std::vector<RegionDiscriminantInfo>", region4Disc);
-
 
     tree->Branch("ellIso", "std::vector<int>", &ellIso_);
     tree->Branch("pu", "std::vector<float>", &pu_);
@@ -160,11 +153,9 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->SetAlias("l1gPhi", "phi");
 
     tree->SetAlias("l1gRegionEt", "regionPt");
-    tree->SetAlias("l1g2ndRegionEt", "secondRegionPt");
     tree->SetAlias("l1gJetPt", "jetPt");
 
     tree->SetAlias("l1gRegionEtEM", "regionPtEM");
-    tree->SetAlias("l1g2ndRegionEtEM", "secondRegionPtEM");
     tree->SetAlias("l1gJetPtEM", "jetPtEM");
 
     tree->SetAlias("l1gEmClusterEt", "emClusterEt");
@@ -198,11 +189,9 @@ RateTree::~RateTree() {
 
   delete jetPt_;
   delete regionPt_;
-  delete secondRegionPt_;
 
   delete jetPtEM_;
   delete regionPtEM_;
-  delete secondRegionPtEM_;
 
   delete emClusterEt_;
   delete emClusterCenterEt_;
@@ -266,11 +255,9 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
   jetPt_->clear();
   regionPt_->clear();
-  secondRegionPt_->clear();
 
   jetPtEM_->clear();
   regionPtEM_->clear();
-  secondRegionPtEM_->clear();
 
   emClusterEt_->clear();
   emClusterStripEt_->clear();
@@ -315,12 +302,10 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       }
       jetPt_->push_back(uct->getFloat("associatedJetPt", -4));
       regionPt_->push_back(uct->getFloat("associatedRegionEt", -4));
-      secondRegionPt_->push_back(uct->getFloat("associatedSecondRegionEt", -4));
 
       // em versions
       jetPtEM_->push_back(uct->getFloat("associatedJetPtEM", -4));
       regionPtEM_->push_back(uct->getFloat("associatedRegionEtEM", -4));
-      secondRegionPtEM_->push_back(uct->getFloat("associatedSecondRegionEtEM", -4));
 
       // 3x3 cluster information
       emClusterEt_->push_back(uct->getFloat("emClusterEt", -4));
@@ -366,11 +351,9 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
   jetPt_->push_back(-9999);
   regionPt_->push_back(-9999);
-  secondRegionPt_->push_back(-9999);
 
   jetPtEM_->push_back(-9999);
   regionPtEM_->push_back(-9999);
-  secondRegionPtEM_->push_back(-9999);
 
   emClusterEt_->push_back(-9999);
   emClusterCenterEt_->push_back(-9999);
