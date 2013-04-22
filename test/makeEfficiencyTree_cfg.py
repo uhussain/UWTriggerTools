@@ -356,10 +356,10 @@ process.rlxUCTisoL1EGEfficiency = cms.EDAnalyzer(
 
 # Package all of the lepton efficiencies into one sequence
 process.leptonEfficiencies = cms.Sequence(
-    process.isoTauEfficiency *
+    #process.isoTauEfficiency *
     process.rlxTauEfficiency *
-    process.rlxTauPlusJetEfficiency *
-    process.isoEGEfficiency *
+    #process.rlxTauPlusJetEfficiency *
+    #process.isoEGEfficiency *
     process.rlxEGEfficiency *
     process.rlxUCTisoL1EGEfficiency
 )
@@ -402,11 +402,28 @@ process.corrjetEfficiency = cms.EDAnalyzer(
     )
 )
 
-process.printTaus = cms.EDAnalyzer(
+process.highPtPF = cms.EDFilter(
+    "GenericPFCandidateSelector",
+    src = cms.InputTag("particleFlow"),
+    cut = cms.string("charge != 0 && pt > 10")
+)
+
+process.printPF = cms.EDAnalyzer(
     "CandInfoPrinter",
-    src = cms.InputTag("recoTaus"),
+    src = cms.InputTag("highPtPF"),
     printHeader=cms.bool(True),
     pt = cms.string("pt"),
+    eta = cms.string("eta"),
+    pdgId = cms.string("pdgId")
+)
+
+
+process.printTaus = cms.EDAnalyzer(
+    "CandInfoPrinter",
+    src = cms.InputTag("hpsPFTauProducer"),
+    printHeader=cms.bool(True),
+    pt = cms.string("pt"),
+    ncands = cms.string("signalPFCands.size"),
     eta = cms.string("eta"),
     phi = cms.string("phi"),
     dm = cms.string("decayMode"),
@@ -415,7 +432,8 @@ process.printTaus = cms.EDAnalyzer(
 process.printTPGs = cms.EDFilter(
     "TPGDebugger",
     ecalSrc = cms.InputTag("ecalDigis:EcalTriggerPrimitives"),
-    hcalSrc = cms.InputTag("hackHCALMIPs"),
+    #hcalSrc = cms.InputTag("hackHCALMIPs"),
+    hcalSrc = cms.InputTag("simHcalTriggerPrimitiveDigis"),
     toPrint = cms.VPSet(
         # everything in all events
         cms.PSet(
@@ -428,13 +446,36 @@ process.printTPGs = cms.EDFilter(
     )
 )
 
+process.hackHCALMIPs.src = "simHcalTriggerPrimitiveDigis"
+process.pionEfficiency = cms.EDAnalyzer(
+    "EfficiencyTree",
+    recoSrc = cms.VInputTag("highPtPF"),
+    l1Src = cms.VInputTag(
+        # Combine central jets + tau + forward jets
+        cms.InputTag("l1extraParticles", "Tau"),
+    ),
+    l1GSrc = cms.VInputTag(cms.InputTag("UCTStage1BProducer", "RelaxedTauUnpacked")),
+    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
+    # Max DR for RECO-trigger matching
+    maxDR = cms.double(0.5),
+    # Ntuple configuration
+    ntuple = cms.PSet(
+        common_ntuple_branches,
+        egtau_branches,
+        stage1b_branches
+    )
+)
+
 
 process.p1 = cms.Path(
     process.recoObjects *
     process.emulationSequence *
     #process.printTaus *
-    #process.printTPGs *
+    process.highPtPF *
+    process.printPF *
+    process.printTPGs *
     #process.dump *
+    process.pionEfficiency *
     process.jetEfficiency *
     process.corrjetEfficiency
 )
@@ -450,9 +491,9 @@ if options.stage1B:
     process.leptonEfficienciesStage1B = cloneProcessingSnippet(
         process, process.leptonEfficiencies, 'Stage1B')
     # Update input tags to the stage 1B producer
-    for stage1BTreeMaker in [process.isoTauEfficiencyStage1B,
+    for stage1BTreeMaker in [#process.isoTauEfficiencyStage1B,
                              process.rlxTauEfficiencyStage1B,
-                             process.isoEGEfficiencyStage1B,
+                             #process.isoEGEfficiencyStage1B,
                              process.rlxEGEfficiencyStage1B,
                              process.rlxUCTisoL1EGEfficiencyStage1B]:
         stage1BTreeMaker.l1GSrc[0].setModuleLabel("UCTStage1BProducer")
@@ -545,10 +586,10 @@ process.semileptonicTTBarPath = cms.Path(
     process.pfSumET *
     process.metsignificance *
     process.l1SumsEfficiency *
-    process.uctSumsEfficiency *
+    process.uctSumsEfficiency
     # w/o PU corrections
-    process.UCT2015ProducerNoPU *
-    process.uctSumsNoPUEfficiency
+    #process.UCT2015ProducerNoPU *
+    #process.uctSumsNoPUEfficiency
 )
 
 process.schedule = cms.Schedule(
