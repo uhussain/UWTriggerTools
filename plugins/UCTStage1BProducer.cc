@@ -122,6 +122,9 @@ void UCTStage1BProducer::fillRegionInfo(
   double jetEt = 0;
   double jetEtEm = 0;
 
+  double centerRegionEt = 0;
+  double centerRegionEtEm = 0;
+
   // First fill information about the classic regions which have E+H energy,
   // and MIP/tauVeto information.
   for(L1CaloRegionCollection::const_iterator region = stage1Regions.begin();
@@ -130,6 +133,9 @@ void UCTStage1BProducer::fillRegionInfo(
     int regionPhi = region->gctPhi();
     int deltaEta = regionEta - ieta;
     int deltaPhi = deltaPhiWrapAtN(18, regionPhi, iphi);
+    if (deltaEta == 0 && deltaPhi == 0) {
+      centerRegionEt = region->et()*regionLSB_;
+    }
     if (std::abs(deltaEta) < 2 && std::abs(deltaPhi) < 2) {
       jetEt += region->et()*regionLSB_;
       UCTRegion uctRegion;
@@ -149,11 +155,16 @@ void UCTStage1BProducer::fillRegionInfo(
     int regionPhi = region->gctPhi();
     int deltaEta = regionEta - ieta;
     int deltaPhi = deltaPhiWrapAtN(18, regionPhi, iphi);
+    if (deltaEta == 0 && deltaPhi == 0) {
+      centerRegionEtEm = region->et();
+    }
     if (std::abs(deltaEta) < 2 && std::abs(deltaPhi) < 2) {
       jetEtEm += region->et();
       regions[std::make_pair(deltaEta, deltaPhi)].ecalEt = region->et();
     }
   }
+  toFill.setFloat("associatedRegionEt", centerRegionEt);
+  toFill.setFloat("associatedRegionEtEM", centerRegionEtEm);
 
   // Get the Et's of the highest 2x1 in the center region and a neighboring
   // region.
