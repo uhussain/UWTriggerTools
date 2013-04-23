@@ -446,7 +446,7 @@ process.printTPGs = cms.EDFilter(
     )
 )
 
-process.hackHCALMIPs.src = "simHcalTriggerPrimitiveDigis"
+#process.hackHCALMIPs.src = "simHcalTriggerPrimitiveDigis"
 process.pionEfficiency = cms.EDAnalyzer(
     "EfficiencyTree",
     recoSrc = cms.VInputTag("highPtPF"),
