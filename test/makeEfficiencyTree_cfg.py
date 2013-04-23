@@ -471,11 +471,11 @@ process.p1 = cms.Path(
     process.recoObjects *
     process.emulationSequence *
     #process.printTaus *
-    process.highPtPF *
-    process.printPF *
-    process.printTPGs *
+    #process.highPtPF *
+    #process.printPF *
+    #process.printTPGs *
     #process.dump *
-    process.pionEfficiency *
+    #process.pionEfficiency *
     process.jetEfficiency *
     process.corrjetEfficiency
 )
