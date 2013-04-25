@@ -164,3 +164,27 @@ recoObjects = cms.Sequence(
     isoTaus*
     recoTaus
 )
+
+# For matching taus to MC truth
+
+from RecoTauTag.TauTagTools.TauTruthProduction_cfi import tauGenJets, trueHadronicTaus, genParticles
+
+from RecoTauTag.TauTagTools.RecoTauTruthMatching_cfi import recoTauTruthMatcher
+recoTauTruthMatcher.src = "recoTaus"
+recoTauTruthMatcher.matched = "trueHadronicTaus"
+
+trueTaus = cms.EDFilter(
+    "CandViewGenJetMatchRefSelector",
+    filter = cms.bool(False),
+    src = cms.InputTag("recoTaus"),
+    matching = cms.InputTag("recoTauTruthMatcher")
+)
+
+recoObjects_truthMatched = cms.Sequence(
+    recoObjects *
+    genParticles *
+    tauGenJets *
+    trueHadronicTaus *
+    recoTauTruthMatcher *
+    trueTaus
+)

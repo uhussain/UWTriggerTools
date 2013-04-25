@@ -466,9 +466,17 @@ process.pionEfficiency = cms.EDAnalyzer(
     )
 )
 
+reco_object_step = process.recoObjects
+
+# Determine if we want truth matching or not.
+if options.isMC:
+    reco_object_step = process.recoObjects_truthMatched
+    process.rlxTauPlusJetEfficiency.recoSrc = cms.VInputTag("trueTaus")
+    process.isoTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
+    process.rlxTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
 
 process.p1 = cms.Path(
-    process.recoObjects *
+    reco_object_step *
     process.emulationSequence *
     #process.printTaus *
     #process.highPtPF *
