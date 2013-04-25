@@ -477,7 +477,7 @@ if options.isMC:
 
 process.p1 = cms.Path(
     reco_object_step *
-    process.emulationSequence *
+    process.emulationSequence
     #process.printTaus *
     #process.highPtPF *
     #process.printPF *
