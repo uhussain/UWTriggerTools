@@ -484,8 +484,8 @@ process.p1 = cms.Path(
     #process.printTPGs *
     #process.dump *
     #process.pionEfficiency *
-    process.jetEfficiency *
-    process.corrjetEfficiency
+    #process.jetEfficiency *
+    #process.corrjetEfficiency
 )
 
 if options.stage1:
@@ -602,7 +602,7 @@ process.semileptonicTTBarPath = cms.Path(
 
 process.schedule = cms.Schedule(
     process.p1,
-    process.semileptonicTTBarPath
+    #process.semileptonicTTBarPath
 )
 
 # Make the framework shut up.
