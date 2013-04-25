@@ -1,3 +1,4 @@
+#flake8: noqa
 import FWCore.ParameterSet.Config as cms
 
 '''
@@ -96,6 +97,10 @@ cleanJets=cms.Sequence(
     recoJets
 )
 
+# Rerun the PFTau sequence
+from Configuration.StandardSequences.MagneticField_cff import *
+from RecoTauTag.Configuration.RecoPFTauTag_cff import *
+
 # Select good taus
 dmTaus = cms.EDFilter(
     "PFTauSelector",
@@ -154,6 +159,7 @@ recoTaus = cms.EDFilter(
 
 recoObjects = cms.Sequence(
     cleanJets *
+    recoTauClassicHPSSequence *
     dmTaus *
     isoTaus*
     recoTaus
