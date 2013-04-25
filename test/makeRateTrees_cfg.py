@@ -230,8 +230,8 @@ process.sumsUCTRates = cms.EDAnalyzer(
 
 process.uctHadronicRates = cms.Sequence(
     #process.jetUCTRate *
-    process.corrjetUCTRate *
-    process.sumsUCTRates
+    process.corrjetUCTRate
+    #process.sumsUCTRates
 )
 
 
@@ -241,8 +241,8 @@ process.p1 = cms.Path(
     process.tauL1Rate *
     process.isoEGL1Rate *
     process.rlxEGL1Rate *
-    process.jetL1Rate *
-    process.sumsL1Rates
+    process.jetL1Rate
+    #process.sumsL1Rates
 )
 
 if options.stage1:
