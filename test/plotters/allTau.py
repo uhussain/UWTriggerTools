@@ -17,12 +17,15 @@ aIso = True    # I region + Iso<ISOTHRESHOLD
 aPUa = False      # P region + ISO + PU subtraction (puValA)
 aPUb = False      # P region + ISO + PU subtraction (puValB)
 aNoIso = True  # R region
-aLOne = True     # C current
+aLOne = False     # C current
+aLOneb = False     #L1b current
 aMC_iso = False  # Mi MC region + ISO
+a14MC_Noiso = False
+a8MC_Noiso = False
 aMC_lOne = False   # Mc MC current
 al1b_Iso = True  # Bi L1b region + ISO
 al1b_NoIso = True # Bn L1b region
-
+Only_l1b = False
 #rate plot
 rateLine = False # line at recoPtVal
 
@@ -35,20 +38,24 @@ resReco=True # cut on reco pt at recoPtVal
 LIso=3
 LSB=50
 l1ptVal=20
-recoPtVal= 20
+recoPtVal= 35
 ISOTHRESHOLD=0.20
 puValA = 5
 puValB = 9
 L1_CALIB_FACTOR = 1.0
 L1G_CALIB_FACTOR = 1.0
 ZEROBIAS_RATE=15000000.00
-saveWhere='../plots/Tau_'
+saveWhere='../plots/Tau_Stage1B_NewVar/'
+#saveWhere=''
 
 ########
 # File #
 ########
+##The names of these files change frequently
+
 # Efficiency
-eff_ntuple = '../data/uct_tau_efficiency.root'
+eff_ntuple = '/afs/hep.wisc.edu/cms/tperry/CMSSW_6_0_1_PostLS1v2_patch4/src/L1Trigger/UCT2015/test/data/EvanL1b/uct_tau_efficiency.root'
+#L1
 eff_rlx_spot = 'rlxTauEfficiency/Ntuple'
 eff_iso_spot = 'isoTauEfficiency/Ntuple'
 eff_ntuple_file = ROOT.TFile(eff_ntuple)
@@ -61,7 +68,9 @@ l1b_eff_rlx_tau_ntuple = eff_ntuple_file.Get(l1b_eff_rlx_spot)
 l1b_eff_iso_tau_ntuple = eff_ntuple_file.Get(l1b_eff_iso_spot)
 
 # Rate
-rate_ntuple = '../data/uct_rates_eic'+str(LIso)+'.root'
+rate_ntupleb = '../data/uct_rates_14mc_eic3.root'
+
+rate_ntuple = '../data/uct_rates_14mc_eic3.root'
 rate_rlx_l1_spot = 'tauL1Rate/Ntuple'
 rate_rlx_l1g_spot = 'rlxTauUCTRate/Ntuple'
 rate_ntuple_file = ROOT.TFile(rate_ntuple)
@@ -72,14 +81,22 @@ l1b_rate_rlx_l1g_spot = 'rlxTauUCTRateStage1B/Ntuple'
 l1b_rate_iso_l1g_spot = 'isoTauUCTRateStage1B/Ntuple'
 l1b_rate_rlx_l1g_tau_ntuple = rate_ntuple_file.Get(l1b_rate_rlx_l1g_spot)
 l1b_rate_iso_l1g_tau_ntuple = rate_ntuple_file.Get(l1b_rate_iso_l1g_spot)
-# MC Rate
-mc_rate_ntuple = '../data/LSB'+str(LSB)+'/uct_rates_eic'+str(LIso)+'_mc.root'
-mc_rate_rlx_l1_spot = 'tauL1Rate/Ntuple'
-mc_rate_rlx_l1g_spot = 'rlxTauUCTRate/Ntuple'
-mc_rate_ntuple_file = ROOT.TFile(mc_rate_ntuple)
-mc_rate_rlx_l1_tau_ntuple = mc_rate_ntuple_file.Get(mc_rate_rlx_l1_spot)
-mc_rate_rlx_l1g_tau_ntuple = mc_rate_ntuple_file.Get(mc_rate_rlx_l1g_spot)
+#14TeV MC Rate
+mc14_rate_ntuple = '../data/uct_rates_14mc_eic3.root'
 
+mc14_rate_rlx_l1_spot = 'tauL1Rate/Ntuple'
+mc14_rate_rlx_l1g_spot = 'rlxTauUCTRate/Ntuple'
+mc14_rate_ntuple_file = ROOT.TFile(mc14_rate_ntuple)
+mc14_rate_rlx_l1_tau_ntuple = mc14_rate_ntuple_file.Get(mc14_rate_rlx_l1_spot)
+mc14_rate_rlx_l1g_tau_ntuple = mc14_rate_ntuple_file.Get(mc14_rate_rlx_l1g_spot)
+
+#14TeV MC Rate
+mc8_rate_ntuple= '/afs/hep.wisc.edu/cms/tperry/CMSSW_6_0_1_PostLS1v2_patch4/src/L1Trigger/UCT2015/test/data/uct_rates_eic'+str(LIso)+'.root'
+mc8_rate_rlx_l1_spot = 'tauL1Rate/Ntuple'
+mc8_rate_rlx_l1g_spot = 'rlxTauUCTRate/Ntuple'
+mc8_rate_ntuple_file = ROOT.TFile(mc8_rate_ntuple)
+mc8_rate_rlx_l1_tau_ntuple = mc8_rate_ntuple_file.Get(mc8_rate_rlx_l1_spot)
+mc8_rate_rlx_l1g_tau_ntuple = mc8_rate_ntuple_file.Get(mc8_rate_rlx_l1g_spot)
 store = ROOT.TFile(saveWhere+'store.root','RECREATE')
 
 name=''
@@ -87,13 +104,16 @@ if aIso: name+='I'
 if aPUa or aPUb: name+='P'
 if aNoIso: name+='N'
 if aLOne: name+='C'
+if aLOneb: name+='Bc'
 if aMC_iso: name+='Mi'
+if a14MC_Noiso: name+='Mn14'
+if a8MC_Noiso: name+='Mn8'
 if aMC_lOne: name+='Mc'
 if al1b_Iso: name+='Bi'
 if al1b_NoIso: name+='Bn'
 extraName=''
 
-log = open(saveWhere+name+'_reco'+str(recoPtVal)+'_iso'+str(ISOTHRESHOLD)+extraName+'.log','w')
+log = open(saveWhere+name+'_reco'+str(recoPtVal)+'_l1'+str(l1ptVal)+'_iso'+str(ISOTHRESHOLD)+extraName+'.log','w')
 log.write('LIso = '+str(LIso)+'\n')
 log.write('LSB = '+str(LSB)+'\n')
 log.write('l1ptVal = '+str(l1ptVal)+'\n')
@@ -129,7 +149,7 @@ colorPUa=ROOT.EColor.kRed
 markerPUa=33
 colorPUb=ROOT.EColor.kYellow+3
 markerPUb=23
-colorMi=ROOT.EColor.kGreen+3
+colorMi=ROOT.EColor.kAzure
 markerMi=24
 colorMc=ROOT.EColor.kViolet-7
 markerMc=25
@@ -137,6 +157,8 @@ colorBi=ROOT.EColor.kBlack
 markerBi=24
 colorBn=ROOT.EColor.kCyan
 markerBn=25
+colorBc=ROOT.EColor.kMagenta+2
+markerBc=23
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 
@@ -144,6 +166,7 @@ def make_plot(tree, variable, selection, binning, xaxis='', title='',calFactor=1
  ''' Plot a variable using draw and return the histogram '''
  draw_string = "%s * %0.2f>>htemp(%s)" % (variable,calFactor, ", ".join(str(x) for x in binning))
  print draw_string
+ print selection
  tree.Draw(draw_string, selection, "goff")
  output_histo = ROOT.gDirectory.Get("htemp").Clone()
  output_histo.GetXaxis().SetTitle(xaxis)
@@ -154,36 +177,39 @@ def make_plot(tree, variable, selection, binning, xaxis='', title='',calFactor=1
 ##### RESOLUTION #####################################################
 ######################################################################
 def make_res_nrml(
-ntuple,reco,l1,l1g,binning,cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='',setLOG=False):
+ntuple,bntuple,reco,l1,l1g,binning,cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='',extraCut='',extraCutb='',setLOG=False):
  '''variable: (reco-l1g)/reco  with cut l1g > l1pt'''
  canvas.SetLogy(setLOG)
  info = 'RES_'+str(reco)+'_'+cutPtVar+'Cut'
  
  l1gplot = make_plot(
   ntuple, '('+str(reco)+' - ('+str(L1G_CALIB_FACTOR)+' * '+str(l1g)+'))/'+str(reco), 
-  'l1gMatch&&'+cutPtVarg+'>'+str(cutPt),binning
+  'l1gMatch&&'+cutPtVarg+'>'+str(cutPt)+extraCut,binning
  )
+
  l1gplot.SetTitle('Resolution')
- l1gplot.GetXaxis().SetTitle(reco+'-'+l1+'/'+reco)
+ l1gplot.GetXaxis().SetTitle('(recoPt- l1gPt)/recoPt')
  l1gplot.SetLineColor(ROOT.EColor.kBlue)
- l1gplot.Scale(1/l1gplot.Integral())
 
- l1plot = make_plot(
-  ntuple, '('+str(reco)+' - ('+str(l1)+'))/'+str(reco), 
-  'l1Match&&'+cutPtVar+'>'+str(cutPt),binning
+ l1bplot = make_plot(
+ bntuple, #'('+str(reco)+' - ('+str(L1G_CALIB_FACTOR)+' * '+str(l1g)+'))/'+str(reco),
+  #'('+str(reco)+' - ('+str(L1G_CALIB_FACTOR)+')*(max(max(l1g2RegionEt*l1g2RegionPattern,l1g3RegionEt*l1g3RegionPattern),l1g4RegionPattern*l1g4RegionEt) + (!l1g2RegionPattern)*max(l1gRegionEt,'+str(l1g)+')))/'+str(reco), 
+  '('+str(reco)+' - ('+str(L1G_CALIB_FACTOR)+')*(l1g2RegionEt*l1g2RegionPattern + (!l1g2RegionPattern)*max(l1gRegionEt,'+str(l1g)+')))/'+str(reco),
+  'l1gMatch&&'+cutPtVarg+'>'+str(cutPt)+extraCutb,binning
  )
- l1plot.SetLineColor(ROOT.EColor.kRed)
- l1plot.Scale(1/l1plot.Integral())
-
+ 
+ l1bplot.Scale(1/l1bplot.Integral())
+ l1bplot.SetLineColor(ROOT.EColor.kRed)
  legend = ROOT.TLegend(0.6,0.7,0.89,0.89,'','brNDC')
  legend.SetFillColor(ROOT.EColor.kWhite)
  legend.SetBorderSize(0)
  legend.AddEntry(l1gplot,'upgrade')
- legend.AddEntry(l1plot,'current')
+ legend.AddEntry(l1bplot,'Stage 1B upgrade')
 
  l1gplot.Draw()
- l1plot.Draw('sames')
- l1gplot.SetMaximum(1.1*max(l1gplot.GetMaximum(),l1plot.GetMaximum()))
+ l1bplot.Draw('sames')
+ #l1gplot.SetMaximum(1.1*max(l1gplot.GetMaximum(),l1bplot.GetMaximum()))
+ l1gplot.SetMaximum(0.1)
  legend.Draw()
  
  canvas.SaveAs(saveWhere+info+filename+'.png')
@@ -238,6 +264,7 @@ def make_l1_efficiency(denom, num,color=ROOT.EColor.kBlue,marker=20):
  eff.SetLineColor(color)
  return eff
 
+
 def effi_histo(ntuple,variable,cut,binning,denom,title,leg,color,marker,logg):
  num = make_plot(ntuple,variable,cut,binning)
  efi = make_l1_efficiency(denom,num,color,marker)
@@ -267,15 +294,18 @@ def compare_efficiencies(
  '''
  if l1ntuple is None:
   l1ntuple = ntuple
-
+ variableb = variable
+ if variable == 'l1gPt':
+  variableb = '(('+str(L1G_CALIB_FACTOR)+')*(l1g2RegionEt*l1g2RegionPattern + (!l1g2RegionPattern)*max(l1gRegionEt,l1gPt)))'
  cutD = recoPtCut+'&&'+extraCut
- denom = make_plot(
-  ntuple,variable,
-  cutD,
-  binning
- )
+ if not (Only_l1b):
+  denom = make_plot(
+   ntuple,variable,
+   cutD,
+   binning
+  )
  denomB = make_plot(
-  bntuple,variable,
+  bntuple,variableb,
   cutD,
   binning
  )
@@ -284,7 +314,8 @@ def compare_efficiencies(
  log.write('-------- Efficiency ---------\n\n')
  log.write('File: '+eff_ntuple+'\n')
  log.write('Variable: '+variable+'\n\n')
- log.write('Denominator Tree: '+ntuple.GetDirectory().GetName()+'\n\n')
+ if not (Only_l1b):
+  log.write('Denominator Tree: '+ntuple.GetDirectory().GetName()+'\n\n')
  log.write('Denominator Stage 1b Tree: '+bntuple.GetDirectory().GetName()+'\n\n')
  log.write('Denominator Cut: '+cutD+'\n\n')
  
@@ -312,15 +343,22 @@ def compare_efficiencies(
    colorI,markerI,log)
   l1g.SetName('l1g')
   l1g.Write()
+  #print 'Iso facts'
+  #print cutI
+  #print variable
+  #print l1g.Integral()
 # Bi
 #L1B ntuple with Region and Isolation
  if l1b_Iso:
   cutBi=recoPtCut+'&&'+extraCut+'&&'+isoCut +'&&'+l1gPtCut+'&&l1gMatch'
-  bl1g=effi_histo(bntuple,variable,cutBi,binning,denomB,
+  bl1g=effi_histo(bntuple,variableb,cutBi,binning,denomB,
    'L1b: Region + Isolation < '+str(ISOTHRESHOLD),legend,
    colorBi,markerBi,log)
   bl1g.SetName('bl1g')
   bl1g.Write()
+  #print 'bl1g facts'
+  #print cutBi
+  #print bl1g.Integral()
 # P
 #ntuple with Region and Isolation
  if PUa:
@@ -352,9 +390,9 @@ def compare_efficiencies(
   l1g_noiso.Write()
 # Bn
 # L1b: bntuple with Region and without Isolation
- if noIso:
+ if l1b_noIso:
   cutBn=recoPtCut+'&&'+extraCut+'&&'+l1gPtCut+'&& l1gMatch'
-  bl1g_noiso=effi_histo(bntuple,variable,cutBn,binning,denomB,
+  bl1g_noiso=effi_histo(bntuple,variableb,cutBn,binning,denomB,
   'L1b: Region',legend,
    colorBn,markerBn,log) 
   bl1g_noiso.SetName('bl1g_noiso')
@@ -368,6 +406,11 @@ def compare_efficiencies(
   colorC,markerC,log)
   l1.SetName('l1')
   l1.Write()
+ if aLOneb:
+  cutBc = recoPtCut+'&&'+extraCut+'&&'+l1PtCut+'&&l1gMatch'
+  l1b = effi_histo(bl1ntuple,variableb,cutBc,binning,denomB,'L1b: Current',legend,colorBc,markerBc,log)
+  l1b.SetName('l1b')
+  l1b.Write() 
  
  legend.Draw()
  canvas.SaveAs(saveWhere+name+info+'.png')
@@ -389,14 +432,19 @@ def make_l1_rate(pt, color=ROOT.EColor.kBlack, marker=20):
  rate.SetMarkerColor(color)
  return rate
 
-def rate_histo(ntuple,cut,binning,calibfactor,scale,color,marker,leg,title,logg,line,ptLine,w,s):
- pt = make_plot(ntuple,'pt[0]',cut,binning,'','',calibfactor)
+def rate_histo(ntuple,cut,binning,calibfactor,scale,color,marker,leg,title,logg,line,ptLine,w,s,stage1B=False):
+ if not stage1B:
+ 	pt = make_plot(ntuple,'pt[0]',cut,binning,'','',calibfactor)
+ else:
+ 	pt = make_plot(ntuple,'(region2Disc.totalEt[0]*region2Disc.patternPass[0] + (!region2Disc.patternPass[0])*max(regionPt[0],pt[0]))',cut,binning,'','',calibfactor)
  rate = make_l1_rate(pt,color,marker)
  rate.Scale(scale)
  rate.Draw('phsame')
  leg.AddEntry(rate,title,'pe')
  maxx = rate.GetMaximum()
  binn = rate.GetXaxis().FindBin(ptLine)
+ if ptLine == 0:
+	binn = 1
  rateVal = rate.GetBinContent(binn)
  vert=None
  hor=None
@@ -421,7 +469,8 @@ def make_rate_plot(
  uctntuple,
  binning,
  l1mcntuple=None,
- uctmcntuple=None,
+ uctmc8ntuple=None,
+ uctmc14ntuple=None,
  bl1ntuple=None,
  buctntuple=None,
  filename='',
@@ -434,9 +483,10 @@ def make_rate_plot(
  ):
 
  info = '_RATE'
- scale = ZEROBIAS_RATE/uctntuple.GetEntries()
- scaleMC = ZEROBIAS_RATE/uctmcntuple.GetEntries()
- scaleB = ZEROBIAS_RATE/uctmcntuple.GetEntries()
+ scale = ZEROBIAS_RATE/uctntuple.GetEntries("lumi>40")
+ scale8MC = ZEROBIAS_RATE/uctmc8ntuple.GetEntries()
+ scale14MC = ZEROBIAS_RATE/uctmc14ntuple.GetEntries()
+ scaleB = ZEROBIAS_RATE/buctntuple.GetEntries()
  
  canvas.SetLogy(setLOG)
  frame = ROOT.TH1F('frame','frame',*binning)
@@ -444,7 +494,6 @@ def make_rate_plot(
  frame.SetTitle('')
  frame.GetYaxis().SetTitle('Hz (8TeV,1E34)')
  frame.GetXaxis().SetTitle('p_{T}')
- #frame.SetMaximum(50000)
  frame.SetMaximum(10000000)
  frame.SetMinimum(100)
  tex.DrawLatex(0.1,0.91,'Tau Rate')
@@ -471,7 +520,8 @@ def make_rate_plot(
  bBi=3
  aBn=3
  bBn=3
-
+ aBc=3
+ bBc=3
  log.write('----------------\n')
  log.write('----- Rate -----\n\n')
  log.write('File : '+rate_ntuple+'\n')
@@ -485,6 +535,7 @@ def make_rate_plot(
  maxMc = 1
  maxBi = 1
  maxBn = 1
+ maxBc = 1
 # I
 # Isolated
  if Iso:
@@ -503,10 +554,19 @@ def make_rate_plot(
    buctntuple,cutBi,binning,L1G_CALIB_FACTOR,
    scaleB,colorBi,markerBi,legend,
    'L1b: Region + Isolation <'+str(ISOTHRESHOLD),
-   log,line,ptLine,aBi,bBi)
+   log,line,ptLine,aBi,bBi, stage1B=True)
   info+='_L1B_iso_'+str(ISOTHRESHOLD)
 # P
 # Isolated - PU/A
+ #if l1b_isoID:
+ # cutBi=isoCut+'&&'+extraCut
+ # bl1gRate,maxBi,vertBi,horBi = rate_histo(
+ #  buctntuple,cutBi,binning,L1G_CALIB_FACTOR,
+ #  scaleB,colorBi,markerBi,legend,
+ #  'L1B:Region + ID+ Isolation <'+str(ISOTHRESHOLD),
+ #  log,line,ptLine,aBi,bBi)
+ # info+='_iso_'+str(ISOTHRESHOLD)
+
  if PUa:
   cutPUa=puACut+'&&'+extraCut
   PUaRate,maxPUa,vertPUa,horPUa = rate_histo(
@@ -540,7 +600,7 @@ def make_rate_plot(
    buctntuple,cutBn,binning,L1G_CALIB_FACTOR,
    scaleB,colorBn,markerBn,legend,
    'L1b: Region',
-   log,line,ptLine,aBn,bBn)
+   log,line,ptLine,aBn,bBn,stage1B=True)
 # Current
  if lOne:
   l1Rate,maxC,vertC,horC = rate_histo(
@@ -548,6 +608,12 @@ def make_rate_plot(
    scale,colorC,markerC,legend,
    'Current', 
    log,line,ptLine,aC,bC)
+ if aLOneb:
+  l1bRate,maxBc,vertBc,horBc = rate_histo(
+   bl1ntuple,extraCut,binning,L1G_CALIB_FACTOR,
+   scale,colorBc,markerBc,legend,
+   'Stage 1B Current',
+   log,line,ptLine,aBc,bBc)
 # Mi
 # MC: Region + ID + ISO
  if MC_Iso:
@@ -557,6 +623,25 @@ def make_rate_plot(
    scaleMC,colorMi,markerMi,legend,
    'MC: Region + Isolation <'+str(ISOTHRESHOLD),
    log,line,ptLine,aM,bM)
+ if a8MC_Noiso:
+  cut14Mn=extraCut
+  l1g_mc8Rate,maxMi,vertMi,horMi = rate_histo(
+   uctmc8ntuple,cut14Mn,binning,L1G_CALIB_FACTOR,
+   scale8MC,colorMi,markerMi,legend,
+   '8 TeV MC: Region ',
+   log,line,ptLine,aM,bM)
+
+ if a14MC_Noiso: 
+  cut8Mn = extraCut
+  l1gmc14Rate,maxMi,vertMi,horMi = rate_histo(
+   uctmc14ntuple,cut14Mn,binning,L1G_CALIB_FACTOR,
+   scale14MC,colorMc,markerMc,legend,
+   '14 TeV MC: Region ',
+   log,line,ptLine,aM,bM)
+ 
+
+ 
+   
 # Mc
 # MC: Current
  if MC_lOne:
@@ -565,7 +650,8 @@ def make_rate_plot(
    scaleMC,colorC,markerC,legend,
    'MC: Current', 
    log,line,ptLine,aM,bM)
- frame.SetMaximum(5*max(maxI,maxN,maxC,maxMc,maxMi,maxBn))
+ #print(str(maxI)+' '+str(maxN)+' '+str(maxC)+' '+str(maxMc)+' '+str(maxMi))
+ frame.SetMaximum(5*max(maxI,maxN,maxC,maxMc,maxMi,maxBn,maxBi))
  legend.Draw()
  canvas.SaveAs(saveWhere+name+info+'.png')
 ######################################################################
@@ -584,12 +670,13 @@ if resolutionPlots == True:
 
 # ntuple,reco,l1,l1g,binning,cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='',setLOG=False
  if resL1 == True:
-  make_res_nrml(eff_rlx_tau_ntuple, 'recoPt', 'l1Pt', 'max(l1gPt,l1gRegionEt)', binPt, cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='')
+  make_res_nrml(eff_rlx_tau_ntuple, l1b_eff_rlx_tau_ntuple,'recoPt', 'l1Pt', 'l1gPt', binPt, cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='')
   make_res_angl(eff_rlx_tau_ntuple,'recoEta','l1Eta','l1gEta',binEta, cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='')
   make_res_angl(eff_rlx_tau_ntuple,'recoPhi','l1Phi','l1gPhi',binEta, cutPtVarg='l1gPt',cutPtVar='l1Pt',cutPt=l1ptVal,filename='')
 
  if resReco == True:
-  make_res_nrml(eff_rlx_tau_ntuple, 'recoPt', 'l1Pt', 'max(l1gPt,l1gRegionEt)', binPt, cutPtVarg='recoPt',cutPtVar='recoPt',cutPt=recoPtVal,filename='')
+  make_res_nrml(eff_rlx_tau_ntuple, l1b_eff_rlx_tau_ntuple,'recoPt', 'l1Pt', 'l1gPt', binPt, cutPtVarg='recoPt',cutPtVar='recoPt',cutPt=recoPtVal,extraCut = '',extraCutb = '',filename='2PatternRegionXaxis')
+#extraCutb = '&&l1Pt>20&&l1g2RegionPattern==1&&l1g3RegionPattern==1&&l1g4RegionPattern==1&&l1g2RegionEt>10&&l1g3RegionEt>10&&l1g4RegionEt>10&&l1g2RegionEtEcal>10&&l1g3RegionEtEcal>10&&l1g4RegionEtEcal>10&&(l1g2RegionMips==0||l1g2RegionMips==1)&&(l1g3RegionMips==0||l1g3RegionMips==1)&&(l1g2RegionMips==0||l1g2RegionMips==1)',filename='l1Pt20l1gPatternl1gRegion10l1gRegionEcall1gMips')
   make_res_angl(eff_rlx_tau_ntuple,'recoEta','l1Eta','l1gEta',binEta, cutPtVarg='recoPt',cutPtVar='recoPt',cutPt=recoPtVal,filename='')
   make_res_angl(eff_rlx_tau_ntuple,'recoPhi','l1Phi','l1gPhi',binEta, cutPtVarg='recoPt',cutPtVar='recoPt',cutPt=recoPtVal,filename='')
 ####################
@@ -597,9 +684,10 @@ if resolutionPlots == True:
 ####################
 if efficiencyPlots == True:
 
- binPt = [10,0,150]
+ binPt = [14,0,140]
  binVert=[10,0,40]
  binJetPt=[40,0,70]
+ binExtra=[7,0,140]
  
 # variable,
 # binning,
@@ -614,13 +702,13 @@ if efficiencyPlots == True:
 # setLOG=False
 
  compare_efficiencies(
-  'recoPt',
+  'l1gPt',
   binPt,
   eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
-  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
   recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
-  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
-  l1gPtCut = '(max(l1gPt,l1gRegionEt) > '+str(l1ptVal)+')',
+  l1PtCut = '2>1',
+  l1gPtCut = '2>1',
   isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
   aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
   bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
@@ -630,17 +718,18 @@ if efficiencyPlots == True:
   l1b_Iso=al1b_Iso,
   l1b_noIso=al1b_NoIso,
   PUa=aPUa,
-  PUb=aPUb
+  PUb=aPUb,
+  legExtra=''
  )
  
  compare_efficiencies(
   'nPVs',
   binVert,
   eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
-  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
   recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
   l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
-  l1gPtCut = '(max(l1gPt,l1gRegionEt) > '+str(l1ptVal)+')',
+  l1gPtCut = '(l1gPt > '+str(l1ptVal)+')',
   isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
   aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
   bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
@@ -654,12 +743,162 @@ if efficiencyPlots == True:
   legExtra='Reco Pt > '+str(recoPtVal)
 )
 
+
+'''
+ compare_efficiencies(
+  'l1g2ndRegionEtEM',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+
+ compare_efficiencies(
+  'l1gEmClusterCenterEt',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+
+ compare_efficiencies(
+  'l1gEmClusterStripEt',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+
+ compare_efficiencies(
+  'l1g2ndRegionEtEM',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+
+ compare_efficiencies(
+  'l1gJetPtEM',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+
+ compare_efficiencies(
+  'l1gRegionEtEM',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+
+ compare_efficiencies(
+  'l1gRegionEt',
+  binExtra,
+  eff_rlx_tau_ntuple, eff_iso_tau_ntuple,
+  bntuple=l1b_eff_rlx_tau_ntuple,bl1ntuple=l1b_eff_rlx_tau_ntuple,
+  recoPtCut = '(recoPt >= '+str(recoPtVal)+')',
+  l1PtCut = '(l1Pt >= '+str(l1ptVal)+')',
+  l1gPtCut = '(l1Pt > '+str(l1ptVal)+')',
+  isoCut='((l1gJetPt-max(l1gRegionEt,l1gPt))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  aPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValA)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  bPUCut='((l1gJetPt-max(l1gRegionEt,l1gPt)-(l1gPU/'+str(puValB)+'))/max(l1gRegionEt,l1gPt) <'+str(ISOTHRESHOLD)+')',
+  Iso=aIso,
+  noIso=aNoIso,
+  lOne=aLOne,
+  l1b_Iso=al1b_Iso,
+  l1b_noIso=al1b_NoIso,
+  PUa=aPUa,
+  PUb=aPUb,
+  legExtra='Reco Pt > '+str(recoPtVal)
+)
+'''
+
 ##############
 # Rate Plots #
 ##############
 if ratePlots == True:
  #binRate = [12,25,85]
- binRate = [14,0,75]
+ binRate = [14,5,140]
 
 # l1ntuple,
 # uctntuple,
@@ -677,9 +916,11 @@ if ratePlots == True:
 # line=False
 
  make_rate_plot(rate_rlx_l1_tau_ntuple,rate_rlx_l1g_tau_ntuple,binRate,
-  l1mcntuple=mc_rate_rlx_l1_tau_ntuple,
-  uctmcntuple=mc_rate_rlx_l1g_tau_ntuple,
-  bl1ntuple=None,
+  l1mcntuple=mc14_rate_rlx_l1_tau_ntuple,
+  uctmc8ntuple=mc8_rate_rlx_l1g_tau_ntuple,
+  uctmc14ntuple=mc14_rate_rlx_l1g_tau_ntuple,
+  bl1ntuple=l1b_rate_rlx_l1g_tau_ntuple,
+  #bl1ntuple=None,
   buctntuple=l1b_rate_rlx_l1g_tau_ntuple,
   filename='',
   setLOG=True,
@@ -696,5 +937,6 @@ if ratePlots == True:
   l1b_Iso=al1b_Iso,
   l1b_noIso=al1b_NoIso,
   line = rateLine,
-  ptLine=recoPtVal
+  #ptLine=recoPtVal
+  ptLine = 60
  )

@@ -9,9 +9,9 @@ then
 fi
 
 #OUTPUTDIR=/scratch/$LOGNAME
-OUTPUTDIR=../data/LSB50
+OUTPUTDIR=../data/LSB50/Apr29
 
-hadd -f $OUTPUTDIR/uct_mc_efficiency_pu50.root $hdfs/${1}-PU50-makeEfficiencyTree_cfg/*root &
-hadd -f $OUTPUTDIR/uct_mc_efficiency_pu35.root $hdfs/${1}-PU35-makeEfficiencyTree_cfg/*root &
+hadd -f $OUTPUTDIR/uct_mc_efficiency_pu50_hcal.root $hdfs/${1}-PU50-HCALONLY-makeEfficiencyTree_cfg/*root &
+hadd -f $OUTPUTDIR/uct_mc_efficiency_pu50_norm.root $hdfs/${1}-PU50-makeEfficiencyTree_cfg/*root &
 
 wait

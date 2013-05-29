@@ -9,11 +9,9 @@ then
 fi
 
 #OUTPUTDIR=/scratch/$LOGNAME
-OUTPUTDIR=../data/LSB50
+OUTPUTDIR=../data/LSB50/nohcal
 
-hadd -f $OUTPUTDIR/uct_eg_efficiency_eic3.root $hdfs/${1}-EIC3-EGEfficiency-makeEfficiencyTree_cfg/*root &
-hadd -f $OUTPUTDIR/uct_tau_efficiency.root $hdfs/${1}-TauEfficiency-makeEfficiencyTree_cfg/*root &
-hadd -f $OUTPUTDIR/uct_jet_efficiency.root $hdfs/${1}-JetEfficiency-makeEfficiencyTree_cfg/*root &
-hadd -f $OUTPUTDIR/uct_rates_eic3.root $hdfs/${1}-EIC3-Rates-makeRateTrees_cfg/*root &
+hadd -f $OUTPUTDIR/uct_rates_stage1b.root $hdfs/2013-04-23-Stage1c-Norm-makeRateTrees_cfg/*root &
+hadd -f $OUTPUTDIR/uct_rates_stage1c.root $hdfs/2013-04-23-Stage1c-HCAL-makeRateTrees_cfg/*root &
 
 wait
