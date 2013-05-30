@@ -196,6 +196,7 @@ stage1b_branches = cms.PSet(
     l1gJetPtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPtEM', -4) : -2"),
     # only defined for taus, EG objects are EM clusters by defintion.
     l1gEmClusterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterEt', -4) : -2"),
+    l1gEmCluster2x1Et = cms.string("? l1gMatch ? l1g.getFloat('emCluster2x1Et', -4) : -2"),
     l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
     l1gEmClusterStripEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterStripEt', -4) : -2"),
     l1gEmClusterFG = cms.string("? l1gMatch ? l1g.getInt('emClusterCenterFG', -4) : -2"),

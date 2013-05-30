@@ -284,6 +284,17 @@ void UCT2015EClusterProducer::makeEClusters() {
 	  unsigned int eClusterET = center_et +
 	    neighborN_et + neighborS_et + neighborE_et + neighborW_et +
 	    neighborNE_et + neighborSW_et + neighborSE_et + neighborNW_et;
+
+          unsigned int adjacentNeighbors[4] = {
+            neighborN_et,
+            neighborS_et,
+            neighborE_et,
+            neighborW_et
+          };
+
+          unsigned int topTwo = center_et + *std::max_element(
+              adjacentNeighbors, adjacentNeighbors + 4);
+
 	  // Temporarily use the tower (iPhi, iEta) -- todo: convert to half-tower resolution
           double realEt = eClusterET;
           double stripEt = center_et + neighborS_et + neighborN_et;
@@ -293,6 +304,8 @@ void UCT2015EClusterProducer::makeEClusters() {
           theCluster.setInt("twrPhi", iPhi);
           theCluster.setInt("twrEta", iEta);
           theCluster.setFloat("emClusterCenterEt", center_et);
+          theCluster.setFloat("emCluster2x1Et", topTwo);
+          theCluster.setFloat("emClusterEt", realEt);
           theCluster.setFloat("emClusterStripEt", stripEt);
           theCluster.setInt("emClusterCenterFG", center_FG);
           theCluster.setInt("rgnPhi", twrPhi2RegionPhi(iPhi));
