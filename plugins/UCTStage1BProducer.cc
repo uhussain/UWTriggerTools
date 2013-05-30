@@ -650,6 +650,10 @@ void UCTStage1BProducer::makeTaus() {
       // neighboring 2x1s.
       double tauCandEta = convertRegionEta(ieta);
       double tauCandPhi = convertRegionPhi(iphi);
+      if (matchedEmCluster) {
+        tauCandPhi = matchedEmCluster->phi();
+        tauCandEta = matchedEmCluster->eta();
+      }
       UCTCandidate theTau(seedEnergy, tauCandEta, tauCandPhi);
 
       // add some metadata
