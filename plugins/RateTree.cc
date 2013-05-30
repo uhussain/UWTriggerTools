@@ -279,6 +279,9 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emCluster2x1Et_->clear();
   emClusterCenterFG_->clear();
 
+  highestCenter2x1Et_->clear();
+  highestNeighbor2x1Et_->clear();
+
   region2Disc->clear();
   region3Disc->clear();
   region4Disc->clear();
