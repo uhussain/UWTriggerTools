@@ -59,6 +59,7 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* emClusterEt_;
     std::vector<Float_t>* emClusterStripEt_;
     std::vector<Float_t>* emClusterCenterEt_;
+    std::vector<Float_t>* emCluster2x1Et_;
     std::vector<Int_t>* emClusterCenterFG_;
 
     std::vector<Float_t>* highestCenter2x1Et_;
@@ -110,6 +111,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterEt_ = new std::vector<Float_t>();
   emClusterStripEt_ = new std::vector<Float_t>();
   emClusterCenterEt_ = new std::vector<Float_t>();
+  emCluster2x1Et_ = new std::vector<Float_t>();
   emClusterCenterFG_ = new std::vector<Int_t>();
 
   highestCenter2x1Et_ = new std::vector<Float_t>();
@@ -139,6 +141,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterEt", "std::vector<float>", emClusterEt_);
     tree->Branch("emClusterStripEt", "std::vector<float>", emClusterStripEt_);
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
+    tree->Branch("emCluster2x1Et", "std::vector<float>", emCluster2x1Et_);
     tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
 
     tree->Branch("highestCenter2x1Et", "std::vector<float>", highestCenter2x1Et_);
@@ -170,6 +173,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->SetAlias("l1gEmClusterEt", "emClusterEt");
     tree->SetAlias("l1gEmClusterStripEt", "emClusterStripEt");
     tree->SetAlias("l1gEmClusterCenterEt", "emClusterCenterEt");
+    tree->SetAlias("l1gEmCluster2x1Et", "emCluster2x1Et");
 
     tree->SetAlias("l1gEllIso", "ellIso");
     tree->SetAlias("l1gTauVeto", "tauVeto");
@@ -204,6 +208,7 @@ RateTree::~RateTree() {
 
   delete emClusterEt_;
   delete emClusterCenterEt_;
+  delete emCluster2x1Et_;
   delete emClusterCenterFG_;
   delete emClusterStripEt_;
 
@@ -271,6 +276,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterEt_->clear();
   emClusterStripEt_->clear();
   emClusterCenterEt_->clear();
+  emCluster2x1Et_->clear();
   emClusterCenterFG_->clear();
 
   region2Disc->clear();
@@ -319,6 +325,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       // 3x3 cluster information
       emClusterEt_->push_back(uct->getFloat("emClusterEt", -4));
       emClusterCenterEt_->push_back(uct->getFloat("emClusterCenterEt", -4));
+      emCluster2x1Et_->push_back(uct->getFloat("emCluster2x1Et", -4));
       emClusterCenterFG_->push_back(uct->getInt("emClusterCenterFG", -4));
       emClusterStripEt_->push_back(uct->getFloat("emClusterStripEt", -4));
 
@@ -369,6 +376,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
   emClusterEt_->push_back(-9999);
   emClusterCenterEt_->push_back(-9999);
+  emCluster2x1Et_->push_back(-9999);
   emClusterStripEt_->push_back(-9999);
 
   highestCenter2x1Et_->push_back(-9999);
