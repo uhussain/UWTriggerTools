@@ -367,36 +367,36 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   }
 
   // pad everything, to work around the MaxIf bug.
-  pts_->push_back(-9999);
-  etas_->push_back(-9999);
-  phis_->push_back(-9999);
+  pts_->push_back(-5);
+  etas_->push_back(-5);
+  phis_->push_back(-5);
 
-  jetPt_->push_back(-9999);
-  regionPt_->push_back(-9999);
+  jetPt_->push_back(-5);
+  regionPt_->push_back(-5);
 
-  jetPtEM_->push_back(-9999);
-  regionPtEM_->push_back(-9999);
+  jetPtEM_->push_back(-5);
+  regionPtEM_->push_back(-5);
 
-  emClusterEt_->push_back(-9999);
-  emClusterCenterEt_->push_back(-9999);
-  emCluster2x1Et_->push_back(-9999);
-  emClusterStripEt_->push_back(-9999);
+  emClusterEt_->push_back(-5);
+  emClusterCenterEt_->push_back(-5);
+  emCluster2x1Et_->push_back(-5);
+  emClusterStripEt_->push_back(-5);
 
-  highestCenter2x1Et_->push_back(-9999);
-  highestNeighbor2x1Et_->push_back(-9999);
+  highestCenter2x1Et_->push_back(-5);
+  highestNeighbor2x1Et_->push_back(-5);
 
   region2Disc->push_back(RegionDiscriminantInfo());
   region3Disc->push_back(RegionDiscriminantInfo());
   region4Disc->push_back(RegionDiscriminantInfo());
 
-  ellIso_->push_back(-9999);
-  pu_->push_back(-9999);
-  puUIC_->push_back(-9999);
-  puEM_->push_back(-9999);
-  puUICEM_->push_back(-9999);
-  mips_->push_back(-9999);
-  taus_->push_back(-9999);
-  type_->push_back(-9999);
+  ellIso_->push_back(-5);
+  pu_->push_back(-5);
+  puUIC_->push_back(-5);
+  puEM_->push_back(-5);
+  puUICEM_->push_back(-5);
+  mips_->push_back(-5);
+  taus_->push_back(-5);
+  type_->push_back(-5);
 
   tree->Fill();
 }
