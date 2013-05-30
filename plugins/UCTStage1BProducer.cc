@@ -288,10 +288,7 @@ UCTStage1BProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 void UCTStage1BProducer::puSubtraction()
 {
-  puLevel = 0;
-  puLevelUIC = 0;
-  double r_puLevelUIC=0.0;
-
+  double regionSum = 0;
   int puCount = 0;
   double Rarea=0.0;
 
@@ -300,14 +297,13 @@ void UCTStage1BProducer::puSubtraction()
     double regionEt = stage1Region->et()*regionLSB_;
     double puETMax = 10;
     if(regionEt <= puETMax) {
-      puLevel += regionEt;
+      regionSum += regionEt;
       puCount++;
-      r_puLevelUIC += regionEt;
       Rarea += getRegionArea(stage1Region->gctEta());
     }
   }
-  puLevel = puLevel / puCount;
-  puLevelUIC = r_puLevelUIC / Rarea;
+  puLevel = regionSum / puCount;
+  puLevelUIC = regionSum / Rarea;
 }
 
 void UCTStage1BProducer::makeEGs() {
@@ -486,6 +482,7 @@ void UCTStage1BProducer::makeEGs() {
         egCand.setInt("mipBit", mipBitAtCenter);
         egCand.setInt("tauVeto", tauVetoBitAtCenter);
 
+        fillRegionInfo(egCand, *stage1Regions, *emRegions, *tauCands);
 	rlxEGList.push_back(egCand);
 
 	if(relativeRgnIsolation < egRelativeRgnIsolationCut &&
