@@ -32,6 +32,12 @@ options.register(
     VarParsing.varType.int,
     "EIC Isolation threshold")
 options.register(
+    'hActivityCut',
+    0.5,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "HCAL activity threshold")
+options.register(
     "stage1B",
     0,
     VarParsing.multiplicity.singleton,
@@ -278,3 +284,6 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 eic = options.eicIsolationThreshold
 print "Setting EIC threshold to %i" % eic
 process.RCTConfigProducers.eicIsolationThreshold = eic
+hActivity = options.hActivityCut
+print "Setting hActivity threshold to %f" % hactivity
+process.RCTConfigProducers.hActivityCut = hActivity
