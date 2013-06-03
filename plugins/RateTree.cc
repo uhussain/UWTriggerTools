@@ -76,6 +76,7 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* puUIC_;
     std::vector<Float_t>* puEM_;
     std::vector<Float_t>* puUICEM_;
+    std::vector<Float_t>* effArea_;
     std::vector<bool>* taus_;
     std::vector<bool>* mips_;
 
@@ -128,6 +129,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   puUIC_ = new std::vector<Float_t>();
   puEM_ = new std::vector<Float_t>();
   puUICEM_ = new std::vector<Float_t>();
+  effArea_ = new std::vector<Float_t>();
 
   // L1 variables
   type_ = new std::vector<Int_t>();
@@ -159,6 +161,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("puUIC", "std::vector<float>", &puUIC_);
     tree->Branch("puEM", "std::vector<float>", &puEM_);
     tree->Branch("puUICEM", "std::vector<float>", &puUICEM_);
+    tree->Branch("effArea", "std::vector<float>", &effArea_);
     tree->Branch("tauVeto", "std::vector<bool>", &taus_);
     tree->Branch("mipBit", "std::vector<bool>", &mips_);
 
@@ -186,6 +189,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->SetAlias("l1gPUUIC", "puUIC");
     tree->SetAlias("l1gPUEM", "puEM");
     tree->SetAlias("l1gPUUICEM", "puUICEM");
+    tree->SetAlias("l1gEffArea", "effArea");
   } else {
     tree->SetAlias("l1Pt", "pt");
     tree->SetAlias("l1Eta", "eta");
@@ -222,6 +226,7 @@ RateTree::~RateTree() {
   delete puUIC_;
   delete puEM_;
   delete puUICEM_;
+  delete effArea_;
   delete mips_;
   delete taus_;
 }
@@ -297,6 +302,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   puUIC_->clear();
   puEM_->clear();
   puUICEM_->clear();
+  effArea_->clear();
   taus_->clear();
   mips_->clear();
 
@@ -351,6 +357,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       puUIC_->push_back(uct->getFloat("puLevelUIC", -4));
       puEM_->push_back(uct->getFloat("puLevelEM", -4));
       puUICEM_->push_back(uct->getFloat("puLevelUICEM", -4));
+      effArea_->push_back(uct->getFloat("effArea", -4));
       mips_->push_back(uct->getInt("mipBit", -4));
       taus_->push_back(uct->getInt("tauVeto", -4));
       // UCT doesn't have a type
@@ -400,6 +407,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   puUIC_->push_back(-5);
   puEM_->push_back(-5);
   puUICEM_->push_back(-5);
+  effArea_->push_back(-5);
   mips_->push_back(-5);
   taus_->push_back(-5);
   type_->push_back(-5);
