@@ -61,6 +61,7 @@ class RateTree : public edm::EDAnalyzer {
     std::vector<Float_t>* emClusterCenterEt_;
     std::vector<Float_t>* emCluster2x1Et_;
     std::vector<Int_t>* emClusterCenterFG_;
+    std::vector<Int_t>* emCluster2x1FG_;
 
     std::vector<Float_t>* highestCenter2x1Et_;
     std::vector<Float_t>* highestNeighbor2x1Et_;
@@ -113,6 +114,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
   emClusterCenterEt_ = new std::vector<Float_t>();
   emCluster2x1Et_ = new std::vector<Float_t>();
   emClusterCenterFG_ = new std::vector<Int_t>();
+  emCluster2x1FG_ = new std::vector<Int_t>();
 
   highestCenter2x1Et_ = new std::vector<Float_t>();
   highestNeighbor2x1Et_ = new std::vector<Float_t>();
@@ -143,6 +145,7 @@ RateTree::RateTree(const edm::ParameterSet& pset) {
     tree->Branch("emClusterCenterEt", "std::vector<float>", emClusterCenterEt_);
     tree->Branch("emCluster2x1Et", "std::vector<float>", emCluster2x1Et_);
     tree->Branch("emClusterCenterFG", "std::vector<int>", emClusterCenterFG_);
+    tree->Branch("emCluster2x1FG", "std::vector<int>", emCluster2x1FG_);
 
     tree->Branch("highestCenter2x1Et", "std::vector<float>", highestCenter2x1Et_);
     tree->Branch("highestNeighbor2x1Et", "std::vector<float>", highestNeighbor2x1Et_);
@@ -210,6 +213,7 @@ RateTree::~RateTree() {
   delete emClusterCenterEt_;
   delete emCluster2x1Et_;
   delete emClusterCenterFG_;
+  delete emCluster2x1FG_;
   delete emClusterStripEt_;
 
   delete type_;
@@ -278,6 +282,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   emClusterCenterEt_->clear();
   emCluster2x1Et_->clear();
   emClusterCenterFG_->clear();
+  emCluster2x1FG_->clear();
 
   highestCenter2x1Et_->clear();
   highestNeighbor2x1Et_->clear();
@@ -330,6 +335,7 @@ void RateTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
       emClusterCenterEt_->push_back(uct->getFloat("emClusterCenterEt", -4));
       emCluster2x1Et_->push_back(uct->getFloat("emCluster2x1Et", -4));
       emClusterCenterFG_->push_back(uct->getInt("emClusterCenterFG", -4));
+      emCluster2x1FG_->push_back(uct->getInt("emCluster2x1FG", -4));
       emClusterStripEt_->push_back(uct->getFloat("emClusterStripEt", -4));
 
       highestCenter2x1Et_->push_back(uct->getFloat("highestCenter2x1Et", -4));

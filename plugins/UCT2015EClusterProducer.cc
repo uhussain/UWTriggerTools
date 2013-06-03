@@ -220,6 +220,8 @@ void UCT2015EClusterProducer::makeEClusters() {
 	unsigned int neighborN_et = 0;
         bool neighborN_fg = false;
         bool neighborS_fg = false;
+        bool neighborW_fg = false;
+        bool neighborE_fg = false;
 	unsigned int neighborS_et = 0;
 	unsigned int neighborE_et = 0;
 	unsigned int neighborW_et = 0;
@@ -248,30 +250,40 @@ void UCT2015EClusterProducer::makeEClusters() {
 	  neighborE_et = eTowerETCode[iPhi][E];
 	  neighborNE_et = eTowerETCode[N][E];
 	  neighborSE_et = eTowerETCode[S][E];
+
+          neighborN_fg = eTowerFGVeto[N][iEta];
+	  neighborS_fg = eTowerFGVeto[S][iEta];
+	  neighborE_fg = eTowerFGVeto[E][iEta];
+
 	}
 	else if(iEta == N_TOWER_ETA - 1) {
 	  unsigned int W = iEta - 1;
 	  neighborN_et = eTowerETCode[N][iEta];
 	  neighborS_et = eTowerETCode[S][iEta];
-          neighborN_fg = eTowerFGVeto[N][iEta];
-	  neighborS_fg = eTowerFGVeto[S][iEta];
 	  neighborW_et = eTowerETCode[iPhi][W];
 	  neighborNW_et = eTowerETCode[N][W];
 	  neighborSW_et = eTowerETCode[S][W];
+
+          neighborN_fg = eTowerFGVeto[N][iEta];
+	  neighborS_fg = eTowerFGVeto[S][iEta];
+          neighborW_fg = eTowerFGVeto[W][iEta];
 	}
 	else {
 	  unsigned int E = iEta + 1;
 	  unsigned int W = iEta - 1;
 	  neighborN_et = eTowerETCode[N][iEta];
 	  neighborS_et = eTowerETCode[S][iEta];
-          neighborN_fg = eTowerFGVeto[N][iEta];
-	  neighborS_fg = eTowerFGVeto[S][iEta];
 	  neighborE_et = eTowerETCode[iPhi][E];
 	  neighborW_et = eTowerETCode[iPhi][W];
 	  neighborNE_et = eTowerETCode[N][E];
 	  neighborNW_et = eTowerETCode[N][W];
 	  neighborSE_et = eTowerETCode[S][E];
 	  neighborSW_et = eTowerETCode[S][W];
+
+          neighborN_fg = eTowerFGVeto[N][iEta];
+	  neighborS_fg = eTowerFGVeto[S][iEta];
+          neighborW_fg = eTowerFGVeto[W][iEta];
+	  neighborE_fg = eTowerFGVeto[E][iEta];
 	}
 	if(center_et > neighborN_et &&
 	   center_et > neighborNW_et &&
@@ -292,8 +304,19 @@ void UCT2015EClusterProducer::makeEClusters() {
             neighborW_et
           };
 
-          unsigned int topTwo = center_et + *std::max_element(
+          unsigned int adjacentNeighborsFG[4] = {
+            neighborN_fg,
+            neighborS_fg,
+            neighborE_fg,
+            neighborW_fg
+          };
+
+          unsigned int *topElementEt = std::max_element(
               adjacentNeighbors, adjacentNeighbors + 4);
+
+          unsigned int topTwo = center_et + *topElementEt;
+
+          unsigned int secondFG = *(adjacentNeighborsFG + (topElementEt - adjacentNeighbors));
 
 	  // Temporarily use the tower (iPhi, iEta) -- todo: convert to half-tower resolution
           double realEt = eClusterET;
@@ -308,6 +331,7 @@ void UCT2015EClusterProducer::makeEClusters() {
           theCluster.setFloat("emClusterEt", realEt);
           theCluster.setFloat("emClusterStripEt", stripEt);
           theCluster.setInt("emClusterCenterFG", center_FG);
+          theCluster.setInt("emCluster2x1FG", secondFG);
           theCluster.setInt("rgnPhi", twrPhi2RegionPhi(iPhi));
           theCluster.setInt("rgnEta", twrEta2RegionEta(iEta));
           theCluster.setFloat("puLevelEM", puLevel);

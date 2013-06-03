@@ -660,6 +660,7 @@ void UCTStage1BProducer::makeTaus() {
       theTau.setFloat("emClusterEt", matchedEmCluster ? matchedEmCluster->et() : -1);
       theTau.setFloat("emClusterCenterEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterCenterEt") : -1);
       theTau.setFloat("emCluster2x1Et", matchedEmCluster ? matchedEmCluster->getFloat("emCluster2x1Et") : -1);
+      theTau.setInt("emCluster2x1FG", matchedEmCluster ? matchedEmCluster->getInt("emCluster2x1FG") : -1);
       theTau.setInt("emClusterCenterFG", matchedEmCluster ? matchedEmCluster->getInt("emClusterCenterFG") : -1);
       theTau.setFloat("emClusterStripEt", matchedEmCluster ? matchedEmCluster->getFloat("emClusterStripEt") : -1);
       theTau.setFloat("puLevel", puLevel);
