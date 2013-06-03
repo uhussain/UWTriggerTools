@@ -285,5 +285,5 @@ eic = options.eicIsolationThreshold
 print "Setting EIC threshold to %i" % eic
 process.RCTConfigProducers.eicIsolationThreshold = eic
 hActivity = options.hActivityCut
-print "Setting hActivity threshold to %f" % hactivity
+print "Setting hActivity threshold to %f" % hActivity
 process.RCTConfigProducers.hActivityCut = hActivity
