@@ -248,6 +248,8 @@ electron_branches = cms.PSet(
 tau_branches = cms.PSet(
     emFraction = cms.string("reco.emFraction"),
     decayMode = cms.string("reco.decayMode"),
+    recoEcal = cms.string("ecalEnergy"),
+    recoHcal = cms.string("hcalEnergy"),
     # EK - as far as I can tell, this does not use the lead track at all
     hcal = cms.string("reco.hcalTotOverPLead"),
 )

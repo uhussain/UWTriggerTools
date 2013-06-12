@@ -43,6 +43,11 @@ class L1RecoMatch {
     /// Get number of PVs
     unsigned int nPVs() const;
 
+    // Tau specific: get the associated calorimeter energy.  Returns -5 if
+    // not a tau.
+    double ecalEnergy() const;
+    double hcalEnergy() const;
+
   private:
     const reco::Candidate* reco_;
     const reco::Candidate* l1extra_;

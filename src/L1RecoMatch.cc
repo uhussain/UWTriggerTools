@@ -1,4 +1,5 @@
 #include "L1Trigger/UCT2015/interface/L1RecoMatch.h"
+#include "DataFormats/TauReco/interface/PFTau.h"
 
 L1RecoMatch::L1RecoMatch(const reco::Candidate* reco, const reco::Candidate* l1,
     const reco::Candidate* l1g, edm::EventID id,
@@ -40,4 +41,30 @@ unsigned int L1RecoMatch::nTotalObjects() const {
 
 unsigned int L1RecoMatch::nPVs() const {
   return nPVs_;
+}
+
+double L1RecoMatch::ecalEnergy() const {
+  double output = 0;
+  const reco::PFTau* the_tau = dynamic_cast<const reco::PFTau*>(this->reco());
+  if (!the_tau) {
+    return -5;
+  }
+  for (size_t i = 0; i < the_tau->signalPFCands().size(); ++i) {
+    const reco::PFCandidate& pfcand = *(the_tau->signalPFCands().at(i));
+    output += pfcand.ecalEnergy() * sin(pfcand.theta());
+  }
+  return output;
+}
+
+double L1RecoMatch::hcalEnergy() const {
+  double output = 0;
+  const reco::PFTau* the_tau = dynamic_cast<const reco::PFTau*>(this->reco());
+  if (!the_tau) {
+    return -5;
+  }
+  for (size_t i = 0; i < the_tau->signalPFCands().size(); ++i) {
+    const reco::PFCandidate& pfcand = *(the_tau->signalPFCands().at(i));
+    output += pfcand.hcalEnergy() * sin(pfcand.theta());
+  }
+  return output;
 }
