@@ -364,7 +364,7 @@ UCT2015L1ExtraProducer::produce( edm::Event& iEvent,
 	std::vector<L1GObject>::const_iterator end = tauObjs->end() ;
 	for( int i = 0 ; itr != end ; ++itr, ++i ) {
 	  double ldTrkPt = itr->pt();
-	  double pt = max(itr->pt(), itr->associatedRegionEt());
+	  double pt = max((double)itr->pt(), itr->associatedRegionEt());
 	  double jetPt = itr->associatedJetPt();
 	  double phi = itr->phiValue();
 	  double eta = itr->etaValue();
