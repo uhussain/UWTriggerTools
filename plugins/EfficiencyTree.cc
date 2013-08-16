@@ -46,6 +46,7 @@ class EfficiencyTree : public edm::EDAnalyzer {
     edm::InputTag l1GPUSrc_;
     edm::InputTag pvSrc_;
     double maxDR_;
+    bool useVertex_;
 };
 
 EfficiencyTree::EfficiencyTree(const edm::ParameterSet& pset):
@@ -59,6 +60,7 @@ EfficiencyTree::EfficiencyTree(const edm::ParameterSet& pset):
     l1GSrc_ = pset.getParameter<VInputTag>("l1GSrc");
     l1GPUSrc_ = pset.getParameter<edm::InputTag>("l1GPUSrc");
     maxDR_ = pset.getParameter<double>("maxDR");
+    useVertex_ = pset.exists("useVertex") ? pset.getParameter<bool>("useVertex") : true;
 }
 
 namespace {
@@ -112,7 +114,8 @@ void EfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
   // Get PV collection
   edm::Handle<reco::VertexCollection> vertices;
-  evt.getByLabel(pvSrc_, vertices);
+  if(useVertex_)
+    evt.getByLabel(pvSrc_, vertices);
 
   // Now match reco objects to L1 objects
   std::vector<L1RecoMatch> matches;
@@ -120,8 +123,10 @@ void EfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
     const reco::Candidate* recoObject = recoObjects[i];
     const reco::Candidate* bestL1 = findBestMatch(recoObject, l1Objects, maxDR_);
     const reco::Candidate* bestL1G = findBestMatch(recoObject, l1GObjects, maxDR_);
+    int vertices_i = 1;
+    if(useVertex_) vertices_i = vertices->size();
     L1RecoMatch theMatch(recoObject, bestL1, bestL1G, evt.id(),
-        matches.size(), recoObjects.size(), vertices->size());
+						 matches.size(), recoObjects.size(), vertices_i);
     matches.push_back(theMatch);
   }
 
