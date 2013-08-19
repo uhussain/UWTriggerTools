@@ -55,6 +55,7 @@ UCT2015Producer = cms.EDProducer(
     "UCT2015Producer",
     puCorrect = cms.bool(True),
     useUICrho = cms.bool(True),
+    useHI = cms.bool(False),
     # All of these uint32 thresholds are in GeV.
     puETMax = cms.uint32(7),
     regionETCutForHT = cms.uint32(5),
