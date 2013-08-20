@@ -87,11 +87,13 @@ private:
 
   bool puCorrect;
   bool useUICrho; // which PU denstity to use for energy correction determination
+  bool useHI; // do HI-style background subtraction
 
   unsigned int puETMax;
   unsigned int puLevel;
   //double puLevelUIC; // puLevel divided by puCount*Area, not multiply by 9.0
   unsigned int  puLevelUIC; // puLevel divided by puCount*Area, not multiply by 9.0
+  vector<int> puLevelHI;
 
   unsigned int sumET;
   int sumEx;
@@ -148,6 +150,7 @@ unsigned const UCT2015Producer::N_JET_ETA = L1CaloRegionDetId::N_ETA * 4;
 UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
   useUICrho(iConfig.getParameter<bool>("useUICrho")),
+  useHI(iConfig.getParameter<bool>("useHI")),
   puETMax(iConfig.getParameter<unsigned int>("puETMax")),
   regionETCutForHT(iConfig.getParameter<unsigned int>("regionETCutForHT")),
   regionETCutForMET(iConfig.getParameter<unsigned int>("regionETCutForMET")),
@@ -162,6 +165,9 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
 {
   puLevel = 0;
   puLevelUIC = 0.0;
+  puLevelHI.resize(L1CaloRegionDetId::N_ETA);
+  for(unsigned i = 0; i < L1CaloRegionDetId::N_ETA; ++i)
+    puLevelHI[i] = 0;
 
   // Also declare we produce unpacked collections (which have more info)
   produces<UCTCandidateCollection>( "JetUnpacked" ) ;
@@ -296,6 +302,14 @@ void UCT2015Producer::puSubtraction()
   puLevel = 0;
   puLevelUIC = 0;
   double r_puLevelUIC=0.0;
+  double r_puLevelHI[L1CaloRegionDetId::N_ETA];
+  int etaCount[L1CaloRegionDetId::N_ETA];
+  for(unsigned i = 0; i < L1CaloRegionDetId::N_ETA; ++i)
+  {
+    puLevelHI[i] = 0;
+    r_puLevelHI[i] = 0.0;
+    etaCount[i] = 0;
+  }
 
   int puCount = 0;
   double Rarea=0.0;
@@ -307,6 +321,8 @@ void UCT2015Producer::puSubtraction()
       r_puLevelUIC += newRegion->et();
       Rarea += getRegionArea(newRegion->gctEta());
     }
+    r_puLevelHI[newRegion->gctEta()] += newRegion->et();
+    etaCount[newRegion->gctEta()]++;
   }
   // Add a factor of 9, so it corresponds to a jet.  Reduces roundoff error.
   puLevel *= 9;
@@ -315,6 +331,10 @@ void UCT2015Producer::puSubtraction()
   puLevelUIC=0;
   if (r_puLevelUIC > 0.) puLevelUIC = floor (r_puLevelUIC + 0.5);
 
+  for(unsigned i = 0; i < L1CaloRegionDetId::N_ETA; ++i)
+  {
+    puLevelHI[i] = floor(r_puLevelHI[i]/etaCount[i] + 0.5);
+  }
 }
 
 void UCT2015Producer::makeSums()
@@ -367,7 +387,10 @@ void UCT2015Producer::makeJets() {
   for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin();
       newRegion != newRegions->end(); newRegion++) {
     double regionET = regionPhysicalEt(*newRegion);
-    if(regionET > jetSeed) {
+    if(puCorrect && useHI)
+      regionET = std::max(0.,regionET -
+			  (puLevelHI[newRegion->gctEta()]*regionLSB_));
+    if((regionET > jetSeed) || (puCorrect && useHI)) {
       double neighborN_et = 0;
       double neighborS_et = 0;
       double neighborE_et = 0;
@@ -383,48 +406,72 @@ void UCT2015Producer::makeJets() {
 	if(deltaGctPhi(*newRegion, *neighbor) == 1 &&
 	   (newRegion->gctEta()    ) == neighbor->gctEta()) {
 	  neighborN_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborN_et = std::max(0.,neighborET -
+				    (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
 		(newRegion->gctEta()    ) == neighbor->gctEta()) {
 	  neighborS_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborS_et = std::max(0.,neighborET -
+				    (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 0 &&
 		(newRegion->gctEta() + 1) == neighbor->gctEta()) {
 	  neighborE_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborE_et = std::max(0.,neighborET -
+				    (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 0 &&
 		(newRegion->gctEta() - 1) == neighbor->gctEta()) {
 	  neighborW_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborW_et = std::max(0.,neighborET -
+				    (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 1 &&
 		(newRegion->gctEta() + 1) == neighbor->gctEta()) {
 	  neighborNE_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborNE_et = std::max(0.,neighborET -
+				     (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
 		(newRegion->gctEta() - 1) == neighbor->gctEta()) {
 	  neighborSW_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborSW_et = std::max(0.,neighborET -
+				     (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == 1 &&
 		(newRegion->gctEta() - 1) == neighbor->gctEta()) {
 	  neighborNW_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborNW_et = std::max(0.,neighborET -
+				     (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
 	else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
 		(newRegion->gctEta() + 1) == neighbor->gctEta()) {
 	  neighborSE_et = neighborET;
+	  if(puCorrect && useHI)
+	    neighborSE_et = std::max(0.,neighborET -
+				     (puLevelHI[neighbor->gctEta()]*regionLSB_));
           nNeighbors++;
 	  continue;
 	}
@@ -502,6 +549,8 @@ UCT2015Producer::correctJets(const list<UCTCandidate>& jets) {
     //apply Michael's jet correction function
     if (useUICrho){
       jpt = jetcorrUIC(jetET, jet->getInt("rgnEta"), jet->getFloat("puLevelUIC"));
+    }else if (useHI) {
+      jpt = jetET;
     }else{
       jpt = jetcorr(jetET, jet->getInt("rgnEta"), jet->getFloat("puLevel"));
     }
