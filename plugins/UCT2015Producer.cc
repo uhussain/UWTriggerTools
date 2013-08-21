@@ -326,7 +326,7 @@ void UCT2015Producer::puSubtraction()
   }
   // Add a factor of 9, so it corresponds to a jet.  Reduces roundoff error.
   puLevel *= 9;
-  puLevel = puLevel / puCount;
+  if(puCount != 0) puLevel = puLevel / puCount;
   r_puLevelUIC = r_puLevelUIC / Rarea;
   puLevelUIC=0;
   if (r_puLevelUIC > 0.) puLevelUIC = floor (r_puLevelUIC + 0.5);
