@@ -11,7 +11,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 #from Configuration.StandardSequences.Geometry_cff import *
-from Configuration.Geometry.GeometryIdeal_cff import *
+#from Configuration.Geometry.GeometryIdeal_cff import *
 from Configuration.StandardSequences.RawToDigi_Data_cff import *
 from L1Trigger.UCT2015.Lut import *
 
