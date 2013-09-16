@@ -117,6 +117,7 @@ else:
     process.load("L1Trigger.UCT2015.emulationMC_cfi")
 
 process.load("L1Trigger.UCT2015.recoObjects_cfi")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 
 # Determine which calibration to use
 from L1Trigger.UCT2015.emulation_cfi import \
