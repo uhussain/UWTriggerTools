@@ -372,14 +372,20 @@ void UCT2015Producer::makeSums()
   unsigned int iPhi = L1CaloRegionDetId::N_PHI * physicalPhi / (2 * 3.1415927);
   METObject = UCTCandidate(MET, 0, physicalPhi);
   METObject.setInt("rgnPhi", iPhi);
+  METObject.setInt("rank", MET);
 
   double physicalPhiHT = atan2(sumHy, sumHx) + 3.1415927;
   iPhi = L1CaloRegionDetId::N_PHI * (physicalPhiHT) / (2 * 3.1415927);
   MHTObject = UCTCandidate(MHT, 0, physicalPhiHT);
   MHTObject.setInt("rgnPhi", iPhi);
+  MHTObject.setInt("rank", MHT);
 
   SETObject = UCTCandidate(sumET, 0, 0);
+  SETObject.setInt("rank", sumET);
+
   SHTObject = UCTCandidate(sumHT, 0, 0);
+  SHTObject.setInt("rank", sumHT);
+
 }
 
 void UCT2015Producer::makeJets() {
@@ -521,6 +527,7 @@ void UCT2015Producer::makeJets() {
         theJet.setInt("rgnPhi", jetPhi);
         theJet.setInt("rctEta",  newRegion->rctEta());
         theJet.setInt("rctPhi", newRegion->rctPhi());
+        theJet.setInt("rank", jetET);
 
         // Embed the puLevel information in the jet object for later tuning
         theJet.setFloat("puLevel", puLevel);
