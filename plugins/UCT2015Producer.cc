@@ -519,6 +519,9 @@ void UCT2015Producer::makeJets() {
         UCTCandidate theJet(jetET, convertRegionEta(jetEta), convertRegionPhi(jetPhi));
         theJet.setInt("rgnEta", jetEta);
         theJet.setInt("rgnPhi", jetPhi);
+        theJet.setInt("rctEta",  newRegion->rctEta());
+        theJet.setInt("rctPhi", newRegion->rctPhi());
+
         // Embed the puLevel information in the jet object for later tuning
         theJet.setFloat("puLevel", puLevel);
         theJet.setFloat("puLevelUIC", puLevelUIC);
@@ -670,6 +673,10 @@ void UCT2015Producer::makeEGTaus() {
             // Add extra information to the candidate
             egtauCand.setInt("rgnEta", egtCand->regionId().ieta());
             egtauCand.setInt("rgnPhi", egtCand->regionId().iphi());
+            egtauCand.setInt("rctEta", egtCand->regionId().rctEta());
+            egtauCand.setInt("rctPhi", egtCand->regionId().rctPhi());
+            egtauCand.setInt("rank", egtCand->rank());
+            egtauCand.setFloat("test", et);
             egtauCand.setFloat("associatedJetPt", -3);
             egtauCand.setFloat("associatedRegionEt", regionEt);
             egtauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
