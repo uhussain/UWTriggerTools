@@ -125,6 +125,7 @@ private:
   unsigned int egtSeed;
   double relativeIsolationCut;
   double relativeJetIsolationCut;
+  double switchOffTauIso;
   list<UCTCandidate> rlxTauList, corrRlxTauList;
   list<UCTCandidate> rlxEGList;
   list<UCTCandidate> isoTauList, corrIsoTauList;
@@ -160,6 +161,7 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   egtSeed(iConfig.getParameter<unsigned int>("egtSeed")),
   relativeIsolationCut(iConfig.getParameter<double>("relativeIsolationCut")),
   relativeJetIsolationCut(iConfig.getParameter<double>("relativeJetIsolationCut")),
+  switchOffTauIso(iConfig.getParameter<double>("switchOffTauIso")),
   egLSB_(iConfig.getParameter<double>("egammaLSB")),
   regionLSB_(iConfig.getParameter<double>("regionLSB"))
 {
@@ -372,14 +374,20 @@ void UCT2015Producer::makeSums()
   unsigned int iPhi = L1CaloRegionDetId::N_PHI * physicalPhi / (2 * 3.1415927);
   METObject = UCTCandidate(MET, 0, physicalPhi);
   METObject.setInt("rgnPhi", iPhi);
+  METObject.setInt("rank", MET);
 
   double physicalPhiHT = atan2(sumHy, sumHx) + 3.1415927;
   iPhi = L1CaloRegionDetId::N_PHI * (physicalPhiHT) / (2 * 3.1415927);
   MHTObject = UCTCandidate(MHT, 0, physicalPhiHT);
   MHTObject.setInt("rgnPhi", iPhi);
+  MHTObject.setInt("rank", MHT);
 
   SETObject = UCTCandidate(sumET, 0, 0);
+  SETObject.setInt("rank", sumET);
+
   SHTObject = UCTCandidate(sumHT, 0, 0);
+  SHTObject.setInt("rank", sumHT);
+
 }
 
 void UCT2015Producer::makeJets() {
@@ -519,6 +527,10 @@ void UCT2015Producer::makeJets() {
         UCTCandidate theJet(jetET, convertRegionEta(jetEta), convertRegionPhi(jetPhi));
         theJet.setInt("rgnEta", jetEta);
         theJet.setInt("rgnPhi", jetPhi);
+        theJet.setInt("rctEta",  newRegion->rctEta());
+        theJet.setInt("rctPhi", newRegion->rctPhi());
+        theJet.setInt("rank", jetET);
+
         // Embed the puLevel information in the jet object for later tuning
         theJet.setFloat("puLevel", puLevel);
         theJet.setFloat("puLevelUIC", puLevelUIC);
@@ -667,9 +679,13 @@ void UCT2015Producer::makeEGTaus() {
                 convertRegionEta(egtCand->regionId().ieta()),
                 convertRegionPhi(egtCand->regionId().iphi()));
 
+
             // Add extra information to the candidate
             egtauCand.setInt("rgnEta", egtCand->regionId().ieta());
             egtauCand.setInt("rgnPhi", egtCand->regionId().iphi());
+            egtauCand.setInt("rctEta", egtCand->regionId().rctEta());
+            egtauCand.setInt("rctPhi", egtCand->regionId().rctPhi());
+            egtauCand.setInt("rank", egtCand->rank());
             egtauCand.setFloat("associatedJetPt", -3);
             egtauCand.setFloat("associatedRegionEt", regionEt);
             egtauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
@@ -702,18 +718,28 @@ void UCT2015Producer::makeEGTaus() {
                 //if (!region->tauVeto() && !region->mip())
                   rlxEGList.back().setFloat("associatedJetPt", jet->pt());
 
-		double isolation = regionEt - (regionLSB_*puLevel/9.) - et;   // Core isolation (could go less than zero)
-		double relativeIsolation = isolation / et;
-		double jetIsolation = jet->pt() - regionLSB_*puLevel - et;        // Jet isolation
-		double relativeJetIsolation = jetIsolation / et;
+		double jetIsolation = jet->pt() - regionEt;        // Jet isolation
+		double relativeJetIsolation = jetIsolation / regionEt;
 		// A 2x1 and 1x2 cluster above egtSeed passing relative isolation will be in tau list
-		if(relativeIsolation < relativeIsolationCut && relativeJetIsolation < relativeJetIsolationCut && egtCand->isolated()) {
+                if(relativeJetIsolation < relativeJetIsolationCut || regionEt > switchOffTauIso){
+//		if(relativeIsolation < relativeIsolationCut && relativeJetIsolation < relativeJetIsolationCut && egtCand->isolated()) { // We do not want L-Iso!
                   isoTauList.push_back(rlxTauList.back());
-		  // Good patterns of EG candidate + relative isolation makes it to IsoEG
-		  if(!region->tauVeto() && !region->mip()) {
-		    isoEGList.push_back(rlxEGList.back());
-		  }
 		}
+
+                double isolationEG = regionEt  - et;   // Core isolation (could go less than zero)
+                double relativeIsolationEG = isolationEG / et;
+                double jetIsolationEG = jet->pt() - et;        // Jet isolation
+                double relativeJetIsolationEG = jetIsolationEG / et;
+                // A 2x1 and 1x2 cluster above egtSeed passing relative isolation will be in tau list
+                if(relativeIsolationEG < relativeIsolationCut && relativeJetIsolationEG < relativeJetIsolationCut){
+                  // Good patterns of EG candidate + relative isolation makes it to IsoEG
+                  if(!region->tauVeto() && !region->mip()) {
+                    isoEGList.push_back(rlxEGList.back());
+                  }
+                }
+
+
+
 		break;
 	      }
 	    }
