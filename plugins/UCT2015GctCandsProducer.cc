@@ -158,7 +158,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         unsigned iPhi=itr.getInt("rgnPhi");
                         unsigned rctEta=itr.getInt("rctEta");
                         unsigned gctEta=((rctEta & 0x7) | (iEta<11 ? 0x8 : 0x0));
-                        double rank = emScale->rank( itr.pt() ) ;
+                        unsigned rank = emScale->rank( itr.pt() ) ;
                         L1GctEmCand gctEmCand=L1GctEmCand(rank,iPhi,gctEta,0);        
                         rlxEmResult->push_back( gctEmCand  );
                 }
@@ -187,7 +187,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
 
                         unsigned gctEta=((rctEta & 0x7) | (iEta<11 ? 0x8 : 0x0));
 
-                        double rank = emScale->rank( itr.pt() ) ;
+                        unsigned rank = emScale->rank( itr.pt() ) ;
 
                         L1GctEmCand gctEmCand=L1GctEmCand(rank,iPhi,gctEta,1);
                         isoEmResult->push_back( gctEmCand  );
@@ -218,7 +218,8 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         unsigned hwEta=(((rctEta % 7) & 0x7) | (iEta<11 ? 0x8 : 0));
                         unsigned hwPhi= iPhi& 0x1f;
                         const int16_t bx=0; 
-                        double rank = jetScale->rank(itr.pt()) ;
+                        double pt=itr.getFloat("associatedRegionEt");
+                        unsigned rank = jetScale->rank(pt);
                         bool isFor=false;
                         bool isTau=true;
                         L1GctJetCand gctJetCand=L1GctJetCand(rank, hwPhi, hwEta, isTau , isFor,(uint16_t) 0, (uint16_t) 0, bx);
@@ -249,7 +250,8 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         unsigned hwEta=(((rctEta % 7) & 0x7) | (iEta<11 ? 0x8 : 0));
                         unsigned hwPhi= iPhi& 0x1f;
                         const int16_t bx=0; 
-                        double rank = jetScale->rank(itr.pt()) ;
+                        double pt=itr.getFloat("associatedRegionEt");
+                        unsigned rank = jetScale->rank(pt);
                         bool isFor=false;
                         bool isTau=true;
                         L1GctJetCand gctJetCand=L1GctJetCand(rank, hwPhi, hwEta, isTau , isFor,(uint16_t) 0, (uint16_t) 0, bx);
@@ -281,7 +283,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         unsigned hwPhi= iPhi& 0x1f;
                         bool isTau=false;
                         const int16_t bx=0; 
-                        double rank = jetScale->rank(itr.pt()) ;
+                        unsigned rank = jetScale->rank(itr.pt()) ;
 
                         bool isFor=(rctEta>=7);
                         L1GctJetCand gctJetCand=L1GctJetCand(rank, hwPhi, hwEta, isTau , isFor,(uint16_t) 0, (uint16_t) 0, bx);
@@ -301,7 +303,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         unsigned hwPhi= iPhi& 0x1f;
                         bool isTau=false;
                         const int16_t bx=0; 
-                        double rank = jetScale->rank(itr.pt()) ;
+                        unsigned rank = jetScale->rank(itr.pt()) ;
 
                         bool isFor=(rctEta>=7);
                         L1GctJetCand gctJetCand=L1GctJetCand(rank, hwPhi, hwEta, isTau , isFor,(uint16_t) 0, (uint16_t) 0, bx);
@@ -312,10 +314,6 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                                 L1GctJetCand gctJetCand=L1GctJetCand(0,0,0,0,1,(uint16_t) 0, (uint16_t) 0,0);
                                 forJetResult->push_back( gctJetCand  );
                         }
-
-
-
-
 
       }
 
