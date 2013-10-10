@@ -68,7 +68,7 @@ UCT2015GctCandsProducer::UCT2015GctCandsProducer(const edm::ParameterSet& ps) :
   produces<L1GctEmCandCollection>("isoEm");
   produces<L1GctEmCandCollection>("rlxEm");
   produces<L1GctJetCandCollection>("isoTau");
-  produces<L1GctJetCandCollection>("rlxTau");
+//  produces<L1GctJetCandCollection>("rlxTau");
 
   produces<L1GctJetCandCollection>("cenJets");
   produces<L1GctJetCandCollection>("forJets");
@@ -192,7 +192,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         L1GctEmCand gctEmCand=L1GctEmCand(rank,iPhi,gctEta,1);
                         isoEmResult->push_back( gctEmCand  );
                 }
-                if(isoEmResult->size()<4)
+                if(isoEmResult->size()<maxIsoEGs_)
                         for ( unsigned int j = 0 ; j<(maxIsoEGs_-egObjsIso->size()); j++){
                                 L1GctEmCand gctEmCand=L1GctEmCand( 0,(unsigned)0,(unsigned)0,1);
                                 isoEmResult->push_back( gctEmCand  );
@@ -202,7 +202,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
 
      // TAU 
      // They need to be treated as Jets! 
-   
+/*   
       edm::Handle< UCTCandidateCollection > tauObjs ;
       e.getByLabel( tauSourceRlx_, tauObjs ) ;
 
@@ -230,7 +230,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                                 isoTauResult->push_back( gctJetCand  );
                         }
       }
-
+*/
 
      // isoTAU
      // We'll only use this one    
@@ -287,8 +287,8 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         L1GctJetCand gctJetCand=L1GctJetCand(rank, hwPhi, hwEta, isTau , isFor,(uint16_t) 0, (uint16_t) 0, bx);
                         if (!isFor) cenJetResult->push_back( gctJetCand  );
                 }
-                if(cenJetResult->size()<4)
-                        for ( unsigned int j = 0 ; j<(4-egObjsIso->size()); j++){
+                if(cenJetResult->size()<maxJets_)
+                        for ( unsigned int j = 0 ; j<(maxJets_-cenJetResult->size()); j++){
                                 L1GctJetCand gctJetCand=L1GctJetCand(0,0,0,0,0,(uint16_t) 0, (uint16_t) 0,0);
                                 cenJetResult->push_back( gctJetCand  );
                         }
@@ -307,8 +307,8 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
                         L1GctJetCand gctJetCand=L1GctJetCand(rank, hwPhi, hwEta, isTau , isFor,(uint16_t) 0, (uint16_t) 0, bx);
                         if (isFor) forJetResult->push_back( gctJetCand  );
                 }
-                if(forJetResult->size()<4)
-                        for ( unsigned int j = 0 ; j<(4-egObjsIso->size()); j++){
+                if(forJetResult->size()<maxJets_)
+                        for ( unsigned int j = 0 ; j<(maxJets_-forJetResult->size()); j++){
                                 L1GctJetCand gctJetCand=L1GctJetCand(0,0,0,0,1,(uint16_t) 0, (uint16_t) 0,0);
                                 forJetResult->push_back( gctJetCand  );
                         }
@@ -416,7 +416,7 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
   e.put(isoEmResult,"isoEm");
 
   e.put(isoTauResult,"isoTau");
-  e.put(rlxTauResult,"rlxTau");
+//  e.put(rlxTauResult,"rlxTau");
 
   e.put(cenJetResult,"cenJets");
   e.put(forJetResult,"forJets");
