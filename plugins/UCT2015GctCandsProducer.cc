@@ -66,9 +66,9 @@ UCT2015GctCandsProducer::UCT2015GctCandsProducer(const edm::ParameterSet& ps) :
 
   // list of products
   produces<L1GctEmCandCollection>("isoEm");
-  produces<L1GctEmCandCollection>("rlxEm");
-  produces<L1GctJetCandCollection>("isoTau");
-//  produces<L1GctJetCandCollection>("rlxTau");
+  produces<L1GctEmCandCollection>("nonIsoEm");
+  produces<L1GctJetCandCollection>("tauJets");
+//  produces<L1GctJetCandCollection>("isoTau");
 
   produces<L1GctJetCandCollection>("cenJets");
   produces<L1GctJetCandCollection>("forJets");
@@ -410,10 +410,10 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
 
 
   // put the collections into the event
-  e.put(rlxEmResult,"rlxEm");
+  e.put(rlxEmResult,"nonIsoEm");
   e.put(isoEmResult,"isoEm");
 
-  e.put(isoTauResult,"isoTau");
+  e.put(isoTauResult,"tauJets");
 //  e.put(rlxTauResult,"rlxTau");
 
   e.put(cenJetResult,"cenJets");
