@@ -51,23 +51,38 @@ void PFSumET::produce(edm::Event& evt, const edm::EventSetup& es) {
   double sumET = 0;
   double sumHT = 0;
 
+  double sumET_x = 0;
+  double sumHT_x = 0;
+
+  double sumET_y = 0;
+  double sumHT_y = 0;
+
   for (size_t i = 0; i < pfcands->size(); ++i) {
     const reco::PFCandidate& pfcand = pfcands->at(i);
     if (std::abs(pfcand.eta()) > maxEta_)
       continue;
     if (std::abs(pfcand.pdgId() == 13) && excludeMuons_)
       continue;
-    sumET += pfcand.et();
-    if (pfcand.et() > minForHt_)
-      sumHT += pfcand.et();
+    sumET_x += pfcand.px();
+    sumET_y += pfcand.py();
+    sumET += pfcand.pt();
+
+    if (pfcand.et() > minForHt_){
+      sumHT_x += pfcand.px();
+      sumHT_y += pfcand.py();
+      sumHT += pfcand.pt();
+      }   
   }
 
+  std::cout<<"sht:  "<<sumHT<<std::endl;
+  std::cout<<"set:  "<<sumET<<std::endl;
+
   std::auto_ptr<LeafCandidateCollection> set(new LeafCandidateCollection);
-  set->push_back(reco::LeafCandidate(0, reco::Candidate::LorentzVector(sumET, 0, 0, 0)));
+  set->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(sumET,0,0,0)));
   evt.put(set, "set");
 
   std::auto_ptr<LeafCandidateCollection> sht(new LeafCandidateCollection);
-  sht->push_back(reco::LeafCandidate(0, reco::Candidate::LorentzVector(sumHT, 0, 0, 0)));
+  sht->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(sumHT,0,0,0)));
   evt.put(sht, "sht");
 }
 
