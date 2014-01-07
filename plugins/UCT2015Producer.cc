@@ -86,6 +86,7 @@ private:
   // ----------member data ---------------------------
 
   bool puCorrect;
+  bool puCorrectSums;
   bool useUICrho; // which PU denstity to use for energy correction determination
   bool useHI; // do HI-style background subtraction
 
@@ -150,6 +151,7 @@ unsigned const UCT2015Producer::N_JET_ETA = L1CaloRegionDetId::N_ETA * 4;
 //
 UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   puCorrect(iConfig.getParameter<bool>("puCorrect")),
+  puCorrectSums(iConfig.getParameter<bool>("puCorrectSums")),
   useUICrho(iConfig.getParameter<bool>("useUICrho")),
   useHI(iConfig.getParameter<bool>("useHI")),
   puETMax(iConfig.getParameter<unsigned int>("puETMax")),
@@ -355,7 +357,10 @@ void UCT2015Producer::makeSums()
       continue;
     }
     //unsigned int regionET = newRegion->et() - puLevel;
-    double regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);
+
+    double regionET =  regionPhysicalEt(*newRegion);     
+    if(puCorrectSums)    regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);
+ 
     if(regionET >= regionETCutForMET){
     	sumET += regionET;
     	sumEx += (int) (((double) regionET) * cosPhi[newRegion->gctPhi()]);
@@ -701,11 +706,9 @@ void UCT2015Producer::makeEGTaus() {
 
 	    // Note tauVeto now refers to emActivity pattern veto;
             // Good patterns are from EG candidates
-            // EKF - temporarily remove selection, do it at ntuple level.
-
-	    //if(!region->tauVeto() && !region->mip()) {
-            rlxEGList.push_back(egtauCand);
-	    //}
+	    if(!region->tauVeto() && !region->mip()) {
+               rlxEGList.push_back(egtauCand);
+	    }
 
 	    // Look for overlapping jet and require that isolation be passed
 	    for(list<UCTCandidate>::iterator jet = jetList.begin(); jet != jetList.end(); jet++) {
@@ -714,9 +717,11 @@ void UCT2015Producer::makeEGTaus() {
 		 (int)egtCand->regionId().ieta() == jet->getInt("rgnEta")) {
                 // Embed tuning parameters into the relaxed objects
                 rlxTauList.back().setFloat("associatedJetPt", jet->pt());
-                // EG ID disabled - EKF
-                //if (!region->tauVeto() && !region->mip())
+           
+                // EG ID enabled! MC
+                if (!region->tauVeto() && !region->mip()){
                   rlxEGList.back().setFloat("associatedJetPt", jet->pt());
+                }
 
 		double jetIsolation = jet->pt() - regionEt;        // Jet isolation
 		double relativeJetIsolation = jetIsolation / regionEt;

@@ -556,6 +556,7 @@ process.load("L1Trigger.UCT2015.PFSumET_cfi")
 
 process.l1SumsEfficiency = cms.EDAnalyzer(
     "SumsEfficiencyTree",
+    tree2015 =cms.bool(False),
     l1MHTSrc = cms.InputTag("l1extraParticles", "MHT"),
     l1METSrc = cms.InputTag("l1extraParticles", "MET"),
     # Evan said change l1METSigSrc to match recoMETSigSrc
@@ -569,9 +570,11 @@ process.l1SumsEfficiency = cms.EDAnalyzer(
     recoMETSigSrc = cms.InputTag("metsignificance"), # calomet
     recoSHTSrc = cms.InputTag("pfSumET", "sht"),
     recoSETSrc = cms.InputTag("pfSumET", "set"),
+
 )
 process.uctSumsEfficiency = cms.EDAnalyzer(
     "SumsEfficiencyTree",
+    tree2015 =cms.bool(True),
     l1MHTSrc = cms.InputTag("UCT2015Producer", "MHTUnpacked"),
     l1METSrc = cms.InputTag("UCT2015Producer", "METUnpacked"),
     l1METSigSrc = cms.InputTag("UCT2015Producer", "METSIGUnpacked"),
@@ -605,15 +608,27 @@ process.semileptonicTTBarPath = cms.Path(
     process.pfSumET *
     process.metsignificance *
     process.l1SumsEfficiency *
-    process.uctSumsEfficiency
+    process.uctSumsEfficiency*
     # w/o PU corrections
-    #process.UCT2015ProducerNoPU *
-    #process.uctSumsNoPUEfficiency
+    process.UCT2015ProducerNoPU *
+    process.uctSumsNoPUEfficiency
 )
+# Output definition
+process.output = cms.OutputModule("PoolOutputModule",
+    fileName = cms.untracked.string('out.root'),
+    outputCommands = cms.untracked.vstring(
+    'keep *',
+   )
+)
+
+process.out = cms.EndPath(process.output)
+
+
 
 process.schedule = cms.Schedule(
     process.p1,
-    #process.semileptonicTTBarPath
+    process.semileptonicTTBarPath
+#        process.out
 )
 
 # Make the framework shut up.
@@ -629,3 +644,5 @@ process.RCTConfigProducers.eicIsolationThreshold = eic
 hActivity = options.hActivityCut
 print "Setting hActivity threshold to %f" % hActivity
 process.RCTConfigProducers.hActivityCut = hActivity
+
+

@@ -26,7 +26,8 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "DataFormats/METReco/interface/MET.h"
-
+#include "DataFormats/L1Trigger/interface/L1EtMissParticle.h"
+#include "DataFormats/L1Trigger/interface/L1EtMissParticleFwd.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -45,6 +46,7 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     virtual ~SumsEfficiencyTree();
     void analyze(const edm::Event& evt, const edm::EventSetup& es);
   private:
+    bool tree2015_;
     edm::InputTag l1MHTSrc_;
     edm::InputTag l1METSrc_;
     edm::InputTag l1SHTSrc_;
@@ -70,6 +72,9 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     Float_t recoMETPhi_;
     Float_t recoSHT_;
     Float_t recoSET_;
+    Float_t recoSET2_;
+    Float_t recoSHT2_;
+
 
     Int_t pvs_;
     UInt_t run_;
@@ -99,7 +104,9 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   tree->Branch("recoMETPhi", &recoMETPhi_, "recoMETPhi/F");
 
   tree->Branch("recoSHT", &recoSHT_, "recoSHT/F");
+  tree->Branch("recoSHT2", &recoSHT2_, "recoSHT2/F");
   tree->Branch("recoSET", &recoSET_, "recoSET/F");
+  tree->Branch("recoSET2", &recoSET2_, "recoSET2/F");
 
   tree->Branch("pvs", &pvs_, "pvs/i");
   tree->Branch("run", &run_, "run/i");
@@ -110,6 +117,9 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   tree->Branch("L1SingleJet36", &L1SingleJet36_, "L1SingleJet36/i");
   tree->Branch("L1ETM50", &L1ETM50_, "L1ETM50/i");
 
+  // Input things
+
+  tree2015_  = pset.getParameter<bool>("tree2015");
   l1MHTSrc_ = pset.getParameter<edm::InputTag>("l1MHTSrc");
   l1METSrc_ = pset.getParameter<edm::InputTag>("l1METSrc");
   l1SHTSrc_ = pset.getParameter<edm::InputTag>("l1SHTSrc");
@@ -130,10 +140,30 @@ namespace {
 void getValue(const edm::Event& evt, const edm::InputTag& tag, Float_t& et, Float_t& phi) {
   edm::Handle<edm::View<reco::Candidate> > handle;
   evt.getByLabel(tag, handle);
-  et = handle->at(0).et();
+  et = handle->at(0).pt();
   phi = handle->at(0).phi();
+  std::cout<<et<<"   "<<phi<<std::endl;
 }
 
+void getSumEt(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet) {
+  edm::Handle<edm::View<reco::MET> > handle;
+  evt.getByLabel(tag, handle);
+  sumet = handle->at(0).sumEt();
+  std::cout<<sumet<<std::endl;
+}
+
+void getSumEtL1(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet,bool upgrade) {
+  if(!upgrade) {
+  edm::Handle<l1extra::L1EtMissParticleCollection> handle;
+  evt.getByLabel(tag, handle);
+  sumet = handle->at(0).etTotal();
+  } else{
+  edm::Handle<edm::View<reco::Candidate> > handle;
+  evt.getByLabel(tag, handle);
+  sumet = handle->at(0).pt();
+  }
+  std::cout<<sumet<<std::endl;
+}
 
 // Taken from C. Veelken
 void checkL1bit(const DecisionWord& l1GtDecision, const L1GtTriggerMenu& l1GtTriggerMenu,
@@ -182,18 +212,22 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   evt.getByLabel(pvSrc_, vertices);
   pvs_ = vertices->size();
 
+  Float_t dummyPhi, dummySum;
+
+  std::cout<<"get RECO"<<std::endl;
   getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
   getValue(evt, recoMETSrc_, recoMET_, recoMETPhi_);
 
-  Float_t dummyPhi;
-
   getValue(evt, recoSHTSrc_, recoSHT_, dummyPhi);
   getValue(evt, recoSETSrc_, recoSET_, dummyPhi);
+  getSumEt(evt,recoMETSrc_,recoSET2_);
+  getSumEt(evt,recoMHTSrc_,recoSHT2_);
 
+  std::cout<<"get L1"<<std::endl;
   getValue(evt, l1MHTSrc_, l1MHT_, l1MHTPhi_);
   getValue(evt, l1METSrc_, l1MET_, l1METPhi_);
-  getValue(evt, l1SHTSrc_, l1SHT_, dummyPhi);
-  getValue(evt, l1SETSrc_, l1SET_, dummyPhi);
+  getSumEtL1(evt, l1SHTSrc_, l1SHT_,tree2015_);
+  getSumEtL1(evt, l1SETSrc_, l1SET_,tree2015_);
 
   // Fill the L1 bit branches
   edm::Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;
