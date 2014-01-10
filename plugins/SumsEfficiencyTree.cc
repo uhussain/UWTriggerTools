@@ -212,7 +212,7 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   evt.getByLabel(pvSrc_, vertices);
   pvs_ = vertices->size();
 
-  Float_t dummyPhi, dummySum;
+  Float_t dummyPhi;//, dummySum;
 
   std::cout<<"get RECO"<<std::endl;
   getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
