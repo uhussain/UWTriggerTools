@@ -212,9 +212,8 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   evt.getByLabel(pvSrc_, vertices);
   pvs_ = vertices->size();
 
-  Float_t dummyPhi, dummySum;
+  Float_t dummyPhi;//, dummySum;
 
-  std::cout<<"get RECO"<<std::endl;
   getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
   getValue(evt, recoMETSrc_, recoMET_, recoMETPhi_);
 
@@ -223,7 +222,6 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   getSumEt(evt,recoMETSrc_,recoSET2_);
   getSumEt(evt,recoMHTSrc_,recoSHT2_);
 
-  std::cout<<"get L1"<<std::endl;
   getValue(evt, l1MHTSrc_, l1MHT_, l1MHTPhi_);
   getValue(evt, l1METSrc_, l1MET_, l1METPhi_);
   getSumEtL1(evt, l1SHTSrc_, l1SHT_,tree2015_);
@@ -242,7 +240,6 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   bool monitorL1Bit_passed = false;
   checkL1bit(l1GtDecision, *l1GtTriggerMenu, "L1_SingleJet36", monitorL1Bit_found, monitorL1Bit_passed);
   if (false && !monitorL1Bit_found) {
-    std::cerr << "Couldn't find the L1_SingleJet36 bit!" << std::endl;
     printL1bits(l1GtDecision, *l1GtTriggerMenu);
   }
   if (!monitorL1Bit_found)
@@ -252,7 +249,6 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   checkL1bit(l1GtDecision, *l1GtTriggerMenu, "L1_ETM50", monitorL1Bit_found, monitorL1Bit_passed);
   if (false && !monitorL1Bit_found)
-    std::cerr << "Couldn't find the L1_ETM50 bit!" << std::endl;
   if (!monitorL1Bit_found)
     L1ETM50_ = -1;
   else

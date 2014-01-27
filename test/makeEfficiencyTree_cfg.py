@@ -193,6 +193,7 @@ egtau_branches = cms.PSet(
     l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation', -4) : -2"),
     l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto', -4) : -2"),
     l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit', -4) : -2"),
+    l1gIsEle = cms.string("? l1gMatch ? l1g.getInt('isEle', -4) : -2"),
 )
 
 stage1b_branches = cms.PSet(

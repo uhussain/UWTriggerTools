@@ -57,6 +57,7 @@ UCT2015GctCandsProducer::UCT2015GctCandsProducer(const edm::ParameterSet& ps) :
   shtSource_(ps.getParameter<edm::InputTag>("shtSource")),
   metSource_(ps.getParameter<edm::InputTag>("metSource")),
   mhtSource_(ps.getParameter<edm::InputTag>("mhtSource")),
+  saturateEG_(ps.getUntrackedParameter<bool>("saturateEG",true)),
   maxEGs_(ps.getUntrackedParameter<int>("maxEGs",4)),
   maxIsoEGs_(ps.getUntrackedParameter<int>("maxIsoEGs",4)),
   maxTaus_(ps.getUntrackedParameter<int>("maxTaus",4)),
@@ -154,13 +155,16 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
       else {
                 for( unsigned int i = 0 ; i<egObjs->size() && i<maxEGs_; i++){
                         UCTCandidate itr=egObjs->at(i);
+                        double ET=itr.pt();
+                        if(saturateEG_ && itr.pt()>=63) ET=63;   //something about the scale got messed up after 63! Saturating...
                         unsigned iEta=itr.getInt("rgnEta");
                         unsigned iPhi=itr.getInt("rgnPhi");
                         unsigned rctEta=itr.getInt("rctEta");
                         unsigned gctEta=((rctEta & 0x7) | (iEta<11 ? 0x8 : 0x0));
-                        unsigned rank = emScale->rank( itr.pt() ) ;
+                        unsigned rank = emScale->rank( ET) ;
                         L1GctEmCand gctEmCand=L1GctEmCand(rank,iPhi,gctEta,0);        
                         rlxEmResult->push_back( gctEmCand  );
+                        
                 }
                 if(rlxEmResult->size()<maxEGs_)
                         for ( unsigned int j = 0 ; j<(maxEGs_-egObjs->size()); j++){
@@ -181,13 +185,15 @@ void UCT2015GctCandsProducer::produce(edm::Event& e, const edm::EventSetup& c) {
       else {
                 for( unsigned int i = 0 ; i<egObjsIso->size() && i<maxIsoEGs_; i++){
                         UCTCandidate itr=egObjsIso->at(i);
+                        double ET=itr.pt();
+                        if(saturateEG_ && itr.pt()>=63) ET=63;
                         unsigned iEta=itr.getInt("rgnEta");
                         unsigned iPhi=itr.getInt("rgnPhi");
                         unsigned rctEta=itr.getInt("rctEta");
 
                         unsigned gctEta=((rctEta & 0x7) | (iEta<11 ? 0x8 : 0x0));
 
-                        unsigned rank = emScale->rank( itr.pt() ) ;
+                        unsigned rank = emScale->rank( ET) ;
 
                         L1GctEmCand gctEmCand=L1GctEmCand(rank,iPhi,gctEta,1);
                         isoEmResult->push_back( gctEmCand  );

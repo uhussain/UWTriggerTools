@@ -667,6 +667,11 @@ void UCT2015Producer::makeEGTaus() {
 	  {
             double regionEt = regionPhysicalEt(*region);
 
+            bool isEle=false;
+                if(et<63 && (!region->tauVeto() && !region->mip() )) isEle=true;      
+                if(et>=63) isEle=true;
+
+
             // Find the highest region in the 3x3 annulus around the center
             // region.
             double associatedSecondRegionEt = 0;
@@ -700,13 +705,15 @@ void UCT2015Producer::makeEGTaus() {
             egtauCand.setInt("ellIsolation", egtCand->isolated());
             egtauCand.setInt("tauVeto", region->tauVeto());
             egtauCand.setInt("mipBit", region->mip());
+            egtauCand.setInt("isEle", isEle);
+
 
 	    // A 2x1 and 1x2 cluster above egtSeed is always in tau list
             rlxTauList.push_back(egtauCand);
 
 	    // Note tauVeto now refers to emActivity pattern veto;
             // Good patterns are from EG candidates
-	    if(!region->tauVeto() && !region->mip()) {
+            if (isEle){
                rlxEGList.push_back(egtauCand);
 	    }
 
@@ -719,8 +726,11 @@ void UCT2015Producer::makeEGTaus() {
                 rlxTauList.back().setFloat("associatedJetPt", jet->pt());
            
                 // EG ID enabled! MC
-                if (!region->tauVeto() && !region->mip()){
+                if (isEle){
                   rlxEGList.back().setFloat("associatedJetPt", jet->pt());
+                  bool isHighPtEle=true;                      
+                  if(jet->pt()>2*regionEt) isHighPtEle=false;
+                  rlxEGList.back().setInt("isHighPtEle",isHighPtEle);
                 }
 
 		double jetIsolation = jet->pt() - regionEt;        // Jet isolation
@@ -736,9 +746,9 @@ void UCT2015Producer::makeEGTaus() {
                 double jetIsolationEG = jet->pt() - et;        // Jet isolation
                 double relativeJetIsolationEG = jetIsolationEG / et;
                 // A 2x1 and 1x2 cluster above egtSeed passing relative isolation will be in tau list
-                if(relativeIsolationEG < relativeIsolationCut && relativeJetIsolationEG < relativeJetIsolationCut){
+                if(et>=63 || (relativeIsolationEG < relativeIsolationCut && relativeJetIsolationEG < relativeJetIsolationCut)){
                   // Good patterns of EG candidate + relative isolation makes it to IsoEG
-                  if(!region->tauVeto() && !region->mip()) {
+                  if(isEle){
                     isoEGList.push_back(rlxEGList.back());
                   }
                 }

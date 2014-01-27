@@ -14,6 +14,9 @@ process = cms.Process("ReRunningL1")
 
 process.source = cms.Source ("PoolSource",
                              fileNames = cms.untracked.vstring(
+
+#"/store/user/tapas/2012-08-01-CRAB_ZEESkim/skim_11_1_2Z3.root",
+
 "/store/data/Run2012C/ZeroBias1/RAW/v1/000/198/609/04F0C0E3-72CA-E111-A802-003048F117EC.root",
 "/store/data/Run2012C/ZeroBias1/RAW/v1/000/198/609/08361F06-71CA-E111-B50E-003048F1C424.root",
 "/store/data/Run2012C/ZeroBias1/RAW/v1/000/198/609/0AB01403-71CA-E111-B705-003048F110BE.root",
@@ -69,7 +72,7 @@ process.gctReEmulDigis =cms.EDProducer("UCT2015GctCandsProducer",
 
 
 
-process.gctReEmulDigisNOPU=cms.EDProducer("UCT2015GctCandsProducer",
+process.gctReEmulDigisNOTPUCORRECTED=cms.EDProducer("UCT2015GctCandsProducer",
             egRelaxed = cms.InputTag("UCT2015Producer","RelaxedEGUnpacked"),
     egIsolated  = cms.InputTag("UCT2015Producer","IsolatedEGUnpacked"),
             tauRelaxed = cms.InputTag("UCT2015Producer","RelaxedTauUnpacked"), # this collection is ignored in the final output, GT constraints 
@@ -104,21 +107,21 @@ process.l1extraParticlesReEmul = cms.EDProducer("L1ExtraParticlesProd",
 )
 
 
-process.l1extraParticlesReEmulNOPU = cms.EDProducer("L1ExtraParticlesProd",
+process.l1extraParticlesReEmulNOTPUCORRECTED = cms.EDProducer("L1ExtraParticlesProd",
     muonSource = cms.InputTag("gtDigis"),
-    etTotalSource = cms.InputTag("gctReEmulDigisNOPU"),
-    nonIsolatedEmSource = cms.InputTag("gctReEmulDigisNOPU","nonIsoEm"),
-    etMissSource = cms.InputTag("gctReEmulDigisNOPU"),
-    htMissSource = cms.InputTag("gctReEmulDigisNOPU"),
+    etTotalSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED"),
+    nonIsolatedEmSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED","nonIsoEm"),
+    etMissSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED"),
+    htMissSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED"),
     produceMuonParticles = cms.bool(True),
-    forwardJetSource = cms.InputTag("gctReEmulDigisNOPU","forJets"),
-    centralJetSource = cms.InputTag("gctReEmulDigisNOPU","cenJets"),
+    forwardJetSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED","forJets"),
+    centralJetSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED","cenJets"),
     produceCaloParticles = cms.bool(True),
-    tauJetSource = cms.InputTag("gctReEmulDigisNOPU","tauJets"),
-    isolatedEmSource = cms.InputTag("gctReEmulDigisNOPU","isoEm"),
-    etHadSource = cms.InputTag("gctReEmulDigisNOPU"),
-    hfRingEtSumsSource = cms.InputTag("gctReEmulDigisNOPU"), # these are empty
-    hfRingBitCountsSource = cms.InputTag("gctReEmulDigisNOPU"), # these are empty
+    tauJetSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED","tauJets"),
+    isolatedEmSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED","isoEm"),
+    etHadSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED"),
+    hfRingEtSumsSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED"), # these are empty
+    hfRingBitCountsSource = cms.InputTag("gctReEmulDigisNOTPUCORRECTED"), # these are empty
     centralBxOnly = cms.bool(True),
     ignoreHtMiss = cms.bool(False)
 )
@@ -139,16 +142,16 @@ process.l1ExtraTreeProducerReEmul = cms.EDAnalyzer("L1ExtraTreeProducer",
 )
 
 
-process.l1ExtraTreeProducerReEmulNOPU = cms.EDAnalyzer("L1ExtraTreeProducer",
-   nonIsoEmLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:NonIsolated"),
-   isoEmLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:Isolated"),
-   tauJetLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:Tau"),
-   cenJetLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:Central"),
-   fwdJetLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:Forward"),
-   muonLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU"),
-   metLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:MET"),
-   mhtLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU:MHT"),
-   hfRingsLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOPU"),
+process.l1ExtraTreeProducerReEmulNOTPUCORRECTED = cms.EDAnalyzer("L1ExtraTreeProducer",
+   nonIsoEmLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:NonIsolated"),
+   isoEmLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:Isolated"),
+   tauJetLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:Tau"),
+   cenJetLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:Central"),
+   fwdJetLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:Forward"),
+   muonLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED"),
+   metLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:MET"),
+   mhtLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED:MHT"),
+   hfRingsLabel = cms.untracked.InputTag("l1extraParticlesReEmulNOTPUCORRECTED"),
    maxL1Extra = cms.uint32(20)
 )
 
@@ -168,7 +171,7 @@ process.l1ExtraTreeProducer = cms.EDAnalyzer("L1ExtraTreeProducer",
 
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('L1TreeReRunHTCUT5.root')
+    fileName = cms.string('L1TreeReRun_NOPATCH_WithoutIDAfter63.root')
 )
 
 from L1Trigger.GlobalTrigger.gtDigis_cfi import gtDigis
@@ -179,11 +182,11 @@ process.gtReEmulDigis.GmtInputTag  = cms.InputTag("gtDigis") # this is original 
 process.gtReEmulDigis.GctInputTag  = cms.InputTag("gctReEmulDigis")
 process.gtReEmulDigis.EmulateBxInEvent = cms.int32(1)
 
-process.gtReEmulDigisNOPU   = gtDigis.clone()
+process.gtReEmulDigisNOTPUCORRECTED   = gtDigis.clone()
 
-process.gtReEmulDigisNOPU.GmtInputTag  = cms.InputTag("gtDigis") # this is original GMT info from DATA (GMT is read out by GT FED)
-process.gtReEmulDigisNOPU.GctInputTag  = cms.InputTag("gctReEmulDigisNOPU")
-process.gtReEmulDigisNOPU.EmulateBxInEvent = cms.int32(1)
+process.gtReEmulDigisNOTPUCORRECTED.GmtInputTag  = cms.InputTag("gtDigis") # this is original GMT info from DATA (GMT is read out by GT FED)
+process.gtReEmulDigisNOTPUCORRECTED.GctInputTag  = cms.InputTag("gctReEmulDigisNOTPUCORRECTED")
+process.gtReEmulDigisNOTPUCORRECTED.EmulateBxInEvent = cms.int32(1)
 
 
 process.testMET = cms.EDAnalyzer("TestEtHt",
@@ -209,18 +212,16 @@ process.p1 = cms.Path(
     *process.dttfDigis
     *process.csctfDigis
     *process.gctReEmulDigis
-#    *process.gctReEmulDigisNOPU
+    *process.gctReEmulDigisNOTPUCORRECTED
     *process.gtReEmulDigis
-#    *process.gtReEmulDigisNOPU
+    *process.gtReEmulDigisNOTPUCORRECTED
     *process.scalersRawToDigi*
     process.l1extraParticles*
     process.l1extraParticlesReEmul*  
-#    process.l1extraParticlesReEmulNOPU*
+    process.l1extraParticlesReEmulNOTPUCORRECTED*
     process.l1ExtraTreeProducer*
     process.l1ExtraTreeProducerReEmul*
-#    process.l1ExtraTreeProducerReEmulNOPU
-    process.testMET*
-    process.testMHT
+    process.l1ExtraTreeProducerReEmulNOTPUCORRECTED
 
 )
 

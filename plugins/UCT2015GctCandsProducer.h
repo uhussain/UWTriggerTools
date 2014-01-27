@@ -47,6 +47,8 @@ class UCT2015GctCandsProducer : public edm::EDProducer {
   edm::InputTag metSource_;
   edm::InputTag mhtSource_;
 
+  bool saturateEG_;
+
   unsigned int maxEGs_;
   unsigned int maxIsoEGs_;
   unsigned int maxTaus_;
