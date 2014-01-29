@@ -124,7 +124,7 @@ private:
   list<UCTCandidate> jetList, corrJetList;
 
   unsigned int egtSeed;
-  double relativeIsolationCut;
+  double relativeTauIsolationCut;
   double relativeJetIsolationCut;
   double switchOffTauIso;
   list<UCTCandidate> rlxTauList, corrRlxTauList;
@@ -161,7 +161,7 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   maxGctEtaForSums(iConfig.getParameter<unsigned int>("maxGctEtaForSums")),
   jetSeed(iConfig.getParameter<unsigned int>("jetSeed")),
   egtSeed(iConfig.getParameter<unsigned int>("egtSeed")),
-  relativeIsolationCut(iConfig.getParameter<double>("relativeIsolationCut")),
+  relativeTauIsolationCut(iConfig.getParameter<double>("relativeTauIsolationCut")),
   relativeJetIsolationCut(iConfig.getParameter<double>("relativeJetIsolationCut")),
   switchOffTauIso(iConfig.getParameter<double>("switchOffTauIso")),
   egLSB_(iConfig.getParameter<double>("egammaLSB")),
@@ -668,9 +668,9 @@ void UCT2015Producer::makeEGTaus() {
             double regionEt = regionPhysicalEt(*region);
 
             bool isEle=false;
-                if(et<63 && (!region->tauVeto() && !region->mip() )) isEle=true;      
+                if(et<40 && (!region->tauVeto() && !region->mip() )) isEle=true;      
+                if(et>=40 && et<63 && (!region->mip() )) isEle=true;
                 if(et>=63) isEle=true;
-
 
             // Find the highest region in the 3x3 annulus around the center
             // region.
@@ -736,21 +736,23 @@ void UCT2015Producer::makeEGTaus() {
 		double jetIsolation = jet->pt() - regionEt;        // Jet isolation
 		double relativeJetIsolation = jetIsolation / regionEt;
 		// A 2x1 and 1x2 cluster above egtSeed passing relative isolation will be in tau list
-                if(relativeJetIsolation < relativeJetIsolationCut || regionEt > switchOffTauIso){
-//		if(relativeIsolation < relativeIsolationCut && relativeJetIsolation < relativeJetIsolationCut && egtCand->isolated()) { // We do not want L-Iso!
+                if(relativeJetIsolation < relativeTauIsolationCut || regionEt > switchOffTauIso){
+//		if(relativeIsolation < relativeTauIsolationCut && relativeJetIsolation < relativeJetIsolationCut && egtCand->isolated()) { // We do not want L-Iso!
                   isoTauList.push_back(rlxTauList.back());
 		}
 
-                double isolationEG = regionEt  - et;   // Core isolation (could go less than zero)
-                double relativeIsolationEG = isolationEG / et;
+                //double jetIsolationRegionEG = jet->pt()-regionEt;   // Core isolation (could go less than zero)
+                //double relativeJetIsolationRegionEG = jetIsolationRegionEG / regionEt;
                 double jetIsolationEG = jet->pt() - et;        // Jet isolation
                 double relativeJetIsolationEG = jetIsolationEG / et;
-                // A 2x1 and 1x2 cluster above egtSeed passing relative isolation will be in tau list
-                if(et>=63 || (relativeIsolationEG < relativeIsolationCut && relativeJetIsolationEG < relativeJetIsolationCut)){
-                  // Good patterns of EG candidate + relative isolation makes it to IsoEG
-                  if(isEle){
+
+                bool isolatedEG=false;
+                if(et<63 && (regionEt-et)/et<0.5 &&  relativeJetIsolationEG < relativeJetIsolationCut)  isolatedEG=true;; 
+                //if(et>=63 && regionEt<100 && relativeJetIsolationRegionEG < relativeJetIsolationCut)  isolatedEG=true;; 
+                if (et>=63) isolatedEG=true;;
+
+                if(isEle && isolatedEG){
                     isoEGList.push_back(rlxEGList.back());
-                  }
                 }
 
 

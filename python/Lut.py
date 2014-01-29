@@ -12,6 +12,7 @@ RCTConfigProducers.eGammaLSB = 0.5
 RCTConfigProducers.jetMETLSB = 0.5 # Determines what scale the UCT sees for regions/jets
 RCTConfigProducers.eMinForFGCut = 999.
 RCTConfigProducers.eMaxForFGCut = -999.
+#RCTConfigProducers.hOeCut = 0.1
 RCTConfigProducers.hOeCut = 0.05
 RCTConfigProducers.eMinForHoECut = 999.
 RCTConfigProducers.eMaxForHoECut = -999.
