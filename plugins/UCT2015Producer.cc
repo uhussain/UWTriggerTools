@@ -34,6 +34,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "L1Trigger/RegionalCaloTrigger/interface/L1RCT.h"
+
 using namespace std;
 using namespace edm;
 
@@ -77,6 +79,7 @@ class UCT2015Producer : public edm::EDProducer {
 		// Helper methods
 
 		void puSubtraction();
+		void puMultSubtraction();
 
 		void makeSums();
 		void makeJets();
@@ -87,6 +90,7 @@ class UCT2015Producer : public edm::EDProducer {
 		// ----------member data ---------------------------
 
 		bool puCorrect;
+		bool puMultCorrect;
 		bool puCorrectSums;
 		bool useUICrho; // which PU denstity to use for energy correction determination
 		bool useHI; // do HI-style background subtraction
@@ -135,6 +139,7 @@ class UCT2015Producer : public edm::EDProducer {
 		list<UCTCandidate> isoEGList;
 
 		Handle<L1CaloRegionCollection> newRegions;
+		Handle<L1CaloRegionCollection> RegionsPuCorrected;
 		Handle<L1CaloEmCollection> newEMCands;
 
 		vector<double> sinPhi;
@@ -153,6 +158,7 @@ unsigned const UCT2015Producer::N_JET_ETA = L1CaloRegionDetId::N_ETA * 4;
 //
 UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
 	puCorrect(iConfig.getParameter<bool>("puCorrect")),
+	puMultCorrect(iConfig.getParameter<bool>("puMultCorrect")),
 	puCorrectSums(iConfig.getParameter<bool>("puCorrectSums")),
 	useUICrho(iConfig.getParameter<bool>("useUICrho")),
 	useHI(iConfig.getParameter<bool>("useHI")),
@@ -217,6 +223,7 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByLabel("uctDigis", newEMCands);
 
 	if(puCorrect) puSubtraction();
+	if(puMultCorrect) puMultSubtraction();
 
 	makeSums();
 	makeJets();
@@ -303,9 +310,33 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 
 // NB PU is not in the physical scale!!  Needs to be multiplied by regionLSB
+void UCT2015Producer::puMultSubtraction()
+{
+	puMult = 0;
+	for(L1CaloRegionCollection::const_iterator newRegion =
+			newRegions->begin();
+			newRegion != newRegions->end(); newRegion++){
+		double regionET =  regionPhysicalEt(*newRegion);
+		// cout << "regionET: " << regionET <<endl; 
+		if (regionET > 0) {puMult++;}
+	}
+
+	for(L1CaloRegionCollection::const_iterator newRegion =
+			newRegions->begin();
+			newRegion != newRegions->end(); newRegion++){
+		double regionET =  regionPhysicalEt(*newRegion);
+		// cout << "regionET: " << regionET <<endl; 
+		//the divide by regionLSB to get back to gct Digis
+		double region = (pumcorr(regionET, newRegion->gctEta(),puMult))/regionLSB_;
+//		newRegion->et()=region;    
+	}
+
+
+}
+
+
 void UCT2015Producer::puSubtraction()
 {
-	puMult =0;
 	puLevel = 0;
 	puLevelUIC = 0;
 	double r_puLevelUIC=0.0;
@@ -331,10 +362,8 @@ void UCT2015Producer::puSubtraction()
 		}
 		r_puLevelHI[newRegion->gctEta()] += newRegion->et();
 		etaCount[newRegion->gctEta()]++;
-		double regionET =  regionPhysicalEt(*newRegion);
 		// cout << "regionET: " << regionET <<endl; 
-		if (regionET > 0) {puMult++;}
-	
+
 	} //end regionforloop
 	// Add a factor of 9, so it corresponds to a jet.  Reduces roundoff error.
 	puLevel *= 9;

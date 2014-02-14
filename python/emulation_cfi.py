@@ -54,6 +54,7 @@ UCT2015EClusterProducer = cms.EDProducer(
 UCT2015Producer = cms.EDProducer(
     "UCT2015Producer",
     puCorrect = cms.bool(True),
+    puMultCorrect = cms.bool(False),
     puCorrectSums = cms.bool(False), # For now
     useUICrho = cms.bool(True),
     useHI = cms.bool(False),
