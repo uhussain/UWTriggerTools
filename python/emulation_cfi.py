@@ -109,8 +109,8 @@ uctEmulatorStep = cms.Sequence(
     * UCT2015EClusterProducer
     * UCT2015Producer
     * UCTStage1BProducer
-#    * l1extraParticles
-#    * uct2015L1ExtraParticles
+    * l1extraParticles
+    * uct2015L1ExtraParticles
 )
 
 emulationSequence = cms.Sequence(uctDigiStep * uctEmulatorStep)

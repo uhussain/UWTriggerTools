@@ -3,6 +3,8 @@
 Script to make plots of MET/MHT efficiencies
 
 '''
+from subprocess import Popen
+from sys import argv, exit, stdout, stderr
 
 import ROOT
 
@@ -80,7 +82,7 @@ def compare_efficiencies(oct_ntuple, uct_ntuple, variable='recoMET',
     useL1 = True
     if useL1:
         l1.Draw('pe')
-    legend = ROOT.TLegend(0.35, 0.2, 0.89, 0.35, "", "brNDC")
+    legend = ROOT.TLegend(0.65, 0.2, 0.89, 0.35, "", "brNDC")
     if legend_label:
         legend.AddEntry("NULL", legend_label,"")
     legend.SetFillColor(ROOT.EColor.kWhite)
@@ -93,28 +95,42 @@ def compare_efficiencies(oct_ntuple, uct_ntuple, variable='recoMET',
     canvas.SetGridx()
     canvas.SaveAs(filename+".png")
 
+######## File #########
+if len(argv) < 2:
+   print 'Usage:python jetEfficiencyPlot.py RootFile.root label[optional]'
+   exit()
 
-ntuple_file = ROOT.TFile("/scratch/efriis/uct_jet_efficiency.root")
+infile = argv[1]
+ntuple_file = ROOT.TFile(infile)
+
+
+#ntuple_file = ROOT.TFile("/scratch/efriis/uct_jet_efficiency.root")
 uct_sums_ntuple = ntuple_file.Get("uctSumsEfficiency/Ntuple")
 l1_sums_ntuple = ntuple_file.Get("l1SumsEfficiency/Ntuple")
-
+#################
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMET',
                      uct_cut = 'l1MET > 20',
                      oct_cut = 'l1MET > 20',
                      filename = 'l1_met_20'
                     )
+compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
+                     variable='recoMET',
+                     uct_cut = 'l1MET > 30',
+                     oct_cut = 'l1MET > 30',
+                     filename = 'l1_met_30'
+                    )
+
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMET',
                      uct_cut = 'l1MET > 40',
-                     oct_cut = 'l1MET > 20',
-                     filename = 'l1_met_uct_40_l1_20'
+                     oct_cut = 'l1MET > 40',
+                     filename = 'l1_met_uct_40_l1_40'
                     )
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMHT',
-                     #uct_cut = '0.5*l1MHT > 20',
                      uct_cut = 'l1MHT > 20',
                      oct_cut = 'l1MHT > 20',
                      filename = 'l1_mht_20'
@@ -122,10 +138,25 @@ compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMHT',
-                     #uct_cut = '0.5*l1MHT > 20',
                      uct_cut = 'l1MHT > 30',
                      oct_cut = 'l1MHT > 30',
                      filename = 'l1_mht_30'
+                    )
+
+
+compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
+                     variable='recoMHT',
+                     uct_cut = 'l1MHT > 100',
+                     oct_cut = 'l1MHT > 100',
+                     filename = 'l1_mht_100'
+                    )
+
+
+compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
+                     variable='recoMHT',
+                     uct_cut = 'l1MHT > 40',
+                     oct_cut = 'l1MHT > 40',
+                     filename = 'l1_mht_40'
                     )
 
 # Resolutions
