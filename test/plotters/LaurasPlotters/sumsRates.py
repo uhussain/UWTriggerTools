@@ -2,7 +2,7 @@
 
 Script to make some quick rate plots
 
-Author: Nate Woods, adapted from Evan K. Friis, UW Madison
+Author: Laura Dodd, Nate Woods, adapted from Evan K. Friis, UW Madison
 
 '''
 

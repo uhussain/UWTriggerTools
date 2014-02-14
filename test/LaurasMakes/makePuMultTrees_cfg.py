@@ -97,7 +97,7 @@ common_ntuple_branches = cms.PSet(
 # Tree producers
 
 process.treeInclHF = cms.EDAnalyzer(
-    "puMultipTreeEdit",
+    "puMultipTreeRegionEt",
     isUCT = cms.bool(False),
     useHF = cms.bool(False),
     minGctEtaForSums = cms.uint32(0),
@@ -106,7 +106,7 @@ process.treeInclHF = cms.EDAnalyzer(
 )
 
 process.treeNoHF = cms.EDAnalyzer(
-    "puMultipTreeEdit",
+    "puMultipTreeRegionEt",
     isUCT = cms.bool(False),
     useHF = cms.bool(True),
     minGctEtaForSums = cms.uint32(4),
