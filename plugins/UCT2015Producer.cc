@@ -359,6 +359,7 @@ void UCT2015Producer::makeSums()
     //unsigned int regionET = newRegion->et() - puLevel;
 
     double regionET =  regionPhysicalEt(*newRegion);     
+
     if(puCorrectSums)    regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);
  
     if(regionET >= regionETCutForMET){
