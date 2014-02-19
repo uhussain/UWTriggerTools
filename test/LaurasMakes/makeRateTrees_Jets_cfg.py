@@ -109,6 +109,8 @@ if not options.isMC:
 else:
     process.load("L1Trigger.UCT2015.emulationMC_cfi")
 
+process.load("L1Trigger.UCT2015.recoObjects_cfi")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 # Determine which calibration to use
 from L1Trigger.UCT2015.emulation_cfi import \
         eg_calib_v1, eg_calib_v3, eg_calib_v4
@@ -175,12 +177,12 @@ process.rlxEGUCTRate = cms.EDAnalyzer(
     isUCT = cms.bool(True),
 )
 
-process.uctLeptonRates = cms.Sequence(
-    process.rlxTauUCTRate *
+#process.uctLeptonRates = cms.Sequence(
+    #process.rlxTauUCTRate *
     #process.isoTauUCTRate *
-    process.rlxEGUCTRate
+    #process.rlxEGUCTRate
     #process.isoEGUCTRate
-)
+#)
 process.jetL1Rate = cms.EDAnalyzer(
     "RateTree",
     src = cms.VInputTag(
@@ -230,24 +232,24 @@ process.sumsUCTRates = cms.EDAnalyzer(
 
 process.uctHadronicRates = cms.Sequence(
     process.jetUCTRate *
-    process.corrjetUCTRate
-    #process.sumsUCTRates
+    process.corrjetUCTRate *
+    process.sumsUCTRates
 )
 
 
 process.p1 = cms.Path(
     process.emulationSequence *
     process.scalersRawToDigi *
-    process.tauL1Rate *
-    process.isoEGL1Rate *
-    process.rlxEGL1Rate *
-    process.jetL1Rate
-    #process.sumsL1Rates
+   # process.tauL1Rate *
+   # process.isoEGL1Rate *
+   # process.rlxEGL1Rate *
+    process.jetL1Rate *
+    process.sumsL1Rates
 )
 
 if options.stage1:
     print "Building stage1 trees"
-    process.p1 += process.uctLeptonRates
+    #process.p1 += process.uctLeptonRates
     process.p1 += process.uctHadronicRates
 
 

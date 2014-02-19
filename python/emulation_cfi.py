@@ -38,6 +38,7 @@ uctDigis = cms.EDProducer(
     queryIntervalInLS = cms.uint32(100)#,
 )
 
+
 UCT2015EClusterProducer = cms.EDProducer(
     "UCT2015EClusterProducer",
     debug = cms.bool(False),
@@ -51,10 +52,17 @@ UCT2015EClusterProducer = cms.EDProducer(
     ecalDigis = cms.VInputTag(cms.InputTag("ecalDigis:EcalTriggerPrimitives"))
 )
 
+LauraDigis = cms.EDProducer(
+    "Laura",
+    puMultCorrect = cms.bool(True),
+    regionLSB = RCTConfigProducers.jetMETLSB
+)
+
+
 UCT2015Producer = cms.EDProducer(
     "UCT2015Producer",
-    puCorrect = cms.bool(True),
-    puMultCorrect = cms.bool(False),
+    puCorrect = cms.bool(False),
+    puMultCorrect = cms.bool(True), #Change this one for producer
     puCorrectSums = cms.bool(False), # For now
     useUICrho = cms.bool(True),
     useHI = cms.bool(False),
@@ -107,6 +115,7 @@ uctEmulatorStep = cms.Sequence(
     hackHCALMIPs
     # Now make UCT and L1 objects
     * uctDigis
+    * LauraDigis 
     * UCT2015EClusterProducer
     * UCT2015Producer
     * UCTStage1BProducer

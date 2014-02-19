@@ -74,8 +74,8 @@ void PFSumET::produce(edm::Event& evt, const edm::EventSetup& es) {
       }   
   }
 
-  std::cout<<"sht:  "<<sumHT<<std::endl;
-  std::cout<<"set:  "<<sumET<<std::endl;
+ // std::cout<<"sht:  "<<sumHT<<std::endl;
+//  std::cout<<"set:  "<<sumET<<std::endl;
 
   std::auto_ptr<LeafCandidateCollection> set(new LeafCandidateCollection);
   set->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(sumET,0,0,0)));

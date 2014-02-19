@@ -1,5 +1,5 @@
 #include "L1Trigger/UCT2015/interface/pileupmult_corrections.h"
-
+using namespace std;
 
 double pumcorr(double pt, int ieta, unsigned int pum0) {
         double calib[]={ // no cuts at all Eta0-21 each line is eta, each number is pum0 #
@@ -30,10 +30,13 @@ double pumcorr(double pt, int ieta, unsigned int pum0) {
 
         double pum0corr = calib[ieta*18 + pum0];
 
-        double pum0pt = pt- pum0corr; 
+
         
-//      double pt =  alpha * ptraw + beta * pu + gamma;
+        double pum0pt =  (pt- pum0corr); 
+        if (pum0pt <0) {pum0pt=0;} 
+
         return pum0pt;
+
 }
 
 

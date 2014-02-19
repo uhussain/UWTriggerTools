@@ -60,7 +60,7 @@ class UCT2015Producer : public edm::EDProducer {
 		}
 
 		double regionPhysicalEt(const L1CaloRegion& cand) const {
-			return regionLSB_*cand.et();
+			return std::max(0.,regionLSB_*cand.et());
 		}
 
 		// Find information about observables in the annulus.  We define the annulus
@@ -219,11 +219,13 @@ UCT2015Producer::UCTCandidateCollectionPtr collectionize(const UCTCandidate& obj
 UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-	iEvent.getByLabel("uctDigis", newRegions);
+	if(puMultCorrect) {
+		iEvent.getByLabel("LauraDigis","LauraRegions", newRegions);
+	}
+	else {iEvent.getByLabel("uctDigis", newRegions);}
 	iEvent.getByLabel("uctDigis", newEMCands);
 
 	if(puCorrect) puSubtraction();
-	if(puMultCorrect) puMultSubtraction();
 
 	makeSums();
 	makeJets();
@@ -310,30 +312,30 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 
 // NB PU is not in the physical scale!!  Needs to be multiplied by regionLSB
-void UCT2015Producer::puMultSubtraction()
-{
-	puMult = 0;
-	for(L1CaloRegionCollection::const_iterator newRegion =
-			newRegions->begin();
-			newRegion != newRegions->end(); newRegion++){
-		double regionET =  regionPhysicalEt(*newRegion);
-		// cout << "regionET: " << regionET <<endl; 
-		if (regionET > 0) {puMult++;}
-	}
+/*void UCT2015Producer::puMultSubtraction()
+  {
+  puMult = 0;
+  for(L1CaloRegionCollection::const_iterator newRegion =
+  newRegions->begin();
+  newRegion != newRegions->end(); newRegion++){
+  double regionET =  regionPhysicalEt(*newRegion);
+// cout << "regionET: " << regionET <<endl; 
+if (regionET > 0) {puMult++;}
+}
 
-	for(L1CaloRegionCollection::const_iterator newRegion =
-			newRegions->begin();
-			newRegion != newRegions->end(); newRegion++){
-		double regionET =  regionPhysicalEt(*newRegion);
-		// cout << "regionET: " << regionET <<endl; 
-		//the divide by regionLSB to get back to gct Digis
-		double region = (pumcorr(regionET, newRegion->gctEta(),puMult))/regionLSB_;
+for(L1CaloRegionCollection::const_iterator newRegion =
+newRegions->begin();
+newRegion != newRegions->end(); newRegion++){
+double regionET =  regionPhysicalEt(*newRegion);
+// cout << "regionET: " << regionET <<endl; 
+//the divide by regionLSB to get back to gct Digis
+double regionEtCorr = (pumcorr(regionET, newRegion->gctEta(),puMult))/regionLSB_;
 //		newRegion->et()=region;    
-	}
+}
 
 
 }
-
+*/
 
 void UCT2015Producer::puSubtraction()
 {
@@ -397,8 +399,11 @@ void UCT2015Producer::makeSums()
 
 		double regionET =  regionPhysicalEt(*newRegion);     
 
-		if(puCorrectSums)    regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);
-
+		if(puCorrectSums)    {
+			regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);
+			//	if (puMultCorrect) {regionET=regionEtCorr;}
+			//		else {regionET = std::max(regionPhysicalEt(*newRegion) - puLevel*regionLSB_/9., 0.);}
+		}
 		if(regionET >= regionETCutForMET){
 			sumET += regionET;
 			sumEx += (int) (((double) regionET) * cosPhi[newRegion->gctPhi()]);
@@ -438,6 +443,8 @@ void UCT2015Producer::makeJets() {
 	for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin();
 			newRegion != newRegions->end(); newRegion++) {
 		double regionET = regionPhysicalEt(*newRegion);
+		//   if(puMultCorrect) {regionET=regionEtCorr;}
+	//	std::cout<<"regionET: "<< regionET<<endl;
 		if(puCorrect && useHI)
 			regionET = std::max(0.,regionET -
 					(puLevelHI[newRegion->gctEta()]*regionLSB_));
@@ -460,7 +467,8 @@ void UCT2015Producer::makeJets() {
 					if(puCorrect && useHI)
 						neighborN_et = std::max(0.,neighborET -
 								(puLevelHI[neighbor->gctEta()]*regionLSB_));
-					nNeighbors++;
+					nNeighbors++; 
+				//	std::cout<<"here neighborsN"<<endl;
 					continue;
 				}
 				else if(deltaGctPhi(*newRegion, *neighbor) == -1 &&
@@ -565,6 +573,7 @@ void UCT2015Producer::makeJets() {
 
 				if (!neighborCheck) {
 					std::cout << "phi: " << jetPhi << " eta: " << jetEta << " n: " << nNeighbors << std::endl;
+					std::cout << "JetPt: " << jetET << " regionET: " << regionET << std::endl;
 					assert(false);
 				}
 				UCTCandidate theJet(jetET, convertRegionEta(jetEta), convertRegionPhi(jetPhi));

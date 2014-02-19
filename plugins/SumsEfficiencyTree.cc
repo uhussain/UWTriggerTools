@@ -142,14 +142,14 @@ void getValue(const edm::Event& evt, const edm::InputTag& tag, Float_t& et, Floa
   evt.getByLabel(tag, handle);
   et = handle->at(0).pt();
   phi = handle->at(0).phi();
-  std::cout<<et<<"   "<<phi<<std::endl;
+  //std::cout<<et<<"   "<<phi<<std::endl;
 }
 
 void getSumEt(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet) {
   edm::Handle<edm::View<reco::MET> > handle;
   evt.getByLabel(tag, handle);
   sumet = handle->at(0).sumEt();
-  std::cout<<sumet<<std::endl;
+  //std::cout<<sumet<<std::endl;
 }
 
 void getSumEtL1(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet,bool upgrade) {
@@ -162,7 +162,7 @@ void getSumEtL1(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet,
   evt.getByLabel(tag, handle);
   sumet = handle->at(0).pt();
   }
-  std::cout<<sumet<<std::endl;
+ // std::cout<<sumet<<std::endl;
 }
 
 // Taken from C. Veelken
@@ -194,7 +194,7 @@ void printL1bits(const DecisionWord& l1GtDecision, const L1GtTriggerMenu& l1GtTr
     std::string l1BitName = l1GtAlgorithm->second.algoName();
     int index = l1GtAlgorithm->second.algoBitNumber();
     std::string triggerDecision = ( l1GtDecision[index] ) ? "passed" : "failed";
-    std::cout << " L1 bit = " << l1BitName << ": " << triggerDecision << std::endl;
+   // std::cout << " L1 bit = " << l1BitName << ": " << triggerDecision << std::endl;
   }
 }
 
@@ -214,7 +214,7 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   Float_t dummyPhi;//, dummySum;
 
-  std::cout<<"get RECO"<<std::endl;
+ // std::cout<<"get RECO"<<std::endl;
   getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
   getValue(evt, recoMETSrc_, recoMET_, recoMETPhi_);
 
@@ -223,7 +223,7 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   getSumEt(evt,recoMETSrc_,recoSET2_);
   getSumEt(evt,recoMHTSrc_,recoSHT2_);
 
-  std::cout<<"get L1"<<std::endl;
+ // std::cout<<"get L1"<<std::endl;
   getValue(evt, l1MHTSrc_, l1MHT_, l1MHTPhi_);
   getValue(evt, l1METSrc_, l1MET_, l1METPhi_);
   getSumEtL1(evt, l1SHTSrc_, l1SHT_,tree2015_);
