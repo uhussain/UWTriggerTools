@@ -29,9 +29,9 @@ ntuple_file = ROOT.TFile(infile)
 ######## LABEL & SAVE WHERE #########
 
 if len(argv)>2:
-   saveWhere='~/www/'+argv[2]+'_'
+   saveWhere='~/www/Research/'+argv[2]+'_'
 else:
-   saveWhere='~/www/'
+   saveWhere='~/www/Research/'
 
 #saveWhere = './'
 
@@ -47,7 +47,7 @@ L1G_CALIB_FACTOR = 1.0
 
 
 jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
-jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
+#jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 

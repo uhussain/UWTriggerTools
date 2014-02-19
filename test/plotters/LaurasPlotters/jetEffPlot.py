@@ -33,7 +33,7 @@ ntuple_file_new = ROOT.TFile(infile_new)
 if len(argv)>3:
    saveWhere='~/www/'+argv[3]+'_'
 else:
-   saveWhere='~/www/'
+   saveWhere='~/www/Research/CorrvsNEw/'
 
 
 
@@ -47,9 +47,9 @@ L1G_CALIB_FACTOR = 1.0
 #####################################
 
 
+#jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
+jet_ntuple_new = ntuple_file_new.Get("jetEfficiency/Ntuple")
 jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
-jet_ntuple_new = ntuple_file_new.Get("corrjetEfficiency/Ntuple")
-jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 
@@ -81,7 +81,7 @@ def make_l1g_efficiency(denom, num):
     return eff
 
 
-def compare_efficiencies(ntuple, variable, l1PtCut, binning, filename,
+def compare_efficiencies(ntuple, ntuple_new, variable, l1PtCut, binning, filename,
                          title='', xaxis='', showL1=False):
     ''' Returns a (L1, L1G) tuple of TGraphAsymmErrors '''
     denom = make_plot(
@@ -94,28 +94,35 @@ def compare_efficiencies(ntuple, variable, l1PtCut, binning, filename,
         "l1gMatch && %0.2f * l1gPt > %0.2f" % (L1G_CALIB_FACTOR, l1PtCut),
         binning
     )
-    num_l1 = make_plot(
-        ntuple, variable,
-        "l1Match && l1Pt > %0.2f" % (l1PtCut),
+#    num_l1 = make_plot(
+#        ntuple, variable,
+#        "l1Match && l1Pt > %0.2f" % (l1PtCut),
+#        binning
+#    )
+    num_l1g_new = make_plot(
+        ntuple_new, variable,
+        "l1gMatch && l1gPt > %0.2f" % (l1PtCut),
         binning
     )
-
     frame = ROOT.TH1F("frame", "frame", *binning)
     l1g = make_l1g_efficiency(denom, num_l1g)
-    l1 = make_l1_efficiency(denom, num_l1)
+    #    l1 = make_l1_efficiency(denom, num_l1)
+    l1gnew = make_l1_efficiency(denom, num_l1g_new)
     frame.SetMaximum(1.2)
     frame.SetTitle(title)
     frame.GetXaxis().SetTitle(xaxis)
     frame.Draw()
     l1g.Draw('pe')
-    if showL1:
-        l1.Draw('pe')
+    l1gnew.Draw('pe')
+    #if showL1:
+    #    l1.Draw('pe')
     legend = ROOT.TLegend(0.7, 0.2, 0.89, 0.4, "", "brNDC")
     legend.SetFillColor(ROOT.EColor.kWhite)
     legend.SetBorderSize(1)
     legend.AddEntry(l1g, "UCT", "pe")
-    if showL1:
-        legend.AddEntry(l1, "Current", "pe")
+    legend.AddEntry(l1gnew, "UCT pile up subtracted", "pe")
+    #if showL1:
+    #    legend.AddEntry(l1, "Current", "pe")
     legend.Draw()
     saveas = saveWhere+filename+'.png'
     print saveas
@@ -125,28 +132,28 @@ def compare_efficiencies(ntuple, variable, l1PtCut, binning, filename,
 # Jet efficiency for a 20 GeV cut and 10 GeV cut on L1
 ################################################################################
 
-compare_efficiencies(jet_ntuple, 'recoPt',  100, [40, 0, 300],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  100, [40, 0, 300],
                     'jet_pt_trg100',
                      "Jet 100 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  150, [40, 0, 300],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  150, [40, 0, 300],
                      'jet_pt_trg150',
                      "Jet 150 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  200, [40, 0, 300],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  200, [40, 0, 300],
                      'jet_pt_trg200',
                      "Jet 200 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  30, [40, 0, 200],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  30, [40, 0, 200],
                      'jet_pt_trg30',
                      "Jet 30 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  40, [40, 0, 200],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  40, [40, 0, 200],
                      'jet_pt_trg40',
                      "Jet 40 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  50, [40, 0, 200],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  50, [40, 0, 200],
                      'jet_pt_trg50',
                      "Jet 50 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  60, [40, 0, 200],
+compare_efficiencies(jet_ntuple, jet_ntuple_new,'recoPt',  60, [40, 0, 200],
                      'jet_pt_trg60',
                      "Jet 60 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, 'recoPt',  70, [40, 0, 200],
+compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  70, [40, 0, 200],
                     'jet_pt_trg70',
                    "Jet 70 efficiency", "RECO p_{T} (GeV)",True)
 # Resolutions

@@ -27,26 +27,28 @@ ROOT.gStyle.SetOptStat(0)
 
 ######## File #########
 infile = argv[1]
+new_infile = argv[2]
 ntuple_file = ROOT.TFile(infile)
+ntuple_file_new = ROOT.TFile(new_infile)
 
 ####### Calibration factor ####
-if(len(argv) < 3):
-  L1_CALIB_FACTOR = 1.0
-else:
-  L1_CALIB_FACTOR = float(argv[2])
-
-if(len(argv) < 4):
-  L1G_CALIB_FACTOR = 1.0
-else:
-  L1G_CALIB_FACTOR = float(argv[3])
-
+#if(len(argv) < 3):
+L1_CALIB_FACTOR = 1.0
+#else:
+#  L1_CALIB_FACTOR = float(argv[2])
+#
+#if(len(argv) < 4):
+L1G_CALIB_FACTOR = 1.0
+#else:
+#  L1G_CALIB_FACTOR = float(argv[3])
+#
 
 print 'L1_CALIB_FACTOR: %s' %L1_CALIB_FACTOR 
 ####### Get NTUPLES #########
 #jet_l1_ntuple = ntuple_file.Get("jetL1Rate/Ntuple")
-jet_l1_ntuple = ntuple_file.Get("jetL1Rate/Ntuple")
+jet_uct_ntuple = ntuple_file.Get("jetUCTRate/Ntuple")
 #jet_uct_ntuple = ntuple_file.Get("jetUCTRate/Ntuple")
-jet_uct_ntuple = ntuple_file.Get("corrjetUCTRate/Ntuple")
+jet_uct_ntuple_new = ntuple_file_new.Get("jetUCTRate/Ntuple")
 
 #rlx_tau_L1_ntuple = ntuple_file.Get("tauL1Rate/Ntuple")
 #rlx_tau_UCT_ntuple = ntuple_file.Get("rlxTauUCTRate/Ntuple")
@@ -109,11 +111,11 @@ def make_l1g_rate(pt):
 #### PLOT the RAtes
 print 'here'  
 
-def plotRates(l1ntuple, uctntuple, binning, filename, title='', xaxis='', isIso = False):
+def plotRates(uctntuple_new, uctntuple, binning, filename, title='', xaxis='', isIso = False):
     ''' Save a rate Plot '''
     
     l1_pt = make_plot(
-        l1ntuple, 'pt[0]',
+        uctntuple_new, 'pt[0]',
        # "pt[0]>30 && abs(eta[0])<3", # No selection
        "pt[0]>0 ", # No selection
         #"abs(eta[0])<3", # No selection
@@ -144,8 +146,8 @@ def plotRates(l1ntuple, uctntuple, binning, filename, title='', xaxis='', isIso 
     legend = ROOT.TLegend(0.7, 0.5, 0.89, 0.7, "", "brNDC")
     legend.SetFillColor(ROOT.EColor.kWhite)
     legend.SetBorderSize(1)
-    legend.AddEntry(l1gRate, "UCT Corrected", "p")
-    legend.AddEntry(l1Rate, "Current", "p")
+    legend.AddEntry(l1gRate, "UCT uncalibrated", "p")
+    legend.AddEntry(l1Rate, "UCT PuMultiplicty uncal", "p")
     legend.Draw("same")
     canvas.SaveAs(filename)
 ##################################
@@ -161,8 +163,8 @@ def plotRates(l1ntuple, uctntuple, binning, filename, title='', xaxis='', isIso 
 #plotRates(rlx_ntuple, 20, [40, 0, 200],
 #          '~/www/UCT2015_F/rlx_tau_rate.png',
 #          "Rlx EG Rate", "L1 p_{T} (GeV)")
-plotRates(jet_l1_ntuple,jet_uct_ntuple, [40, 0, 200],
-          '~/www/Research/calcorr_jet_rate_corr_etacut.png',
+plotRates(jet_uct_ntuple_new,jet_uct_ntuple, [40, 0, 200],
+          '~/www/Research/calcorr_jet_rate_corr_comp.png',
           "Jet Rate ", "P_{T} (GeV)")
 
 
