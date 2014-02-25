@@ -57,13 +57,8 @@ class Laura : public edm::EDProducer {
 		unsigned int puMult;
 		bool puMultCorrect;
 
-		double puLevel;
-		double puLevelUIC;
-
 		double regionLSB_;
 
-		//		L1CaloRegionCollection correctedRegion;
-		//		L1CaloRegionCollection LauraRegions;
 		L1CaloRegionCollection LauraRegionList;
 
 };
@@ -120,7 +115,6 @@ Laura::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 			unsigned card=notCorrectedRegion->rctCard();
 			unsigned rgn=notCorrectedRegion->rctRegionIndex();
 			LauraRegionList.push_back(L1CaloRegion(regionEtCorr, overflow, tau,mip,quiet,crate,card,rgn));
-			//	LauraRegionList.push_back(L1CaloRegion(regionET, overflow, tau,mip,quiet,crate,card,rgn));
 		}
 		else 
 		{
@@ -128,9 +122,7 @@ Laura::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 			unsigned crate= notCorrectedRegion->rctCrate();
 			unsigned hfRgn=notCorrectedRegion->rctRegionIndex();
 			LauraRegionList.push_back(L1CaloRegion(regionEtCorr,fineGrain,crate, hfRgn));
-			//	LauraRegionList.push_back(L1CaloRegion(regionET,fineGrain,crate, hfRgn));
 		}
-		//LauraRegionsList.push_back(correctedRegion);
 	}
 	for(L1CaloRegionCollection::const_iterator LaurasNewRegion = LauraRegionList.begin();
 			LaurasNewRegion != LauraRegionList.end(); ++LaurasNewRegion) {
@@ -140,22 +132,4 @@ Laura::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	iEvent.put(LauraRegions, "LauraRegions");
 }
-
-/*double Laura::puMultCalc( Handle<L1CaloRegionCollection>)
-  {
-  puMult = 0;
-
-  for(L1CaloRegionCollection::const_iterator notCorrectedRegion =
-  notCorrectedRegions->begin();
-  notCorrectedRegion != notCorrectedRegions->end(); notCorrectedRegion++){
-  double regionET =  regionPhysicalEt(*notCorrectedRegion);
-// cout << "regionET: " << regionET <<endl; 
-if (regionET > 0) {puMult++;}
-}
-
-return puMult; 
-
-}
-*/
-
 DEFINE_FWK_MODULE(Laura);
