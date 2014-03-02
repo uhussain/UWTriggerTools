@@ -98,8 +98,10 @@ cleanJets=cms.Sequence(
 )
 
 # Rerun the PFTau sequence
+from Configuration.StandardSequences.GeometryIdeal_cff import *
 from Configuration.StandardSequences.MagneticField_cff import *
 from RecoTauTag.Configuration.RecoPFTauTag_cff import *
+from TrackingTools.TransientTrack.TransientTrackBuilder_cfi import * 
 
 # Select good taus
 dmTaus = cms.EDFilter(
@@ -142,11 +144,11 @@ recoTaus = cms.EDFilter(
             selectionCut=cms.double(0.5)
         ),
         cms.PSet(
-            discriminator=cms.InputTag("hpsPFTauDiscriminationByLooseIsolationDBSumPtCorr"),
+            discriminator=cms.InputTag("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr3Hits"),
             selectionCut=cms.double(0.5)
         ),
         cms.PSet(
-            discriminator=cms.InputTag("hpsPFTauDiscriminationByLooseMuonRejection"),
+            discriminator=cms.InputTag("hpsPFTauDiscriminationByLooseMuonRejection3"),
             selectionCut=cms.double(0.5)
         ),
         cms.PSet(
@@ -157,9 +159,10 @@ recoTaus = cms.EDFilter(
     filter = cms.bool(False)
 )
 
+
 recoObjects = cms.Sequence(
     cleanJets *
-    recoTauClassicHPSSequence *
+    PFTau * 
     dmTaus *
     isoTaus*
     recoTaus

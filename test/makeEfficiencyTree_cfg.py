@@ -79,9 +79,8 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-# Load the correct global tag, based on the release
 if 'CMSSW_6' in os.environ['CMSSW_VERSION']:
-    process.GlobalTag.globaltag = 'POSTLS161_V12::All'
+    process.GlobalTag.globaltag = 'POSTLS162_V2::All'
     print "Using global tag for upgrade MC: %s" % process.GlobalTag.globaltag
     if not options.isMC:
         raise ValueError("There is no data in CMSSW 6, you must mean isMC=1")
@@ -92,7 +91,7 @@ else:
     else:
         # CMSSW 5 MC
         process.GlobalTag.globaltag = 'START53_V7B::All'
-    process.GlobalTag.connect   = 'frontier://FrontierProd/CMS_COND_31X_GLOBALTAG'
+    process.GlobalTag.connect = 'frontier://FrontierProd/CMS_COND_31X_GLOBALTAG'
     process.GlobalTag.pfnPrefix = cms.untracked.string('frontier://FrontierProd/')
     print "Using global tag for 52X data: %s" % process.GlobalTag.globaltag
 
@@ -189,6 +188,7 @@ common_ntuple_branches = cms.PSet(
 
 # Specific to EG tau objects
 egtau_branches = cms.PSet(
+    l1gSecondRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedSecondRegionEt', -4) : -2"),
     l1gJetPt = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPt', -4) : -2"),
     l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation', -4) : -2"),
     l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto', -4) : -2"),
@@ -250,16 +250,16 @@ electron_branches = cms.PSet(
 tau_branches = cms.PSet(
     emFraction = cms.string("reco.emFraction"),
     decayMode = cms.string("reco.decayMode"),
-    recoEcal = cms.string("ecalEnergy"),
-    recoHcal = cms.string("hcalEnergy"),
+#    recoEcal = cms.string("ecalEnergy"),
+#    recoHcal = cms.string("hcalEnergy"),
     # EK - as far as I can tell, this does not use the lead track at all
-    hcal = cms.string("reco.hcalTotOverPLead"),
+#    hcal = cms.string("reco.hcalTotOverPLead"),
 )
 
 # Define the tree producers
 process.isoTauEfficiency = cms.EDAnalyzer(
     "EfficiencyTree",
-    recoSrc = cms.VInputTag("recoTaus"),
+    recoSrc = cms.VInputTag("isoTaus"),
     l1Src = cms.VInputTag(cms.InputTag("l1extraParticles", "Tau")),
     l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "IsolatedTauUnpacked")),
     l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
@@ -368,12 +368,12 @@ process.rlxUCTisoL1EGEfficiency = cms.EDAnalyzer(
 
 # Package all of the lepton efficiencies into one sequence
 process.leptonEfficiencies = cms.Sequence(
-    #process.isoTauEfficiency *
-    process.rlxTauEfficiency *
-    #process.rlxTauPlusJetEfficiency *
-    #process.isoEGEfficiency *
-    process.rlxEGEfficiency *
-    process.rlxUCTisoL1EGEfficiency
+    process.isoTauEfficiency *
+    process.rlxTauEfficiency 
+#    process.rlxTauPlusJetEfficiency *
+#    process.isoEGEfficiency *
+#    process.rlxEGEfficiency *
+#    process.rlxUCTisoL1EGEfficiency
 )
 
 process.jetEfficiency = cms.EDAnalyzer(
@@ -432,7 +432,7 @@ process.printPF = cms.EDAnalyzer(
 
 process.printTaus = cms.EDAnalyzer(
     "CandInfoPrinter",
-    src = cms.InputTag("hpsPFTauProducer"),
+    src = cms.InputTag("isoTaus"),
     printHeader=cms.bool(True),
     pt = cms.string("pt"),
     ncands = cms.string("signalPFCands.size"),
@@ -440,6 +440,19 @@ process.printTaus = cms.EDAnalyzer(
     phi = cms.string("phi"),
     dm = cms.string("decayMode"),
 )
+
+process.printTaus2 = cms.EDAnalyzer(
+    "CandInfoPrinter",
+    src = cms.InputTag("recoTaus"),
+    printHeader=cms.bool(True),
+    pt = cms.string("pt"),
+    ncands = cms.string("signalPFCands.size"),
+    eta = cms.string("eta"),
+    phi = cms.string("phi"),
+    dm = cms.string("decayMode"),
+)
+
+
 
 process.printTPGs = cms.EDFilter(
     "TPGDebugger",
@@ -486,18 +499,17 @@ if options.isMC:
     process.rlxTauPlusJetEfficiency.recoSrc = cms.VInputTag("trueTaus")
     process.isoTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
     process.rlxTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
+    process.printTaus.src=cms.InputTag("trueTaus")
 
 process.p1 = cms.Path(
     reco_object_step *
     process.emulationSequence
-    #process.printTaus *
+#    *process.printTaus 
     #process.highPtPF *
     #process.printPF *
     #process.printTPGs *
     #process.dump *
     #process.pionEfficiency *
-    #process.jetEfficiency *
-    #process.corrjetEfficiency
 )
 
 if options.stage1:
@@ -566,12 +578,13 @@ process.l1SumsEfficiency = cms.EDAnalyzer(
     # fixme
     l1SHTSrc = cms.InputTag("l1extraParticles", "MHT"),
     l1SETSrc = cms.InputTag("l1extraParticles", "MET"),
-    recoMHTSrc = cms.InputTag("htMetAK5"),
+    recoMHTSrc = cms.InputTag("pfSumET", "mht"),
     recoMETSrc = cms.InputTag("metNoHF"), # calomet
-    recoMETSigSrc = cms.InputTag("metsignificance"), # calomet
+    #recoMETSigSrc = cms.InputTag("metsignificance"), # does not work in 62X - why?
+    recoMETSigSrc  = cms.InputTag("metNoHF"),
     recoSHTSrc = cms.InputTag("pfSumET", "sht"),
     recoSETSrc = cms.InputTag("pfSumET", "set"),
-
+    recoPFMETSrc = cms.InputTag("pfMet"), # pfmet
 )
 process.uctSumsEfficiency = cms.EDAnalyzer(
     "SumsEfficiencyTree",
@@ -581,10 +594,11 @@ process.uctSumsEfficiency = cms.EDAnalyzer(
     l1METSigSrc = cms.InputTag("UCT2015Producer", "METSIGUnpacked"),
     l1SHTSrc = cms.InputTag("UCT2015Producer", "SHTUnpacked"),
     l1SETSrc = cms.InputTag("UCT2015Producer", "SETUnpacked"),
-
-    recoMHTSrc = cms.InputTag("htMetAK5"),
     recoMETSrc = cms.InputTag("metNoHF"), # calomet
-    recoMETSigSrc = cms.InputTag("metsignificance"), # calomet
+    recoPFMETSrc = cms.InputTag("pfMet"), # pfmet
+    recoMHTSrc = cms.InputTag("pfSumET", "mht"), # calomet
+#    recoMETSigSrc = cms.InputTag("metsignificance"), #  # does not work in 62X - why?
+    recoMETSigSrc  = cms.InputTag("metNoHF"),
     recoSHTSrc = cms.InputTag("pfSumET", "sht"),
     recoSETSrc = cms.InputTag("pfSumET", "set"),
 )
@@ -603,22 +617,25 @@ process.uctSumsNoPUEfficiency = process.uctSumsEfficiency.clone(
 
 process.semileptonicTTBarPath = cms.Path(
     process.cleanJets *
+    process.jetEfficiency *
+    process.corrjetEfficiency*
     process.oneMuon *
     process.jetsPt30 *
     process.atLeastThreeJets *
     process.pfSumET *
-    process.metsignificance *
+    #process.metsignificance *
     process.l1SumsEfficiency *
-    process.uctSumsEfficiency*
+    process.uctSumsEfficiency
     # w/o PU corrections
-    process.UCT2015ProducerNoPU *
-    process.uctSumsNoPUEfficiency
+    #process.UCT2015ProducerNoPU *
+    #process.uctSumsNoPUEfficiency
 )
 # Output definition
 process.output = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('out.root'),
     outputCommands = cms.untracked.vstring(
-    'keep *',
+    'drop *',    
+    'keep *_*_*_L1UCTEfficiency',
    )
 )
 
@@ -634,7 +651,7 @@ process.schedule = cms.Schedule(
 
 # Make the framework shut up.
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 # Spit out filter efficiency at the end.
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))

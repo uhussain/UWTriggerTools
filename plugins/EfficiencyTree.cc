@@ -117,17 +117,20 @@ void EfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   if(useVertex_)
     evt.getByLabel(pvSrc_, vertices);
 
+
   // Now match reco objects to L1 objects
   std::vector<L1RecoMatch> matches;
   for (size_t i = 0; i < recoObjects.size(); ++i) {
     const reco::Candidate* recoObject = recoObjects[i];
     const reco::Candidate* bestL1 = findBestMatch(recoObject, l1Objects, maxDR_);
     const reco::Candidate* bestL1G = findBestMatch(recoObject, l1GObjects, maxDR_);
+
     int vertices_i = 1;
     if(useVertex_) vertices_i = vertices->size();
     L1RecoMatch theMatch(recoObject, bestL1, bestL1G, evt.id(),
 						 matches.size(), recoObjects.size(), vertices_i);
     matches.push_back(theMatch);
+
   }
 
   // Now fill our TTree for each of the reco matches
@@ -135,6 +138,7 @@ void EfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& es) {
   for (size_t i = 0; i < matches.size(); ++i) {
     ntuple_.fill(matches[i]);
   }
+
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"

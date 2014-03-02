@@ -55,6 +55,7 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     edm::InputTag recoMETSrc_;
     edm::InputTag recoSHTSrc_;
     edm::InputTag recoSETSrc_;
+    edm::InputTag recoPFMETSrc_;
     edm::InputTag pvSrc_;
 
     TTree* tree;
@@ -74,6 +75,8 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     Float_t recoSET_;
     Float_t recoSET2_;
     Float_t recoSHT2_;
+    Float_t recoPFMET_;
+    Float_t recoPFMETPhi_;
 
 
     Int_t pvs_;
@@ -103,6 +106,9 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   tree->Branch("recoMHTPhi", &recoMHTPhi_, "recoMHTPhi/F");
   tree->Branch("recoMETPhi", &recoMETPhi_, "recoMETPhi/F");
 
+  tree->Branch("recoPFMETPhi", &recoPFMETPhi_, "recoPFMETPhi/F");
+  tree->Branch("recoPFMET", &recoPFMET_, "recoPFMET/F");
+
   tree->Branch("recoSHT", &recoSHT_, "recoSHT/F");
   tree->Branch("recoSHT2", &recoSHT2_, "recoSHT2/F");
   tree->Branch("recoSET", &recoSET_, "recoSET/F");
@@ -129,6 +135,7 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   recoMETSrc_ = pset.getParameter<edm::InputTag>("recoMETSrc");
   recoSHTSrc_ = pset.getParameter<edm::InputTag>("recoSHTSrc");
   recoSETSrc_ = pset.getParameter<edm::InputTag>("recoSETSrc");
+  recoPFMETSrc_ = pset.getParameter<edm::InputTag>("recoPFMETSrc");
 
   pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<edm::InputTag>("pvSrc") : edm::InputTag("offlinePrimaryVertices");
 }
@@ -142,14 +149,12 @@ void getValue(const edm::Event& evt, const edm::InputTag& tag, Float_t& et, Floa
   evt.getByLabel(tag, handle);
   et = handle->at(0).pt();
   phi = handle->at(0).phi();
-  std::cout<<et<<"   "<<phi<<std::endl;
 }
 
 void getSumEt(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet) {
   edm::Handle<edm::View<reco::MET> > handle;
   evt.getByLabel(tag, handle);
   sumet = handle->at(0).sumEt();
-  std::cout<<sumet<<std::endl;
 }
 
 void getSumEtL1(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet,bool upgrade) {
@@ -162,7 +167,6 @@ void getSumEtL1(const edm::Event& evt, const edm::InputTag& tag, Float_t& sumet,
   evt.getByLabel(tag, handle);
   sumet = handle->at(0).pt();
   }
-  std::cout<<sumet<<std::endl;
 }
 
 // Taken from C. Veelken
@@ -194,7 +198,6 @@ void printL1bits(const DecisionWord& l1GtDecision, const L1GtTriggerMenu& l1GtTr
     std::string l1BitName = l1GtAlgorithm->second.algoName();
     int index = l1GtAlgorithm->second.algoBitNumber();
     std::string triggerDecision = ( l1GtDecision[index] ) ? "passed" : "failed";
-    std::cout << " L1 bit = " << l1BitName << ": " << triggerDecision << std::endl;
   }
 }
 
@@ -216,11 +219,12 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
   getValue(evt, recoMETSrc_, recoMET_, recoMETPhi_);
+  getValue(evt, recoPFMETSrc_, recoPFMET_, recoPFMETPhi_);
 
+  getValue(evt, recoMHTSrc_, recoMHT_, recoMHTPhi_);
   getValue(evt, recoSHTSrc_, recoSHT_, dummyPhi);
   getValue(evt, recoSETSrc_, recoSET_, dummyPhi);
   getSumEt(evt,recoMETSrc_,recoSET2_);
-  getSumEt(evt,recoMHTSrc_,recoSHT2_);
 
   getValue(evt, l1MHTSrc_, l1MHT_, l1MHTPhi_);
   getValue(evt, l1METSrc_, l1MET_, l1METPhi_);

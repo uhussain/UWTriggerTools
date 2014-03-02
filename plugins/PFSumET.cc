@@ -42,6 +42,8 @@ PFSumET::PFSumET(const edm::ParameterSet& pset) {
 
   produces<LeafCandidateCollection>("set");
   produces<LeafCandidateCollection>("sht");
+  produces<LeafCandidateCollection>("mht");
+
 }
 void PFSumET::produce(edm::Event& evt, const edm::EventSetup& es) {
 
@@ -74,8 +76,8 @@ void PFSumET::produce(edm::Event& evt, const edm::EventSetup& es) {
       }   
   }
 
-  std::cout<<"sht:  "<<sumHT<<std::endl;
-  std::cout<<"set:  "<<sumET<<std::endl;
+  double mHT=sqrt(sumHT_x*sumHT_x+sumHT_y*sumHT_y);
+
 
   std::auto_ptr<LeafCandidateCollection> set(new LeafCandidateCollection);
   set->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(sumET,0,0,0)));
@@ -84,6 +86,13 @@ void PFSumET::produce(edm::Event& evt, const edm::EventSetup& es) {
   std::auto_ptr<LeafCandidateCollection> sht(new LeafCandidateCollection);
   sht->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(sumHT,0,0,0)));
   evt.put(sht, "sht");
+
+  std::auto_ptr<LeafCandidateCollection> mht(new LeafCandidateCollection);
+  mht->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(mHT,0,0,0)));   // we could also add phi
+  evt.put(mht, "mht");
+
+
+
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
