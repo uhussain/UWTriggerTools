@@ -95,6 +95,7 @@ const reco::Candidate* findBestMatch(const reco::Candidate* recoObject,
       if (!output || deltaR < bestDeltaR) {
         output = l1Collection[i];
         bestDeltaR = deltaR;
+        
       }
     }
   }

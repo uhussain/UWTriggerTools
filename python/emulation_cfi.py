@@ -59,15 +59,15 @@ UCT2015Producer = cms.EDProducer(
     useHI = cms.bool(False),
     # All of these uint32 thresholds are in GeV.
     puETMax = cms.uint32(7),
-    regionETCutForHT = cms.uint32(5),
+    regionETCutForHT = cms.uint32(7),
     regionETCutForMET = cms.uint32(0),
     minGctEtaForSums = cms.uint32(4),
     maxGctEtaForSums = cms.uint32(17),
-    jetSeed = cms.uint32(5),
-    egtSeed = cms.uint32(5),
-    relativeTauIsolationCut = cms.double(0.4),
-    relativeJetIsolationCut = cms.double(0.3),
-    switchOffTauIso= cms.double(60),
+    jetSeed = cms.uint32(10),
+    egtSeed = cms.uint32(2),
+    relativeTauIsolationCut = cms.double(0.6),
+    relativeJetIsolationCut = cms.double(0.4),
+    switchOffTauIso= cms.double(40),
     egammaLSB = cms.double(1.0), # This has to correspond with the value from L1CaloEmThresholds
     regionLSB = RCTConfigProducers.jetMETLSB,
 )
@@ -109,8 +109,8 @@ uctEmulatorStep = cms.Sequence(
     * UCT2015EClusterProducer
     * UCT2015Producer
     * UCTStage1BProducer
-#    * l1extraParticles
-#    * uct2015L1ExtraParticles
+    * l1extraParticles
+    * uct2015L1ExtraParticles
 )
 
 emulationSequence = cms.Sequence(uctDigiStep * uctEmulatorStep)

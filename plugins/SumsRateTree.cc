@@ -47,6 +47,7 @@ class SumsRateTree : public edm::EDAnalyzer {
     Float_t l1SHT_;
     Float_t l1SET_;
 
+
     Int_t pu_;
     UInt_t run_;
     UInt_t lumi_;

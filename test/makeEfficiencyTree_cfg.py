@@ -257,6 +257,22 @@ tau_branches = cms.PSet(
 )
 
 # Define the tree producers
+process.isoTauEcalSeedEfficiency = cms.EDAnalyzer(
+    "EfficiencyTree",
+    recoSrc = cms.VInputTag("isoTaus"),
+    l1Src = cms.VInputTag(cms.InputTag("l1extraParticles", "Tau")),
+    l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "IsolatedTauEcalSeedUnpacked")),
+    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
+    # Max DR for RECO-trigger matching
+    maxDR = cms.double(0.5),
+    # Ntuple configuration
+    ntuple = cms.PSet(
+        common_ntuple_branches,
+        egtau_branches,
+        tau_branches,
+    )
+)
+
 process.isoTauEfficiency = cms.EDAnalyzer(
     "EfficiencyTree",
     recoSrc = cms.VInputTag("isoTaus"),
@@ -272,6 +288,25 @@ process.isoTauEfficiency = cms.EDAnalyzer(
         tau_branches,
     )
 )
+
+
+# Define the tree producers
+process.rlxTauEcalSeedEfficiency = cms.EDAnalyzer(
+    "EfficiencyTree",
+    recoSrc = cms.VInputTag("recoTaus"),
+    l1Src = cms.VInputTag(cms.InputTag("l1extraParticles", "Tau")),
+    l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "RelaxedTauEcalSeedUnpacked")),
+    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
+    # Max DR for RECO-trigger matching
+    maxDR = cms.double(0.5),
+    # Ntuple configuration
+    ntuple = cms.PSet(
+        common_ntuple_branches,
+        egtau_branches,
+        tau_branches,
+    )
+)
+
 # Define the tree producers
 process.rlxTauEfficiency = cms.EDAnalyzer(
     "EfficiencyTree",
@@ -288,6 +323,7 @@ process.rlxTauEfficiency = cms.EDAnalyzer(
         tau_branches,
     )
 )
+
 
 # Define the tree producers
 process.rlxTauPlusJetEfficiency = cms.EDAnalyzer(
@@ -368,12 +404,16 @@ process.rlxUCTisoL1EGEfficiency = cms.EDAnalyzer(
 
 # Package all of the lepton efficiencies into one sequence
 process.leptonEfficiencies = cms.Sequence(
+    process.isoTauEcalSeedEfficiency *
+    process.rlxTauEcalSeedEfficiency *
+
     process.isoTauEfficiency *
-    process.rlxTauEfficiency 
-#    process.rlxTauPlusJetEfficiency *
-#    process.isoEGEfficiency *
-#    process.rlxEGEfficiency *
-#    process.rlxUCTisoL1EGEfficiency
+    process.rlxTauEfficiency
+    *process.rlxTauPlusJetEfficiency *
+
+    process.isoEGEfficiency *
+    process.rlxEGEfficiency *
+    process.rlxUCTisoL1EGEfficiency
 )
 
 process.jetEfficiency = cms.EDAnalyzer(
@@ -497,6 +537,8 @@ reco_object_step = process.recoObjects
 if options.isMC:
     reco_object_step = process.recoObjects_truthMatched
     process.rlxTauPlusJetEfficiency.recoSrc = cms.VInputTag("trueTaus")
+    process.isoTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
+    process.rlxTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
     process.isoTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
     process.rlxTauEfficiency.recoSrc = cms.VInputTag("trueTaus")
     process.printTaus.src=cms.InputTag("trueTaus")
@@ -645,13 +687,13 @@ process.out = cms.EndPath(process.output)
 
 process.schedule = cms.Schedule(
     process.p1,
-    process.semileptonicTTBarPath
-#        process.out
+    process.semileptonicTTBarPath 
+       # process.out
 )
 
 # Make the framework shut up.
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Spit out filter efficiency at the end.
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))

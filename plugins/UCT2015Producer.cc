@@ -66,9 +66,12 @@ private:
   // MIPS in annulus refers to number of regions in the annulus which have
   // their MIP bit set.
   // egFlags is the number where (!tauVeto && !mip)
+  //
+  // Modified to also save the third region (idea: if 2 contigous region pass the seed --> still count as tau. if 3 do --> this is not a tau). Maria
   void findAnnulusInfo(int ieta, int iphi,
       const L1CaloRegionCollection& regions,
       double* associatedSecondRegionEt,
+      double* associatedThirdRegionEt,
       unsigned int* mipsInAnnulus,
       unsigned int* egFlagsInAnnulus,
       unsigned int* mipInSecondRegion) const;
@@ -80,6 +83,7 @@ private:
   void makeSums();
   void makeJets();
   void makeEGTaus();
+  void makeTaus();
 
   list<UCTCandidate> correctJets(const list<UCTCandidate>&);
 
@@ -131,6 +135,7 @@ private:
   list<UCTCandidate> rlxEGList;
   list<UCTCandidate> isoTauList, corrIsoTauList;
   list<UCTCandidate> isoEGList;
+  list<UCTCandidate> rlxTauRegionOnlyList, isoTauRegionOnlyList;
 
   Handle<L1CaloRegionCollection> newRegions;
   Handle<L1CaloEmCollection> newEMCands;
@@ -182,6 +187,8 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   produces<UCTCandidateCollection>( "IsolatedTauUnpacked" ) ;
   produces<UCTCandidateCollection>( "CorrRelaxedTauUnpacked" ) ;
   produces<UCTCandidateCollection>( "CorrIsolatedTauUnpacked" ) ;
+  produces<UCTCandidateCollection>( "RelaxedTauEcalSeedUnpacked" ) ;
+  produces<UCTCandidateCollection>( "IsolatedTauEcalSeedUnpacked" ) ;
 
   produces<UCTCandidateCollection>( "PULevelUnpacked" ) ;
   produces<UCTCandidateCollection>( "PULevelUICUnpacked" ) ;
@@ -219,6 +226,7 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   makeSums();
   makeJets();
   makeEGTaus();
+  makeTaus();
 
   UCTCandidateCollectionPtr unpackedJets(new UCTCandidateCollection);
   UCTCandidateCollectionPtr unpackedRlxTaus(new UCTCandidateCollection);
@@ -228,6 +236,9 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   UCTCandidateCollectionPtr unpackedCorrIsoTaus(new UCTCandidateCollection);
   UCTCandidateCollectionPtr unpackedRlxEGs(new UCTCandidateCollection);
   UCTCandidateCollectionPtr unpackedIsoEGs(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedRlxTauRegionOnlys(new UCTCandidateCollection);
+  UCTCandidateCollectionPtr unpackedIsoTauRegionOnlys(new UCTCandidateCollection);
+
 
   //uncorrected Jet and Tau collections
   for(list<UCTCandidate>::iterator jet = jetList.begin();
@@ -245,6 +256,19 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       isoTau++) {
     unpackedIsoTaus->push_back(*isoTau);
   }
+  for(list<UCTCandidate>::iterator rlxTauRegionOnly = rlxTauRegionOnlyList.begin();
+      rlxTauRegionOnly != rlxTauRegionOnlyList.end();
+      rlxTauRegionOnly++) {
+    unpackedRlxTauRegionOnlys->push_back(*rlxTauRegionOnly);
+  }
+  for(list<UCTCandidate>::iterator isoTauRegionOnly = isoTauRegionOnlyList.begin();
+      isoTauRegionOnly != isoTauRegionOnlyList.end();
+      isoTauRegionOnly++) {
+    unpackedIsoTauRegionOnlys->push_back(*isoTauRegionOnly);
+  }
+
+
+
   //corrected Jet and Tau collections
   corrJetList = correctJets(jetList);
   corrRlxTauList = correctJets(rlxTauList);
@@ -290,13 +314,15 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(collectionize(SHTObject), "SHTUnpacked");
 
   iEvent.put(unpackedJets, "JetUnpacked");
-  iEvent.put(unpackedRlxTaus, "RelaxedTauUnpacked");
-  iEvent.put(unpackedIsoTaus, "IsolatedTauUnpacked");
+  iEvent.put(unpackedRlxTaus, "RelaxedTauEcalSeedUnpacked");
+  iEvent.put(unpackedIsoTaus, "IsolatedTauEcalSeedUnpacked");
   iEvent.put(unpackedCorrJets, "CorrJetUnpacked");
   iEvent.put(unpackedCorrRlxTaus, "CorrRelaxedTauUnpacked");
   iEvent.put(unpackedCorrIsoTaus, "CorrIsolatedTauUnpacked");
   iEvent.put(unpackedRlxEGs, "RelaxedEGUnpacked");
   iEvent.put(unpackedIsoEGs, "IsolatedEGUnpacked");
+  iEvent.put(unpackedRlxTauRegionOnlys, "RelaxedTauUnpacked");
+  iEvent.put(unpackedIsoTauRegionOnlys, "IsolatedTauUnpacked");
 
 }
 
@@ -593,6 +619,7 @@ UCT2015Producer::correctJets(const list<UCTCandidate>& jets) {
 void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
     const L1CaloRegionCollection& regions,
     double* associatedSecondRegionEt,
+    double* associatedThirdRegionEt,
     unsigned int* mipsInAnnulus,
     unsigned int* egFlagsInAnnulus,
     unsigned int* mipInSecondRegion) const {
@@ -605,6 +632,8 @@ void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
   // us to subtract off the highest neighbor at the end, so we only loop once.
   bool highestNeighborHasMip = false;
   bool highestNeighborHasEGFlag = false;
+  double secondNeighborEt = 0;
+
 
   for(L1CaloRegionCollection::const_iterator region = regions.begin();
       region != regions.end(); region++) {
@@ -615,6 +644,7 @@ void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
     if ((deltaPhi + deltaEta) > 0 && deltaPhi < 2 && deltaEta < 2) {
       double regionET = regionPhysicalEt(*region);
       if (regionET > highestNeighborEt) {
+        if(highestNeighborEt!=0) secondNeighborEt=highestNeighborEt;
         highestNeighborEt = regionET;
         // Keep track of what flags the highest neighbor has
         highestNeighborHasMip = region->mip();
@@ -645,6 +675,7 @@ void UCT2015Producer::findAnnulusInfo(int ieta, int iphi,
 
   // set output
   *associatedSecondRegionEt = highestNeighborEt;
+  *associatedThirdRegionEt =secondNeighborEt;
   *mipsInAnnulus = mipsCount;
   *mipInSecondRegion = highestNeighborHasMip;
   *egFlagsInAnnulus = egFlagCount;
@@ -672,22 +703,31 @@ void UCT2015Producer::makeEGTaus() {
                 if(et>=40 && et<63 && (!region->mip() )) isEle=true;
                 if(et>=63) isEle=true;
 
+            isEle=true;  // Lets rescue the old LUT
+
             // Find the highest region in the 3x3 annulus around the center
             // region.
             double associatedSecondRegionEt = 0;
+            double associatedThirdRegionEt = 0;
             unsigned int mipsInAnnulus = 0;
             unsigned int egFlagsInAnnulus = 0;
             unsigned int mipInSecondRegion = 0;
             findAnnulusInfo(
                 egtCand->regionId().ieta(), egtCand->regionId().iphi(),
                 *newRegions,
-                &associatedSecondRegionEt, &mipsInAnnulus, &egFlagsInAnnulus,
+                &associatedSecondRegionEt, &associatedThirdRegionEt, &mipsInAnnulus, &egFlagsInAnnulus,
                 &mipInSecondRegion);
 
             UCTCandidate egtauCand(
                 et,
                 convertRegionEta(egtCand->regionId().ieta()),
                 convertRegionPhi(egtCand->regionId().iphi()));
+
+/*            UCTCandidate tauCand(
+                regionEt,
+                convertRegionEta(egtCand->regionId().ieta()),
+                convertRegionPhi(egtCand->regionId().iphi()));
+*/
 
 
             // Add extra information to the candidate
@@ -706,6 +746,19 @@ void UCT2015Producer::makeEGTaus() {
             egtauCand.setInt("tauVeto", region->tauVeto());
             egtauCand.setInt("mipBit", region->mip());
             egtauCand.setInt("isEle", isEle);
+
+/*
+            tauCand.setInt("rgnEta", egtCand->regionId().ieta());
+            tauCand.setInt("rgnPhi", egtCand->regionId().iphi());
+            tauCand.setInt("rctEta", egtCand->regionId().rctEta());
+            tauCand.setInt("rctPhi", egtCand->regionId().rctPhi());
+            tauCand.setFloat("associatedRegionEt", regionEt);
+            tauCand.setFloat("associatedJetPt", -3);
+            tauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
+            tauCand.setInt("associatedSecondRegionMIP", mipInSecondRegion);
+            tauCand.setInt("tauVeto", region->tauVeto());
+            tauCand.setInt("mipBit", region->mip());
+*/
 
 
 	    // A 2x1 and 1x2 cluster above egtSeed is always in tau list
@@ -747,7 +800,7 @@ void UCT2015Producer::makeEGTaus() {
                 double relativeJetIsolationEG = jetIsolationEG / et;
 
                 bool isolatedEG=false;
-                if(et<63 && (regionEt-et)/et<0.5 &&  relativeJetIsolationEG < relativeJetIsolationCut)  isolatedEG=true;; 
+                if(et<63 && relativeJetIsolationEG < relativeJetIsolationCut)  isolatedEG=true;; 
                 //if(et>=63 && regionEt<100 && relativeJetIsolationRegionEG < relativeJetIsolationCut)  isolatedEG=true;; 
                 if (et>=63) isolatedEG=true;;
 
@@ -775,6 +828,80 @@ void UCT2015Producer::makeEGTaus() {
   isoTauList.reverse();
 
 }
+
+void UCT2015Producer::makeTaus() {
+  rlxTauRegionOnlyList.clear();
+  isoTauRegionOnlyList.clear();
+      for(L1CaloRegionCollection::const_iterator region = newRegions->begin();
+	  region != newRegions->end(); region++) {
+            double regionEt = regionPhysicalEt(*region);
+            if(regionEt<jetSeed) continue;
+
+            double associatedSecondRegionEt = 0;
+            double associatedThirdRegionEt = 0;
+            unsigned int mipsInAnnulus = 0;
+            unsigned int egFlagsInAnnulus = 0;
+            unsigned int mipInSecondRegion = 0;
+            findAnnulusInfo(
+                region->id().ieta(), region->id().iphi(),
+                *newRegions,
+                &associatedSecondRegionEt, &associatedThirdRegionEt,  &mipsInAnnulus, &egFlagsInAnnulus,
+                &mipInSecondRegion);
+        
+            double tauEt=regionEt;
+
+            if(associatedThirdRegionEt>egtSeed) continue;    
+            if(associatedSecondRegionEt>egtSeed)  tauEt +=associatedSecondRegionEt;
+
+            UCTCandidate tauCand(
+                tauEt,
+                convertRegionEta(region->id().ieta()),    // this is wrong (should take into acount the neighbours and center the tau in the division
+                convertRegionPhi(region->id().iphi()));   // also, two taus will appear! we need to remove one
+
+
+            tauCand.setInt("gctEta", region->gctEta());
+            tauCand.setInt("gctPhi", region->gctPhi());
+            tauCand.setInt("rgnEta", region->id().ieta());
+            tauCand.setInt("rgnPhi", region->id().iphi());
+            tauCand.setInt("rctEta", region->id().rctEta());
+            tauCand.setInt("rctPhi", region->id().rctPhi());
+            tauCand.setFloat("associatedJetPt", -3);
+            tauCand.setFloat("associatedRegionEt", regionEt);
+            tauCand.setFloat("puLevel", puLevel);
+            tauCand.setFloat("puLevelUIC", puLevelUIC);
+            tauCand.setInt("tauVeto", region->tauVeto());
+            tauCand.setInt("mipBit", region->mip());
+            tauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
+            tauCand.setInt("associatedSecondRegionMIP", mipInSecondRegion);
+
+            rlxTauRegionOnlyList.push_back(tauCand);
+
+	    // Look for overlapping jet and require that isolation be passed
+	    for(list<UCTCandidate>::iterator jet = jetList.begin(); jet != jetList.end(); jet++) {
+
+	      if((int)region->gctPhi() == jet->getInt("rgnPhi") &&
+		 (int)region->gctEta() == jet->getInt("rgnEta")) {
+                rlxTauRegionOnlyList.back().setFloat("associatedJetPt", jet->pt());
+           
+		double jetIsolation = jet->pt() - regionEt;        // Jet isolation
+		double relativeJetIsolation = jetIsolation / regionEt;
+                if(relativeJetIsolation < relativeTauIsolationCut || regionEt > switchOffTauIso){
+                  isoTauRegionOnlyList.push_back(rlxTauRegionOnlyList.back());
+		}
+
+		break;
+	      }
+	    }
+	  }
+  rlxTauRegionOnlyList.sort();
+  isoTauRegionOnlyList.sort();
+  rlxTauRegionOnlyList.reverse();
+  isoTauRegionOnlyList.reverse();
+
+
+
+}
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(UCT2015Producer);
