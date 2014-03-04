@@ -838,7 +838,7 @@ void UCT2015Producer::makeTaus() {
       for(L1CaloRegionCollection::const_iterator region = newRegions->begin();
 	  region != newRegions->end(); region++) {
             double regionEt = regionPhysicalEt(*region);
-            if(regionEt<jetSeed) continue;
+            if(regionEt<tauSeed) continue;
 
             double associatedSecondRegionEt = 0;
             double associatedThirdRegionEt = 0;
