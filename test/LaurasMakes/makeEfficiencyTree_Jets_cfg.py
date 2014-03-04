@@ -176,6 +176,7 @@ common_ntuple_branches = cms.PSet(
 
     # For tuning isolation and PU subtraction
     l1gPU = cms.string("? l1gMatch ? l1g.getFloat('puLevel', -4) : -2"),
+    l1gPUM = cms.string("? l1gMatch ? l1g.getFloat('puMult', -4) : -2"),
     l1gPUUIC = cms.string("? l1gMatch ? l1g.getFloat('puLevelUIC', -4) : -2"),
     l1gRegionEt = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEt', -4) : -2"),
 
