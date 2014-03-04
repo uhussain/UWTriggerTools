@@ -127,7 +127,9 @@ private:
   unsigned int jetSeed;
   list<UCTCandidate> jetList, corrJetList;
 
+  unsigned int tauSeed;
   unsigned int egtSeed;
+
   double relativeTauIsolationCut;
   double relativeJetIsolationCut;
   double switchOffTauIso;
@@ -165,6 +167,7 @@ UCT2015Producer::UCT2015Producer(const edm::ParameterSet& iConfig) :
   minGctEtaForSums(iConfig.getParameter<unsigned int>("minGctEtaForSums")),
   maxGctEtaForSums(iConfig.getParameter<unsigned int>("maxGctEtaForSums")),
   jetSeed(iConfig.getParameter<unsigned int>("jetSeed")),
+  tauSeed(iConfig.getParameter<unsigned int>("tauSeed")),
   egtSeed(iConfig.getParameter<unsigned int>("egtSeed")),
   relativeTauIsolationCut(iConfig.getParameter<double>("relativeTauIsolationCut")),
   relativeJetIsolationCut(iConfig.getParameter<double>("relativeJetIsolationCut")),
@@ -850,8 +853,7 @@ void UCT2015Producer::makeTaus() {
         
             double tauEt=regionEt;
 
-            if(associatedThirdRegionEt>egtSeed) continue;    
-            if(associatedSecondRegionEt>egtSeed)  tauEt +=associatedSecondRegionEt;
+            if(associatedSecondRegionEt>tauSeed)  tauEt +=associatedSecondRegionEt;
 
             UCTCandidate tauCand(
                 tauEt,
@@ -873,6 +875,7 @@ void UCT2015Producer::makeTaus() {
             tauCand.setInt("mipBit", region->mip());
             tauCand.setFloat("associatedSecondRegionEt", associatedSecondRegionEt);
             tauCand.setInt("associatedSecondRegionMIP", mipInSecondRegion);
+            tauCand.setFloat("associatedThirdRegionEt", associatedThirdRegionEt);
 
             rlxTauRegionOnlyList.push_back(tauCand);
 

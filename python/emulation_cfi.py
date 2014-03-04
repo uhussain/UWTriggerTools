@@ -64,6 +64,7 @@ UCT2015Producer = cms.EDProducer(
     minGctEtaForSums = cms.uint32(4),
     maxGctEtaForSums = cms.uint32(17),
     jetSeed = cms.uint32(10),
+    tauSeed = cms.uint32(7),
     egtSeed = cms.uint32(2),
     relativeTauIsolationCut = cms.double(0.6),
     relativeJetIsolationCut = cms.double(0.4),
