@@ -162,7 +162,7 @@ def plotRates(l1ntuple, uctntuple, binning, filename, title='', xaxis='', isIso 
 #          '~/www/UCT2015_F/rlx_tau_rate.png',
 #          "Rlx EG Rate", "L1 p_{T} (GeV)")
 plotRates(jet_l1_ntuple,jet_uct_ntuple, [40, 0, 200],
-          '~/www/Research/calcorr_jet_rate_corr_etacut.png',
+          '~/www/Research/CORRECTIONS/jet_rate_corr_etacut.png',
           "Jet Rate ", "P_{T} (GeV)")
 
 

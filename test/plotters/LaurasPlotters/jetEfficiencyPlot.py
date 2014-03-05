@@ -47,7 +47,7 @@ L1G_CALIB_FACTOR = 1.0
 
 
 jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
-#jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
+jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 
@@ -111,7 +111,7 @@ def compare_efficiencies(ntuple, variable, l1PtCut, binning, filename,
     legend = ROOT.TLegend(0.7, 0.2, 0.89, 0.4, "", "brNDC")
     legend.SetFillColor(ROOT.EColor.kWhite)
     legend.SetBorderSize(1)
-    legend.AddEntry(l1g, "UCT", "pe")
+    legend.AddEntry(l1g, "UCT calibrated corrected", "pe")
     if showL1:
         legend.AddEntry(l1, "Current", "pe")
     legend.Draw()
@@ -165,10 +165,10 @@ l1PtRes.Draw("same")
 legend1 = ROOT.TLegend(0.2, 0.2, 0.39, 0.4, "", "brNDC")
 legend1.SetFillColor(ROOT.EColor.kWhite)
 legend1.SetBorderSize(1)
-legend1.AddEntry(l1gPtRes, "UCT")
+legend1.AddEntry(l1gPtRes, "UCT Calibrated Corrected")
 legend1.AddEntry(l1PtRes, "Current")
 legend1.Draw("same")
-saveas=saveWhere+'jet_Pt_res_corr_cut_30.png'
+saveas=saveWhere+'jet_Pt_res_corrcal.png'
 canvas.SaveAs(saveas)
 
 # Pt difference vs pilup
@@ -193,7 +193,7 @@ profilel1g.Draw("same")
 saveas=saveWhere+'jet_PU_comp_uct.png'
 canvas.SaveAs(saveas)
 
-jet_ntuple.Draw("recoPt-l1Pt:nPVs>>l1","recoPt>30 &&recoPt<40 && recoEta<3.0 && l1Match","BOX")
+jet_ntuple.Draw("recoPt-l1Pt:nPVs>>l1","recoPt>30 && recoPt<40 && recoEta<3.0 && l1Match","BOX")
 l1 = ROOT.gDirectory.Get("l1")
 l1.SetLineColor(ROOT.EColor.kRed)
 l1.SetTitle('Current Trigger Pt vs PU')
@@ -207,7 +207,7 @@ profilel1.Draw("same")
 saveas=saveWhere+'jet_PU_comp_l1.png'
 canvas.SaveAs(saveas)
 
-jet_ntuple_uncorr.Draw("recoPt-l1gPt:nPVs>>l1gu","recoPt>30 &&recoPt<40 && recoEta<3.0 && l1gMatch","BOX")
+jet_ntuple_uncorr.Draw("recoPt-l1gPt:nPVs>>l1gu","recoPt>30 && recoPt<40 && recoEta<3.0 && l1gMatch","BOX")
 l1gu = ROOT.gDirectory.Get("l1gu")
 l1gu.SetLineColor(ROOT.EColor.kMagenta)
 l1gu.SetTitle('Uncorr Upgrade Trigger Pt vs PU')
@@ -218,11 +218,11 @@ profilel1gu.SetMarkerStyle(23)
 l1gu.GetXaxis().SetTitle("nPVs")
 l1gu.GetYaxis().SetTitle("Reco Pt-Trigger Pt")
 profilel1gu.Draw("same")
-saveas=saveWhere+'jet_PU_comp_uct_uncor.png'
+saveas=saveWhere+'jet_PU_comp_uct_uncor30.png'
 canvas.SaveAs(saveas)
 
 profilel1gu.Draw()
-profilel1gu.SetTitle('Average (Reco Pt)-(Trigger Pt) Difference vs PU (30<recoPT<40)')
+profilel1gu.SetTitle('Average (Reco Pt)-(Trigger Pt) Difference vs PU (30<recoPu<40)')
 profilel1gu.GetYaxis().SetRangeUser(-10.0,25.0)
 profilel1gu.GetXaxis().SetTitle('nPVs')
 profilel1gu.GetYaxis().SetTitle('Average RecoPt-TriggerPt')
@@ -235,7 +235,7 @@ legend1.AddEntry(profilel1, "Current Jet")
 legend1.AddEntry(profilel1g, "Corrected UCT Jet")
 legend1.AddEntry(profilel1gu, "Unorrected UCT Jet")
 legend1.Draw("same")
-saveas=saveWhere+'profilePU.png'
+saveas=saveWhere+'profilePU3040.png'
 canvas.SaveAs(saveas)
 
 

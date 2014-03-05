@@ -44,13 +44,13 @@ def make_l1g_efficiency(denom, num):
     return eff
 
 def compare_efficiencies(oct_ntuple, uct_ntuple, variable='recoMET',
-                         title='', xaxis='MET (GeV)',
+                         title='', xaxis=' (GeV)',
                          uct_cut=None, oct_cut=None,
                          legend_label='',
                          uct_legend = 'UCT',
                          l1_legend = 'Current',
                          filename=None,
-                         binning = (40, 0, 200)
+                         binning = (40, 0, 400)
                         ):
     ''' Returns a (L1, L1G) tuple of TGraphAsymmErrors '''
     denom = make_plot(
@@ -124,9 +124,9 @@ compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMET',
-                     uct_cut = 'l1MET > 40',
-                     oct_cut = 'l1MET > 40',
-                     filename = 'l1_met_uct_40_l1_40'
+                     uct_cut = 'l1MET > 50',
+                     oct_cut = 'l1MET > 50',
+                     filename = 'l1_met_uct_50_l1_50'
                     )
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
@@ -138,17 +138,25 @@ compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMHT',
-                     uct_cut = 'l1MHT > 30',
-                     oct_cut = 'l1MHT > 30',
-                     filename = 'l1_mht_30'
+                     uct_cut = 'l1SHT > 30',
+                     oct_cut = 'l1SHT > 30',
+                     filename = 'l1_sht_30'
                     )
 
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMHT',
-                     uct_cut = 'l1MHT > 100',
-                     oct_cut = 'l1MHT > 100',
-                     filename = 'l1_mht_100'
+                     uct_cut = 'l1SHT > 175',
+                     oct_cut = 'l1SHT > 175',
+                     filename = 'l1_sht_175'
+                    )
+
+
+compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
+                     variable='recoMHT',
+                     uct_cut = 'l1SHT > 50',
+                     oct_cut = 'l1SHT > 50',
+                     filename = 'l1_sht_50'
                     )
 
 

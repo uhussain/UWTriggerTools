@@ -46,7 +46,7 @@ L1G_CALIB_FACTOR = 1.0
 #####################################
 
 
-jet_ntuple = ntuple_file.Get("jetEfficiency/Ntuple")
+jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 

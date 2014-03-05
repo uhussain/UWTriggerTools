@@ -19,22 +19,21 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 ######## File #########
-if len(argv) < 3:
-   print 'Usage:python jetEfficiencyPlot.py RootFile.root RootFile_new.root label[optional]'
+if len(argv) < 2:
+   print 'Usage:python jetEfficiencyPlot.py RootFile.root label[optional]'
    exit()
 
 infile = argv[1]
-infile_new = argv[2]
 ntuple_file = ROOT.TFile(infile)
-ntuple_file_new = ROOT.TFile(infile_new)
 
 ######## LABEL & SAVE WHERE #########
 
-if len(argv)>3:
-   saveWhere='~/www/'+argv[3]+'_'
+if len(argv)>2:
+   saveWhere='~/www/Research/'+argv[2]+'_'
 else:
-   saveWhere='~/www/Research/CorrvsNEw/'
+   saveWhere='~/www/Research/FRIDAY/'
 
+#saveWhere = './'
 
 
 ####### Calibration factor ####
@@ -47,9 +46,8 @@ L1G_CALIB_FACTOR = 1.0
 #####################################
 
 
-#jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
-jet_ntuple_new = ntuple_file_new.Get("corrjetEfficiency/Ntuple")
 jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
+#jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 
@@ -66,7 +64,7 @@ def make_l1_efficiency(denom, num):
     ''' Make an efficiency graph with the "L1" style '''
     eff = ROOT.TGraphAsymmErrors(num, denom)
     eff.SetMarkerStyle(20)
-    eff.SetMarkerColor(ROOT.EColor.kOrange)
+    eff.SetMarkerColor(ROOT.EColor.kRed)
     eff.SetMarkerSize(1.5)
     eff.SetLineColor(ROOT.EColor.kBlack)
     return eff
@@ -75,13 +73,13 @@ def make_l1g_efficiency(denom, num):
     ''' Make an efficiency graph with the "UCT" style '''
     eff = ROOT.TGraphAsymmErrors(num, denom)
     eff.SetMarkerStyle(24)
-    eff.SetMarkerColor(ROOT.EColor.kGreen)
+    eff.SetMarkerColor(ROOT.EColor.kBlue)
     eff.SetMarkerSize(1.5)
     eff.SetLineColor(ROOT.EColor.kBlack)
     return eff
 
 
-def compare_efficiencies(ntuple, ntuple_new, variable, l1PtCut, binning, filename,
+def compare_efficiencies(ntuple, variable, l1PtCut, binning, filename,
                          title='', xaxis='', showL1=False):
     ''' Returns a (L1, L1G) tuple of TGraphAsymmErrors '''
     denom = make_plot(
@@ -94,35 +92,28 @@ def compare_efficiencies(ntuple, ntuple_new, variable, l1PtCut, binning, filenam
         "l1gMatch && %0.2f * l1gPt > %0.2f" % (L1G_CALIB_FACTOR, l1PtCut),
         binning
     )
-#    num_l1 = make_plot(
-#        ntuple, variable,
-#        "l1Match && l1Pt > %0.2f" % (l1PtCut),
-#        binning
-#    )
-    num_l1g_new = make_plot(
-        ntuple_new, variable,
-        "l1gMatch && l1gPt > %0.2f" % (l1PtCut),
+    num_l1 = make_plot(
+        ntuple, variable,
+        "l1Match && l1Pt > %0.2f" % (l1PtCut),
         binning
     )
+
     frame = ROOT.TH1F("frame", "frame", *binning)
     l1g = make_l1g_efficiency(denom, num_l1g)
-    #    l1 = make_l1_efficiency(denom, num_l1)
-    l1gnew = make_l1_efficiency(denom, num_l1g_new)
+    l1 = make_l1_efficiency(denom, num_l1)
     frame.SetMaximum(1.2)
     frame.SetTitle(title)
     frame.GetXaxis().SetTitle(xaxis)
     frame.Draw()
     l1g.Draw('pe')
-    l1gnew.Draw('pe')
-    #if showL1:
-    #    l1.Draw('pe')
+    if showL1:
+        l1.Draw('pe')
     legend = ROOT.TLegend(0.7, 0.2, 0.89, 0.4, "", "brNDC")
     legend.SetFillColor(ROOT.EColor.kWhite)
     legend.SetBorderSize(1)
-    legend.AddEntry(l1g, "UCT", "pe")
-    legend.AddEntry(l1gnew, "UCT pile up subtracted", "pe")
-    #if showL1:
-    #    legend.AddEntry(l1, "Current", "pe")
+    legend.AddEntry(l1g, "UCT calibrated corrected", "pe")
+    if showL1:
+        legend.AddEntry(l1, "Current", "pe")
     legend.Draw()
     saveas = saveWhere+filename+'.png'
     print saveas
@@ -132,84 +123,62 @@ def compare_efficiencies(ntuple, ntuple_new, variable, l1PtCut, binning, filenam
 # Jet efficiency for a 20 GeV cut and 10 GeV cut on L1
 ################################################################################
 
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  100, [40, 0, 300],
+compare_efficiencies(jet_ntuple, 'recoPt',  100, [40, 0, 300],
                     'jet_pt_trg100',
                      "Jet 100 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  150, [40, 0, 300],
+compare_efficiencies(jet_ntuple, 'recoPt',  150, [40, 0, 300],
                      'jet_pt_trg150',
                      "Jet 150 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  200, [40, 0, 300],
+compare_efficiencies(jet_ntuple, 'recoPt',  200, [40, 0, 300],
                      'jet_pt_trg200',
                      "Jet 200 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  30, [40, 0, 200],
+compare_efficiencies(jet_ntuple, 'recoPt',  30, [40, 0, 200],
                      'jet_pt_trg30',
                      "Jet 30 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  40, [40, 0, 200],
+compare_efficiencies(jet_ntuple, 'recoPt',  40, [40, 0, 200],
                      'jet_pt_trg40',
                      "Jet 40 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  50, [40, 0, 200],
+compare_efficiencies(jet_ntuple, 'recoPt',  50, [40, 0, 200],
                      'jet_pt_trg50',
                      "Jet 50 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple, jet_ntuple_new,'recoPt',  60, [40, 0, 200],
+compare_efficiencies(jet_ntuple, 'recoPt',  60, [40, 0, 200],
                      'jet_pt_trg60',
                      "Jet 60 efficiency", "RECO p_{T} (GeV)",True)
-compare_efficiencies(jet_ntuple,jet_ntuple_new, 'recoPt',  70, [40, 0, 200],
+compare_efficiencies(jet_ntuple, 'recoPt',  70, [40, 0, 200],
                     'jet_pt_trg70',
                    "Jet 70 efficiency", "RECO p_{T} (GeV)",True)
-# Resolutions
-jet_ntuple.Draw("(recoPt - (%0.2f * l1gPt))/recoPt>>l1gPtRes(150, -2, 1)" % L1G_CALIB_FACTOR, "l1gMatch && recoPt > 30", "goff")
-l1gPtRes = ROOT.gDirectory.Get("l1gPtRes")
-l1gPtRes.SetLineColor(ROOT.EColor.kOrange)
-l1gPtRes.Scale(1/l1gPtRes.Integral())
-l1gPtRes.SetTitle('')
-l1gPtRes.GetXaxis().SetTitle("(p_{T}^{RECO} - p_{T}^{TRG})/p_{T}^{RECO}")
 
-jet_ntuple_new.Draw("(recoPt - l1gPt)/recoPt>>l1gPtResNew(150, -2, 1)", "l1gMatch && recoPt > 30", "goff")
-l1PtRes = ROOT.gDirectory.Get("l1gPtResNew")
-l1PtRes.SetLineColor(ROOT.EColor.kGreen)
-l1PtRes.Scale(1/l1PtRes.Integral())
-l1gPtRes.Draw()
-l1PtRes.Draw("same")
-legend1 = ROOT.TLegend(0.2, 0.2, 0.39, 0.4, "", "brNDC")
-legend1.SetFillColor(ROOT.EColor.kWhite)
-legend1.SetBorderSize(1)
-legend1.AddEntry(l1gPtRes, "UCT")
-legend1.AddEntry(l1PtRes, "New UCT Calibration")
-legend1.Draw("same")
-saveas=saveWhere+'jet_Pt_res_corr_cut_30_new.png'
-canvas.SaveAs(saveas)
-
-#
 # Resolutions
 jet_ntuple.Draw("(recoPt - (%0.2f * l1gPt))/recoPt>>l1gPtRes(150, -2, 1)" % L1G_CALIB_FACTOR, "l1gMatch && recoPt > 30 && abs(recoEta) < 3.0", "goff")
 l1gPtRes = ROOT.gDirectory.Get("l1gPtRes")
-l1gPtRes.SetLineColor(ROOT.EColor.kOrange)
+l1gPtRes.SetLineColor(ROOT.EColor.kBlue)
 l1gPtRes.Scale(1/l1gPtRes.Integral())
 l1gPtRes.SetTitle('')
 l1gPtRes.GetXaxis().SetTitle("(p_{T}^{RECO} - p_{T}^{TRG})/p_{T}^{RECO}")
 
-jet_ntuple_new.Draw("(recoPt - l1gPt)/recoPt>>l1PtRes(150, -2, 1)", "l1gMatch && recoPt > 30 && abs(recoEta)<3.0", "goff")
+jet_ntuple.Draw("(recoPt - l1Pt)/recoPt>>l1PtRes(150, -2, 1)", "l1Match && recoPt > 30 && abs(recoEta)<3.0", "goff")
 l1PtRes = ROOT.gDirectory.Get("l1PtRes")
-l1PtRes.SetLineColor(ROOT.EColor.kGreen)
+l1PtRes.SetLineColor(ROOT.EColor.kRed)
 l1PtRes.Scale(1/l1PtRes.Integral())
 l1gPtRes.Draw()
 l1PtRes.Draw("same")
 legend1 = ROOT.TLegend(0.2, 0.2, 0.39, 0.4, "", "brNDC")
 legend1.SetFillColor(ROOT.EColor.kWhite)
 legend1.SetBorderSize(1)
-legend1.AddEntry(l1gPtRes, "UCT")
+legend1.AddEntry(l1gPtRes, "UCT Calibrated Corrected")
 legend1.AddEntry(l1PtRes, "Current")
 legend1.Draw("same")
-saveas=saveWhere+'jet_Pt_res_corr_cut_30.png'
+saveas=saveWhere+'jet_Pt_res_corrcal.png'
 canvas.SaveAs(saveas)
 
 # Pt difference vs pilup
+canvas
 ########################################
 # 30<Reco PT<40
 ########################################
 
 
-jet_ntuple_new.Draw("recoPt-l1gPt:nPVs>>l1g","recoPt>30 &&recoPt<40 && recoEta<3.0 && l1gMatch","BOX")
+jet_ntuple.Draw("recoPt-l1gPt:nPVs>>l1g","recoPt>30 &&recoPt<40 && recoEta<3.0 && l1gMatch","BOX")
 l1g = ROOT.gDirectory.Get("l1g")
 l1g.SetLineColor(ROOT.EColor.kBlue)
 l1g.SetTitle('Upgrade Corr Trigger Pt vs PU')
@@ -221,7 +190,7 @@ l1g.GetYaxis().SetTitle("Reco Pt-Trigger Pt")
 profilel1g.SetLineWidth(2)
 profilel1g.Draw("same")
 
-saveas=saveWhere+'jet_PU_comp_uct_new.png'
+saveas=saveWhere+'jet_PU_comp_uct.png'
 canvas.SaveAs(saveas)
 
 jet_ntuple.Draw("recoPt-l1Pt:nPVs>>l1","recoPt>30 &&recoPt<40 && recoEta<3.0 && l1Match","BOX")
@@ -270,6 +239,7 @@ saveas=saveWhere+'profilePU.png'
 canvas.SaveAs(saveas)
 
 
+
 jet_ntuple.Draw("(recoPt - l1Pt)/recoPt>>l1PtRes(150, -2, 1)", "l1Match && recoPt > 30 && abs(recoEta)<3.0", "goff")
 l1PtRes = ROOT.gDirectory.Get("l1PtRes")
 l1PtRes.SetLineColor(ROOT.EColor.kRed)
@@ -295,12 +265,15 @@ l1gEtaRes.Scale(1/l1gEtaRes.Integral())
 l1gEtaRes.SetTitle('')
 l1gEtaRes.SetTitle('')
 l1gEtaRes.GetXaxis().SetTitle("#eta^{RECO} - #eta^{TRG}")
+
 jet_ntuple.Draw("(recoEta - l1Eta)>>l1EtaRes(100, -2, 2)", "l1Match && recoPt > 20", "goff")
 l1EtaRes = ROOT.gDirectory.Get("l1EtaRes")
 l1EtaRes.SetLineColor(ROOT.EColor.kRed)
 l1EtaRes.Scale(1/l1EtaRes.Integral())
+
 l1gEtaRes.Draw()
 l1EtaRes.Draw('same')
+
 legend2 = ROOT.TLegend(0.7, 0.2, 0.89, 0.4, "", "brNDC")
 legend2.SetFillColor(ROOT.EColor.kWhite)
 legend2.SetBorderSize(1)

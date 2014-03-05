@@ -80,9 +80,9 @@ def plotRates(l1Ntuple, l1gNtuple, l1gMCNtuple, binning,
               l1gStyle = 22
              ):
     ''' Save a rate Plot '''
-    scale = ZEROBIAS_RATE/l1Ntuple.GetEntries()
-    scaleg = ZEROBIAS_RATE/l1gNtuple.GetEntries()
-    scaleMC = ZEROBIAS_RATE/l1gMCNtuple.GetEntries()
+#    scale = ZEROBIAS_RATE/l1Ntuple.GetEntries()
+#    scaleg = ZEROBIAS_RATE/l1gNtuple.GetEntries()
+#    scaleMC = ZEROBIAS_RATE/l1gMCNtuple.GetEntries()
 	
     l1_pt = make_plot(
         l1Ntuple, l1Variable,
@@ -102,27 +102,26 @@ def plotRates(l1Ntuple, l1gNtuple, l1gMCNtuple, binning,
 	binning,
 	'','',
 	)
-
     l1Rate = make_l1_rate(l1_pt)
     l1gRate = make_l1g_rate(l1g_pt)
     l1gMCRate = make_l1g_rate(l1g_MC)
-    l1Rate.Scale(scale)
-    l1gRate.Scale(scaleg)
-    l1gMCRate.Scale(scaleMC)
+ #   l1Rate.Scale(scale)
+ #   l1gRate.Scale(scaleg)
+ #   l1gMCRate.Scale(scaleMC)
     l1gRate.SetLineColor(l1gColor)
     l1gRate.SetMarkerStyle(l1gStyle)
     l1gRate.SetMarkerColor(l1gColor)
 
-    l1gRate.SetMaximum(l1Rate.GetMaximum()*20)
-    l1gRate.SetMinimum(
+  #  l1gRate.SetMaximum(l1Rate.GetMaximum()*20)
+  #  l1gRate.SetMinimum(
 #            l1Rate.GetBinContent(l1Rate.FindBin(200))
-	10
-    )
+#	10
+#    )
 
     canvas.SetLogy()
     l1gRate.SetTitle(title)
     l1gRate.GetXaxis().SetTitle(xaxis)
-    l1gRate.GetYaxis().SetTitle("Rate (Hz)")
+    l1gRate.GetYaxis().SetTitle("Rate Events")
     l1gRate.GetYaxis().SetTitleOffset(1.29)
     l1gRate.Draw('ph')
     if showL1:

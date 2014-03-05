@@ -43,7 +43,6 @@ sums_uct_ntuple = ntuple_file.Get("sumsUCTRates/Ntuple")
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 ZEROBIAS_RATE=15000000.00
 #ZEROBIAS_RATE=1.00
-
 def make_plot(tree, variable, selection, binning, xaxis='', title='', calFactor=1):
     ''' Plot a variable using draw and return the histogram '''
     #draw_string = "MaxIf$(%s * %0.2f, %s)>>htemp(%s)" % (variable, calFactor, selection, ", ".join(str(x) for x in binning))
@@ -110,11 +109,12 @@ def plotRates(l1Ntuple, l1gNtuple, binning,
         binning,
         '','', # Don't bother with titles
         )
-
     l1Rate = make_l1_rate(l1_pt)
     l1gRate = make_l1g_rate(l1g_pt)
-    l1Rate.Scale(scale)
-    l1gRate.Scale(scaleg)
+    l1gRate.Sumw2()
+    l1Rate.Sumw2()
+#    l1Rate.Scale(scale)
+#    l1gRate.Scale(scaleg)
     l1gRate.SetLineColor(l1gColor)
     l1gRate.SetMarkerStyle(l1gStyle)
     l1gRate.SetMarkerColor(l1gColor)
@@ -128,7 +128,7 @@ def plotRates(l1Ntuple, l1gNtuple, binning,
     canvas.SetLogy()
     l1gRate.SetTitle(title)
     l1gRate.GetXaxis().SetTitle(xaxis)
-    l1gRate.GetYaxis().SetTitle("Rate (Hz)")
+    l1gRate.GetYaxis().SetTitle("")
     l1gRate.GetYaxis().SetTitleOffset(1.29)
     l1gRate.Draw('ph')
     if showL1:
@@ -178,6 +178,20 @@ plotRates(sums_l1_ntuple, sums_uct_ntuple,
           #'0.5*l1MHT', # fixed
           'mht_rate_cmp_nocut',
           "MHT Rate, nocut", " MH_{T} Threshold (GeV)",
+          l1gLabel="",
+          l1gColor = ROOT.EColor.kBlue,
+          l1gStyle = 20,
+          l1gCut = '',
+          l1Cut = '',
+          showL1 = True,
+         )
+plotRates(sums_l1_ntuple, sums_uct_ntuple,
+          [39, 5, 300],
+          'l1SHT',
+          'l1SHT',
+          #'0.5*l1MHT', # fixed
+          'sht_rate_cmp_nocut',
+          "SHT Rate, nocut", " SH_{T} Threshold (GeV)",
           l1gLabel="",
           l1gColor = ROOT.EColor.kBlue,
           l1gStyle = 20,
