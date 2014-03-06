@@ -8,12 +8,10 @@
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include "DataFormats/L1CaloTrigger/interface/L1CaloCollections.h"
 #include "DataFormats/L1CaloTrigger/interface/L1CaloMipQuietRegion.h"
@@ -23,10 +21,8 @@
 
 #include "L1Trigger/UCT2015/interface/UCTCandidate.h"
 #include "L1Trigger/UCT2015/interface/helpers.h"
-
-
 #include "L1Trigger/UCT2015/interface/pileupmult_corrections.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
+
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 using namespace std;
@@ -116,7 +112,7 @@ Laura::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 			unsigned rgn=notCorrectedRegion->rctRegionIndex();
 			LauraRegionList.push_back(L1CaloRegion(regionEtCorr, overflow, tau,mip,quiet,crate,card,rgn));
 		}
-		else 
+		else //if hf
 		{
 			bool fineGrain= notCorrectedRegion->fineGrain();
 			unsigned crate= notCorrectedRegion->rctCrate();

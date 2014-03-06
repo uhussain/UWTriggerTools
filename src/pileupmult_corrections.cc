@@ -93,10 +93,8 @@ double pumcorr(double pt, int ieta, unsigned int pum0) {
 
 	double corrpum0pt = pum0pt*alpha + gamma;
 
-	//	if (pum0pt <0) {pum0pt=0;} 
 	if (corrpum0pt <0) {corrpum0pt=0;} 
 
-	//	return pum0pt;
 	return corrpum0pt;
 
 }
