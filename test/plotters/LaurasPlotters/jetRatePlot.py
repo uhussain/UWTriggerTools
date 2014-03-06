@@ -46,7 +46,7 @@ print 'L1_CALIB_FACTOR: %s' %L1_CALIB_FACTOR
 #jet_l1_ntuple = ntuple_file.Get("jetL1Rate/Ntuple")
 jet_l1_ntuple = ntuple_file.Get("jetL1Rate/Ntuple")
 #jet_uct_ntuple = ntuple_file.Get("jetUCTRate/Ntuple")
-jet_uct_ntuple = ntuple_file.Get("corrjetUCTRate/Ntuple")
+jet_uct_ntuple = ntuple_file.Get("jetUCTRate/Ntuple")
 
 #rlx_tau_L1_ntuple = ntuple_file.Get("tauL1Rate/Ntuple")
 #rlx_tau_UCT_ntuple = ntuple_file.Get("rlxTauUCTRate/Ntuple")
@@ -162,7 +162,7 @@ def plotRates(l1ntuple, uctntuple, binning, filename, title='', xaxis='', isIso 
 #          '~/www/UCT2015_F/rlx_tau_rate.png',
 #          "Rlx EG Rate", "L1 p_{T} (GeV)")
 plotRates(jet_l1_ntuple,jet_uct_ntuple, [40, 0, 200],
-          '~/www/Research/CORRECTIONS/jet_rate_corr_etacut.png',
+          '~/www/Research/offset_jet_rate_corr_etacut.png',
           "Jet Rate ", "P_{T} (GeV)")
 
 

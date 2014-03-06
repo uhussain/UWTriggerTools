@@ -46,7 +46,7 @@ L1G_CALIB_FACTOR = 1.0
 #####################################
 
 
-jet_ntuple = ntuple_file.Get("corrjetEfficiency/Ntuple")
+jet_ntuple = ntuple_file.Get("jetEfficiency/Ntuple")
 jet_ntuple_uncorr = ntuple_file.Get("jetEfficiency/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
@@ -149,14 +149,14 @@ compare_efficiencies(jet_ntuple, 'recoPt',  70, [40, 0, 200],
                    "Jet 70 efficiency", "RECO p_{T} (GeV)",True)
 
 # Resolutions
-jet_ntuple.Draw("(recoPt - (%0.2f * l1gPt))/recoPt>>l1gPtRes(150, -2, 1)" % L1G_CALIB_FACTOR, "l1gMatch && recoPt > 30 && abs(recoEta) < 3.0", "goff")
+jet_ntuple.Draw("(recoPt - (%0.2f * l1gPt))/recoPt>>l1gPtRes(150, -2, 1)" % L1G_CALIB_FACTOR, "l1gMatch && recoPt > 50 && abs(recoEta) < 3.0", "goff")
 l1gPtRes = ROOT.gDirectory.Get("l1gPtRes")
 l1gPtRes.SetLineColor(ROOT.EColor.kBlue)
 l1gPtRes.Scale(1/l1gPtRes.Integral())
 l1gPtRes.SetTitle('')
 l1gPtRes.GetXaxis().SetTitle("(p_{T}^{RECO} - p_{T}^{TRG})/p_{T}^{RECO}")
 
-jet_ntuple.Draw("(recoPt - l1Pt)/recoPt>>l1PtRes(150, -2, 1)", "l1Match && recoPt > 30 && abs(recoEta)<3.0", "goff")
+jet_ntuple.Draw("(recoPt - l1Pt)/recoPt>>l1PtRes(150, -2, 1)", "l1Match && recoPt > 50 && abs(recoEta)<3.0", "goff")
 l1PtRes = ROOT.gDirectory.Get("l1PtRes")
 l1PtRes.SetLineColor(ROOT.EColor.kRed)
 l1PtRes.Scale(1/l1PtRes.Integral())
@@ -168,7 +168,7 @@ legend1.SetBorderSize(1)
 legend1.AddEntry(l1gPtRes, "UCT Calibrated Corrected")
 legend1.AddEntry(l1PtRes, "Current")
 legend1.Draw("same")
-saveas=saveWhere+'jet_Pt_res_corrcal.png'
+saveas=saveWhere+'jet_Pt_res_corrcal_50.png'
 canvas.SaveAs(saveas)
 
 # Pt difference vs pilup
