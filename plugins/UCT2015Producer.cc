@@ -219,7 +219,7 @@ UCT2015Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
 	if(puMultCorrect) {
-		iEvent.getByLabel("LauraDigis","LauraRegions", newRegions);
+		iEvent.getByLabel("CorrectedDigis","CorrectedRegions", newRegions);
 	}
 	else {iEvent.getByLabel("uctDigis", newRegions);}
 	iEvent.getByLabel("uctDigis", newEMCands);
