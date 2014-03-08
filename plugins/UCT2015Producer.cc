@@ -28,13 +28,12 @@
 
 #include "L1Trigger/UCT2015/interface/UCTCandidate.h"
 #include "L1Trigger/UCT2015/interface/helpers.h"
-#include "L1Trigger/UCT2015/interface/jetcorrections.h"
-#include "L1Trigger/UCT2015/interface/pileupmult_corrections.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "L1Trigger/RegionalCaloTrigger/interface/L1RCT.h"
+#include "L1Trigger/UCT2015/interface/jetcorrections.h"
 
 using namespace std;
 using namespace edm;

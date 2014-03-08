@@ -26,9 +26,6 @@ double jetcorr(double ptraw, int ieta, unsigned int pu) {
 		1.42139, 0, 6.72587,
 		1.26112, 0, 10.0601,
 	};
-
-	//==============================================
-
 	double alpha = calib[3*ieta + 0];
 	double gamma = calib[3*ieta + 2];
 
@@ -36,6 +33,7 @@ double jetcorr(double ptraw, int ieta, unsigned int pu) {
 
 	return pt;
 }
+//==============================================
 
 double jetcorrUIC(double ptraw, int ieta, unsigned int pu) {
 	double calib[]={

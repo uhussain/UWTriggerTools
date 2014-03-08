@@ -13,6 +13,7 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.RawToDigi_Data_cff import *
 from L1Trigger.UCT2015.Lut import *
 from L1Trigger.UCT2015.uct2015L1ExtraParticles_cfi import *
+from L1Trigger.UCT2015.regionSF_cfi import *
 
 
 # Modify the HCAL TPGs according to the proposed HTR modification.  If the HCAL
@@ -55,15 +56,17 @@ UCT2015EClusterProducer = cms.EDProducer(
 LauraDigis = cms.EDProducer(
     "Laura",
     puMultCorrect = cms.bool(True),
-    regionLSB = RCTConfigProducers.jetMETLSB
+    regionLSB = RCTConfigProducers.jetMETLSB,
+    regionSF = regionSF,
+    regionSubtraction = regionSubtraction
 )
 
 
 UCT2015Producer = cms.EDProducer(
     "UCT2015Producer",
-    puCorrect = cms.bool(False),
+    puCorrect = cms.bool(False), #regions corrected instead
     puMultCorrect = cms.bool(True), #Change this one for producer
-    puCorrectSums = cms.bool(False), # For now
+    puCorrectSums = cms.bool(False), # regions corrected instead
     useUICrho = cms.bool(True),
     useHI = cms.bool(False),
     # All of these uint32 thresholds are in GeV.

@@ -117,16 +117,16 @@ compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMET',
                      uct_cut = 'l1MET > 30',
-                     oct_cut = 'l1MET > 30',
-                     filename = 'l1_met_30'
+                     oct_cut = '2*l1MET > 30',
+                     filename = 'l1_met_30*2'
                     )
 
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
                      variable='recoMET',
                      uct_cut = 'l1MET > 50',
-                     oct_cut = 'l1MET > 50',
-                     filename = 'l1_met_uct_50_l1_50'
+                     oct_cut = '2*l1MET > 50',
+                     filename = 'l1_met_uct_50_l1_50*2'
                     )
 
 compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
@@ -171,17 +171,17 @@ compare_efficiencies(l1_sums_ntuple, uct_sums_ntuple,
 uct_sums_ntuple.Draw("(recoMET - l1MET)/recoMET>>l1gRes(100, -2, 2)", "recoMET > 30", "goff")
 l1gRes = ROOT.gDirectory.Get("l1gRes")
 l1gRes.SetLineColor(ROOT.EColor.kBlue)
-l1gRes.Scale(1/l1gRes.Integral())
+#l1gRes.Scale(1/l1gRes.Integral())
 
 l1gRes.SetTitle('')
 l1gRes.GetXaxis().SetTitle("(ME_{T}^{RECO} - ME_{T}^{TRG})/ME_{T}^{RECO}")
 l1gRes.Draw()
 canvas.SaveAs("reco_met30_uct_res.png")
 
-l1_sums_ntuple.Draw("(recoMET - l1MET)/recoMET>>l1Res(100, -2, 2)", "recoMET > 30", "goff")
+l1_sums_ntuple.Draw("(recoMET - 2*l1MET)/recoMET>>l1Res(100, -2, 2)", "recoMET > 30", "goff")
 l1Res = ROOT.gDirectory.Get("l1Res")
 l1Res.SetLineColor(ROOT.EColor.kRed)
-l1Res.Scale(1/l1Res.Integral())
+#l1Res.Scale(1/l1Res.Integral())
 
 l1Res.Draw('same')
-canvas.SaveAs("reco_met30_res_cmp.png")
+canvas.SaveAs("reco_met30_res_cmp_2.png")

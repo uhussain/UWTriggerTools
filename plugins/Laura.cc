@@ -21,7 +21,6 @@
 
 #include "L1Trigger/UCT2015/interface/UCTCandidate.h"
 #include "L1Trigger/UCT2015/interface/helpers.h"
-#include "L1Trigger/UCT2015/interface/pileupmult_corrections.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -56,7 +55,8 @@ class Laura : public edm::EDProducer {
 		double regionLSB_;
 
 		L1CaloRegionCollection LauraRegionList;
-
+		vector<double> m_regionSF;
+		vector<double> m_regionSubtraction;
 };
 
 
@@ -64,6 +64,8 @@ Laura::Laura(const edm::ParameterSet& iConfig) :
 	puMultCorrect(iConfig.getParameter<bool>("puMultCorrect")),
 	regionLSB_(iConfig.getParameter<double>("regionLSB"))
 {
+	m_regionSF=iConfig.getParameter<vector<double> >("regionSF");
+	m_regionSubtraction=iConfig.getParameter<vector<double> >("regionSubtraction");
 	produces<L1CaloRegionCollection>("LauraRegions");
 }
 
@@ -98,7 +100,21 @@ Laura::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		unsigned int regionEta = notCorrectedRegion->gctEta();
 		//the divide by regionLSB to get back to gct Digis
 
-		double regionEtCorr = (pumcorr(regionET, regionEta ,puMult))/regionLSB_;	
+		double alpha = m_regionSF[2*regionEta + 0];
+		double gamma = (m_regionSF[2*regionEta + 1])/9;
+
+		int pumbin = (int) puMult/22;
+
+		double puSub = m_regionSubtraction[18*regionEta+pumbin];
+
+		double pum0pt =  (regionET - puSub); 
+
+		double corrpum0pt = pum0pt*alpha + gamma;
+
+		if (corrpum0pt <0) {corrpum0pt=0;} 
+
+		double regionEtCorr = (corrpum0pt)/regionLSB_;	
+
 
 		if(regionEta<18 && regionEta>3) //if !hf
 		{		
