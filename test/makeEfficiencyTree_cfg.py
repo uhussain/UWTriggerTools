@@ -118,6 +118,12 @@ else:
 process.load("L1Trigger.UCT2015.recoObjects_cfi")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 
+if 'CMSSW_6' in os.environ['CMSSW_VERSION']:
+   process.load("L1Trigger.UCT2015.recoObjects_cfi")
+else:
+   process.load("L1Trigger.UCT2015.recoObjects53X_cfi")
+
+
 # Determine which calibration to use
 from L1Trigger.UCT2015.emulation_cfi import \
         eg_calib_v1, eg_calib_v3, eg_calib_v4
