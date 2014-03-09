@@ -1,0 +1,4 @@
+/store/user/tapas/SingleMu/MuonPlusJetSkim/ec7de2c5ad72b06db04e577b4f78d23e/skim_6_1_w8M.root
+/store/user/tapas/SingleMu/MuonPlusJetSkim/ec7de2c5ad72b06db04e577b4f78d23e/skim_7_1_1Rs.root
+/store/user/tapas/SingleMu/MuonPlusJetSkim/ec7de2c5ad72b06db04e577b4f78d23e/skim_8_1_hOu.root
+/store/user/tapas/SingleMu/MuonPlusJetSkim/ec7de2c5ad72b06db04e577b4f78d23e/skim_9_1_rK0.root

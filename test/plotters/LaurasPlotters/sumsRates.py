@@ -2,33 +2,47 @@
 
 Script to make some quick rate plots
 
-Author: Nate Woods, adapted from Evan K. Friis, UW Madison
+Author: Laura Dodd, Nate Woods, adapted from Evan K. Friis, UW Madison
 
 '''
 
+from sys import argv, stdout, stderr
 import ROOT
 
 # So things don't look like crap.
 ROOT.gROOT.SetStyle("Plain")
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
+
+
+######## File #########
+infile = argv[1]
+ntuple_file = ROOT.TFile(infile)
+ntuplemc_file = ROOT.TFile(infile)
+#######################
+
+
 #ntuple_file = ROOT.TFile("../submission/PU/uct_rates_eic7.root")
 #ntuple_file = ROOT.TFile("../data/LSB50/uct_rates_eic7.root")
 #ntuple_file = ROOT.TFile("../data/LSB50/uct_rates_eic3.root")
-ntuple_file = ROOT.TFile("../data/March_22_MC/uct_rates_eic3.root")
-ntuplemc_file = ROOT.TFile("../data/March_22_MC/mc_rates.root")
+#i
+#ntuple_file = ROOT.TFile("/nfs_scratch/laura/23-1_SUMSTEST2-Norm-sums-makeRateTrees_Sums.root")
+#ntuplemc_file = ROOT.TFile("/nfs_scratch/laura/23-1_SUMSTEST2-Norm-sums-makeRateTrees_Sums.root")
+
+
+#ntuplemc_file = ROOT.TFile("../data/March_22_MC/mc_rates.root")
 #ntuple_file = ROOT.TFile("marias/RATES_TUESDAYMORNING_MIP3_h0p5_e2.root")
 #ntuple_file = ROOT.TFile("/scratch/efriis/uct_rates_eic3.root")
 
-#sums_l1_ntuple = ntuple_file.Get("sumsL1Rates/Ntuple")
-#sums_uct_ntuple = ntuple_file.Get("sumsUCTRates/Ntuple")
-sums_uct_ntuple = ntuple_file.Get("corrjetUCTRate/Ntuple")
-sums_l1_ntuple = ntuple_file.Get("jetL1Rate/Ntuple")
-sums_mc_ntuple = ntuplemc_file.Get("corrjetUCTRate/Ntuple")
+sums_l1_ntuple = ntuple_file.Get("sumsL1Rates/Ntuple")
+sums_uct_ntuple = ntuple_file.Get("sumsUCTRates/Ntuple")
+#sums_uct_ntuple = ntuple_file.Get("corrjetUCTRate/Ntuple")
+#sums_l1_ntuple = ntuple_file.Get("jetL1Rate/Ntuple")
+#sums_mc_ntuple = ntuplemc_file.Get("corrjetUCTRate/Ntuple")
 
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 ZEROBIAS_RATE=15000000.00
-
+#ZEROBIAS_RATE=1.00
 def make_plot(tree, variable, selection, binning, xaxis='', title='', calFactor=1):
     ''' Plot a variable using draw and return the histogram '''
     #draw_string = "MaxIf$(%s * %0.2f, %s)>>htemp(%s)" % (variable, calFactor, selection, ", ".join(str(x) for x in binning))
@@ -72,17 +86,16 @@ def make_l1g_rate(pt):
 
 
 
-def plotRates(l1Ntuple, l1gNtuple, l1gMCNtuple, binning,
+def plotRates(l1Ntuple, l1gNtuple, binning,
               l1Variable='', l1gVariable='',
               filename='', title='', xaxis='',
               l1Cut = '', l1gCut = '',
-              showL1=True, showMC=True, l1gLabel='UCT', l1gColor=ROOT.EColor.kBlack,
+              showL1=True, showMC=False, l1gLabel='UCT', l1gColor=ROOT.EColor.kBlack,
               l1gStyle = 22
              ):
     ''' Save a rate Plot '''
-#    scale = ZEROBIAS_RATE/l1Ntuple.GetEntries()
-#    scaleg = ZEROBIAS_RATE/l1gNtuple.GetEntries()
-#    scaleMC = ZEROBIAS_RATE/l1gMCNtuple.GetEntries()
+    scale = ZEROBIAS_RATE/l1Ntuple.GetEntries()
+    scaleg = ZEROBIAS_RATE/l1gNtuple.GetEntries()
 	
     l1_pt = make_plot(
         l1Ntuple, l1Variable,
@@ -96,32 +109,26 @@ def plotRates(l1Ntuple, l1gNtuple, l1gMCNtuple, binning,
         binning,
         '','', # Don't bother with titles
         )
-    l1g_MC = make_plot(
-	l1gMCNtuple, l1gVariable,
-	l1gCut,
-	binning,
-	'','',
-	)
     l1Rate = make_l1_rate(l1_pt)
     l1gRate = make_l1g_rate(l1g_pt)
-    l1gMCRate = make_l1g_rate(l1g_MC)
- #   l1Rate.Scale(scale)
- #   l1gRate.Scale(scaleg)
- #   l1gMCRate.Scale(scaleMC)
+    l1gRate.Sumw2()
+    l1Rate.Sumw2()
+#    l1Rate.Scale(scale)
+#    l1gRate.Scale(scaleg)
     l1gRate.SetLineColor(l1gColor)
     l1gRate.SetMarkerStyle(l1gStyle)
     l1gRate.SetMarkerColor(l1gColor)
 
-  #  l1gRate.SetMaximum(l1Rate.GetMaximum()*20)
-  #  l1gRate.SetMinimum(
+    l1gRate.SetMaximum(l1Rate.GetMaximum()*20)
+    l1gRate.SetMinimum(
 #            l1Rate.GetBinContent(l1Rate.FindBin(200))
-#	10
-#    )
+	10
+    )
 
     canvas.SetLogy()
     l1gRate.SetTitle(title)
     l1gRate.GetXaxis().SetTitle(xaxis)
-    l1gRate.GetYaxis().SetTitle("Rate Events")
+    l1gRate.GetYaxis().SetTitle("")
     l1gRate.GetYaxis().SetTitleOffset(1.29)
     l1gRate.Draw('ph')
     if showL1:
@@ -135,24 +142,14 @@ def plotRates(l1Ntuple, l1gNtuple, l1gMCNtuple, binning,
     legend.AddEntry(l1gRate, l1gLabel, "p")
     if showL1:
         legend.AddEntry(l1Rate, "Current", "p")
-    if showMC:
-	legend.AddEntry(l1gMCRate, "MC","p")
     legend.Draw()
     print 'rate at 72:'
     binn = l1gRate.GetXaxis().FindBin(72)
     rateVal = l1gRate.GetBinContent(binn)
     print rateVal
-    print 'MC rate at 72:'
-    binn = l1gMCRate.GetXaxis().FindBin(72)
-    rateVal = l1gMCRate.GetBinContent(binn)
-    print rateVal
     print 'rate at 84:'
     binn = l1gRate.GetXaxis().FindBin(84)
     rateVal = l1gRate.GetBinContent(binn)
-    print rateVal
-    print 'MC rate at 84:'
-    binn = l1gMCRate.GetXaxis().FindBin(84)
-    rateVal = l1gMCRate.GetBinContent(binn)
     print rateVal
     canvas.SaveAs(filename+".png")
 
@@ -160,47 +157,61 @@ def plotRates(l1Ntuple, l1gNtuple, l1gMCNtuple, binning,
 # Draw Rates                                                                  #
 ###############################################################################
 
-#plotRates(sums_l1_ntuple, sums_uct_ntuple,
-#          [39, 5, 200],
-#          '2*l1MET',
-#          'l1MET',
-#          'met_rate_cmp',
-#          "MET Rate", " ME_{T} Threshold (GeV)",
-#          l1gLabel="",
-#          l1gColor = ROOT.EColor.kBlue,
-#          l1gStyle = 20,
-#          l1gCut = "",
-#          l1Cut = "",
-#          showL1 = True,
-#         )
-
-#plotRates(sums_l1_ntuple, sums_uct_ntuple,
-#          [39, 5, 200],
-#          'l1MHT',
-#          'l1MHT',
-#          #'0.5*l1MHT', # fixed
-#          'mht_rate_cmp',
-#          "MHT Rate", " MH_{T} Threshold (GeV)",
-#          l1gLabel="",
-#          l1gColor = ROOT.EColor.kBlue,
-#          l1gStyle = 20,
-#          l1gCut = "",
-#          l1Cut = "",
-#          showL1 = True,
-#         )
-plotRates(sums_l1_ntuple, sums_uct_ntuple, sums_mc_ntuple,
+plotRates(sums_l1_ntuple, sums_uct_ntuple,
           [39, 5, 200],
-          'pt',
-          'pt',
-          #'0.5*l1MHT', # fixed
-          'Jet_Rate',
-          "Jet Rate", " P_{t} Threshold (GeV)",
+          'l1MET',
+          'l1MET',
+          'met_rate_cmp_nocut',
+          "MET Rate NoCut", " ME_{T} Threshold (GeV)",
           l1gLabel="",
           l1gColor = ROOT.EColor.kBlue,
           l1gStyle = 20,
-          l1gCut = "",
-          l1Cut = "",
-          showL1 = False,
-          showMC = True
+          l1gCut = '',
+          l1Cut = '',
+          showL1 = True,
          )
+
+plotRates(sums_l1_ntuple, sums_uct_ntuple,
+          [39, 5, 200],
+          'l1MHT',
+          'l1MHT',
+          #'0.5*l1MHT', # fixed
+          'mht_rate_cmp_nocut',
+          "MHT Rate, nocut", " MH_{T} Threshold (GeV)",
+          l1gLabel="",
+          l1gColor = ROOT.EColor.kBlue,
+          l1gStyle = 20,
+          l1gCut = '',
+          l1Cut = '',
+          showL1 = True,
+         )
+plotRates(sums_l1_ntuple, sums_uct_ntuple,
+          [39, 5, 300],
+          'l1SHT',
+          'l1SHT',
+          #'0.5*l1MHT', # fixed
+          'sht_rate_cmp_nocut',
+          "SHT Rate, nocut", " SH_{T} Threshold (GeV)",
+          l1gLabel="",
+          l1gColor = ROOT.EColor.kBlue,
+          l1gStyle = 20,
+          l1gCut = '',
+          l1Cut = '',
+          showL1 = True,
+         )
+#plotRates(sums_l1_ntuple, sums_uct_ntuple, sums_mc_ntuple,
+#          [39, 5, 200],
+#          'pt',
+#          'pt',
+#          #'0.5*l1MHT', # fixed
+#          'Jet_Rate',
+#          "Jet Rate", " P_{t} Threshold (GeV)",
+#          l1gLabel="",
+#          l1gColor = ROOT.EColor.kBlue,
+#          l1gStyle = 20,
+#          l1gCut = "",
+#          l1Cut = "",
+#          showL1 = False,
+##          showMC = True
+#         )
 

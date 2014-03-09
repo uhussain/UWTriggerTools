@@ -191,7 +191,6 @@ void checkL1bit(const DecisionWord& l1GtDecision, const L1GtTriggerMenu& l1GtTri
 
 void printL1bits(const DecisionWord& l1GtDecision, const L1GtTriggerMenu& l1GtTriggerMenu)
 {
-  std::cerr << "Existing L1 bits:" << std::endl;
   const AlgorithmMap& l1GtAlgorithms = l1GtTriggerMenu.gtAlgorithmMap();
   for ( AlgorithmMap::const_iterator l1GtAlgorithm = l1GtAlgorithms.begin();
       l1GtAlgorithm != l1GtAlgorithms.end(); ++l1GtAlgorithm ) {

@@ -78,7 +78,6 @@ void PFSumET::produce(edm::Event& evt, const edm::EventSetup& es) {
 
   double mHT=sqrt(sumHT_x*sumHT_x+sumHT_y*sumHT_y);
 
-
   std::auto_ptr<LeafCandidateCollection> set(new LeafCandidateCollection);
   set->push_back(reco::LeafCandidate(0, reco::Candidate::PolarLorentzVector(sumET,0,0,0)));
   evt.put(set, "set");

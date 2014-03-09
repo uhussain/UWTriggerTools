@@ -70,6 +70,10 @@ eg_calib_v4 = [
     1.310123, 1.249619, 1.218275, 1.218275
 ]
 
+
+
+
+
 RCTConfigProducers.eGammaECalScaleFactors = eg_calib_v4
 
 RCTConfigProducers.eGammaHCalScaleFactors = [1., 1., 1., 1., 1.,
