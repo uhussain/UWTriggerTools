@@ -57,6 +57,7 @@ CorrectedDigis = cms.EDProducer(
     "RegionCorrection",
     puMultCorrect = cms.bool(True),
     regionLSB = RCTConfigProducers.jetMETLSB,
+    egammaLSB = cms.double(1.0), # This has to correspond with the value from L1CaloEmThresholds
     regionSF = regionSF,
     regionSubtraction = regionSubtraction
 )
@@ -78,9 +79,9 @@ UCT2015Producer = cms.EDProducer(
     jetSeed = cms.uint32(10),
     tauSeed = cms.uint32(7),
     egtSeed = cms.uint32(2),
-    relativeTauIsolationCut = cms.double(0.6),
-    relativeJetIsolationCut = cms.double(0.4),
-    switchOffTauIso= cms.double(40),
+    relativeTauIsolationCut = cms.double(1.),
+    relativeJetIsolationCut = cms.double(1.),
+    switchOffTauIso= cms.double(60),
     egammaLSB = cms.double(1.0), # This has to correspond with the value from L1CaloEmThresholds
     regionLSB = RCTConfigProducers.jetMETLSB,
 )

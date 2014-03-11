@@ -8,20 +8,17 @@ then
   exit 1
 fi
 
-farmoutAnalysisJobs $1-HCAL \
+farmoutAnalysisJobs $1-EVAN \
   --infer-cmssw-path \
-  --input-file-list=zerobias_14TeV_mc_files.txt \
+  --input-file-list=NeutrinoGun13_Pu4025ns.txt \
   --input-files-per-job=5 \
-  --job-count=100 \
-  ../makeRateTrees_cfg.py  isMC=1 stage1B=1 stage1=0 eicCardHcalOnly=1 \
+  ../makeRateTrees_cfg.py  isMC=1  \
   'inputFiles=$inputFileNames' 'outputFile=$outputFileName' \
   eicIsolationThreshold=3
 
-farmoutAnalysisJobs $1-Norm \
+farmoutAnalysisJobs $1-DPG \
   --infer-cmssw-path \
-  --input-file-list=zerobias_14TeV_mc_files.txt \
+  --input-file-list=NeutrinoGun13_Pu4025ns.txt  \
   --input-files-per-job=5 \
-  --job-count=100 \
-  ../makeRateTrees_cfg.py  isMC=1 stage1B=0 stage1=1 eicCardHcalOnly=0 \
-  'inputFiles=$inputFileNames' 'outputFile=$outputFileName' \
-  eicIsolationThreshold=3
+  ../runUCTToGTinterface.py  \
+  'inputFiles=$inputFileNames' 'outputFile=$outputFileName' 

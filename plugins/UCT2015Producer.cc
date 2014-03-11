@@ -845,15 +845,6 @@ void UCT2015Producer::makeEGTaus() {
                 if(relativeJetIsolation < relativeTauIsolationCut || regionEt > switchOffTauIso){
                   isoTauList.push_back(rlxTauList.back());
 		}
-		rlxEGList.sort();
-		rlxTauList.sort();
-		isoEGList.sort();
-		isoTauList.sort();
-		rlxEGList.reverse();
-		rlxTauList.reverse();
-		isoEGList.reverse();
-		isoTauList.reverse();
-
                 //double jetIsolationRegionEG = jet->pt()-regionEt;   // Core isolation (could go less than zero)
                 //double relativeJetIsolationRegionEG = jetIsolationRegionEG / regionEt;
                 double jetIsolationEG = jet->pt() - et;        // Jet isolation
@@ -861,15 +852,11 @@ void UCT2015Producer::makeEGTaus() {
 
                 bool isolatedEG=false;
                 if(et<63 && relativeJetIsolationEG < relativeJetIsolationCut)  isolatedEG=true;; 
-                //if(et>=63 && regionEt<100 && relativeJetIsolationRegionEG < relativeJetIsolationCut)  isolatedEG=true;; 
                 if (et>=63) isolatedEG=true;;
 
                 if(isEle && isolatedEG){
                     isoEGList.push_back(rlxEGList.back());
                 }
-
-
-
 		break;
 	      }
 	    }

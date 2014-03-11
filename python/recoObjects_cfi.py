@@ -48,11 +48,10 @@ isoElecs = cms.EDFilter(
     "GsfElectronSelector",
     src = cms.InputTag('recoElecs'),
     cut = cms.string(
-        "(dr03TkSumPt +  dr03EcalRecHitSumEt+  dr03HcalTowerSumEt)/pt  < 0.15 "
+        "(dr03TkSumPt +  dr03EcalRecHitSumEt+  dr03HcalTowerSumEt)/pt  < 0.3 "
     ),
     filter = cms.bool(False),
 )
-
 
 # Apply jet energy corrections - disabled until we can fix the global tag issue.
 calibratedAK5PFJets = cms.EDProducer(
