@@ -66,14 +66,14 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.createGenParticlesEle =cms.EDProducer("FilterGenParticles",
-        MinPtThreshold=cms.untracked.double(0),
+        MinPtThreshold=cms.untracked.double(10),
         GenLevelSelect=cms.untracked.int32(11),
         MaxIsolation=cms.untracked.double(100)
 )
 
 
 process.createGenParticlesEleIso =cms.EDProducer("FilterGenParticles",
-        MinPtThreshold=cms.untracked.double(0),
+        MinPtThreshold=cms.untracked.double(10),
         GenLevelSelect=cms.untracked.int32(11),
         MaxIsolation=cms.untracked.double(1)
 )
