@@ -9,8 +9,7 @@ uct2015L1ExtraParticles = cms.EDProducer(
     produceCaloParticles = cms.bool(True),
     egLabel   = cms.InputTag("UCT2015Producer", "RelaxedEGUnpacked"),
     tauLabel  = cms.InputTag("UCT2015Producer", "RelaxedTauUnpacked"),
-    ## jetLabel  = cms.InputTag("UCT2015Producer", "JetUnpacked"),
-    jetLabel  = cms.InputTag("UCT2015Producer", "CorrJetUnpacked"),
+    jetLabel  = cms.InputTag("UCT2015Producer", "JetUnpacked"),
 
     etMissLabel = cms.InputTag("UCT2015Producer", "METUnpacked"),
     etTotLabel  = cms.InputTag("UCT2015Producer", "SETUnpacked"),

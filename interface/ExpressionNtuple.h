@@ -15,7 +15,7 @@
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "TTree.h"
 
-#include "L1Trigger/UCT2015/interface/ExpressionNtupleColumn.h"
+#include "L1Trigger/UWTriggerTools/interface/ExpressionNtupleColumn.h"
 
 // so we don't conflict with FinalStateAnalysis
 namespace uct {

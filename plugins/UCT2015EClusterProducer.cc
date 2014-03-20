@@ -1,3 +1,8 @@
+// Not in use currently, kept for documentation purposes
+
+/*
+
+
 // Class:      UCT2015EClusterProducer
 //
 // Original Author:  Sridhara Rao Dasu
@@ -357,3 +362,7 @@ void UCT2015EClusterProducer::printEClusters() {
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(UCT2015EClusterProducer);
+
+
+*/
+

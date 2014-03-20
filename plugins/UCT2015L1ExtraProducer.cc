@@ -17,7 +17,7 @@
 #include <memory>
 
 // user include files
-#include "L1Trigger/UCT2015/plugins/UCT2015L1ExtraProducer.h"
+#include "L1Trigger/UWTriggerTools/plugins/UCT2015L1ExtraProducer.h"
 
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"

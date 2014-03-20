@@ -1,3 +1,7 @@
+// Not in use currently, kept for storage purposes
+
+/*
+
 // -*- C++ -*-
 //
 // Package:    UCTStage1BProducer
@@ -681,3 +685,7 @@ void UCTStage1BProducer::makeTaus() {
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(UCTStage1BProducer);
+
+
+*/
+

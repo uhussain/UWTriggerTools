@@ -10,8 +10,8 @@
  *
  * =====================================================================================
  */
-#include "L1Trigger/UCT2015/interface/ExpressionNtuple.h"
-#include "L1Trigger/UCT2015/interface/L1RecoMatch.h"
+#include "L1Trigger/UWTriggerTools/interface/ExpressionNtuple.h"
+#include "L1Trigger/UWTriggerTools/interface/L1RecoMatch.h"
 
 
 #include <memory>

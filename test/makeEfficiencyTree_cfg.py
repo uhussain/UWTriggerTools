@@ -115,13 +115,13 @@ if not options.isMC:
 else:
     process.load("L1Trigger.UCT2015.emulationMC_cfi")
 
-process.load("L1Trigger.UCT2015.recoObjects_cfi")
+process.load("L1Trigger.UWTriggerTools.recoObjects_cfi")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 
 if 'CMSSW_6' in os.environ['CMSSW_VERSION']:
-   process.load("L1Trigger.UCT2015.recoObjects_cfi")
+   process.load("L1Trigger.UWTriggerTools.recoObjects_cfi")
 else:
-   process.load("L1Trigger.UCT2015.recoObjects53X_cfi")
+   process.load("L1Trigger.UWTriggerTools.recoObjects53X_cfi")
 
 
 # Determine which calibration to use
@@ -137,7 +137,6 @@ calib_map = {
 ecal_calibration = calib_map[options.ecalCalib]
 process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
 process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
-process.UCT2015EClusterProducer.ecalCalibration = ecal_calibration
 
 if options.eicCardHcalOnly:
     print "Disabling ECAL in Stage1 EGTau path"
@@ -202,47 +201,6 @@ egtau_branches = cms.PSet(
     l1gIsEle = cms.string("? l1gMatch ? l1g.getInt('isEle', -4) : -2"),
 )
 
-stage1b_branches = cms.PSet(
-    l1gPUEM = cms.string("? l1gMatch ? l1g.getFloat('puLevelEM', -4) : -2"),
-    l1gPUUICEM = cms.string("? l1gMatch ? l1g.getFloat('puLevelUICEM', -4) : -2"),
-    l1gEffArea = cms.string("? l1gMatch ? l1g.getFloat('effArea', -4) : -2"),
-    l1gRegionEtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedRegionEtEM', -4) : -2"),
-    l1gJetPtEM = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPtEM', -4) : -2"),
-    # only defined for taus, EG objects are EM clusters by defintion.
-    l1gEmClusterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterEt', -4) : -2"),
-    l1gEmCluster2x1Et = cms.string("? l1gMatch ? l1g.getFloat('emCluster2x1Et', -4) : -2"),
-    l1gEmClusterCenterEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterCenterEt', -4) : -2"),
-    l1gEmClusterStripEt = cms.string("? l1gMatch ? l1g.getFloat('emClusterStripEt', -4) : -2"),
-    l1gEmClusterFG = cms.string("? l1gMatch ? l1g.getInt('emClusterCenterFG', -4) : -2"),
-    l1gEmCluster2x1FG = cms.string("? l1gMatch ? l1g.getInt('emCluster2x1FG', -4) : -2"),
-
-    l1gHighestCenter2x1 = cms.string("? l1gMatch ? l1g.getFloat('highestCenter2x1Et', -4) : -2"),
-    l1gHighestNeighbor2x1 = cms.string("? l1gMatch ? l1g.getFloat('highestNeighbor2x1Et', -4) : -2"),
-
-    l1g4RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).totalEt : -2"),
-    l1g4RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).totalEtEcal : -2"),
-    l1g4RegionPattern = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).patternPass : -2"),
-    l1g4RegionMips = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).numberOfMips : -2"),
-    l1g4RegionLowestEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).lowestRegionEt : -2"),
-    l1g4RegionLowestEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).lowestRegionEtEcal : -2"),
-    l1g4RegionNumRegions = cms.string("? l1gMatch ? l1g.regionDiscriminant(4).numberOfRegions : -2"),
-
-    l1g3RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).totalEt : -2"),
-    l1g3RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).totalEtEcal : -2"),
-    l1g3RegionPattern = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).patternPass : -2"),
-    l1g3RegionMips = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).numberOfMips : -2"),
-    l1g3RegionLowestEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).lowestRegionEt : -2"),
-    l1g3RegionLowestEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).lowestRegionEtEcal : -2"),
-    l1g3RegionNumRegions = cms.string("? l1gMatch ? l1g.regionDiscriminant(3).numberOfRegions : -2"),
-
-    l1g2RegionEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).totalEt : -2"),
-    l1g2RegionEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).totalEtEcal : -2"),
-    l1g2RegionPattern = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).patternPass : -2"),
-    l1g2RegionMips = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).numberOfMips : -2"),
-    l1g2RegionLowestEt = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).lowestRegionEt : -2"),
-    l1g2RegionLowestEtEcal = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).lowestRegionEtEcal : -2"),
-    l1g2RegionNumRegions = cms.string("? l1gMatch ? l1g.regionDiscriminant(2).numberOfRegions : -2"),
-)
 
 # Keep track of electron isolation values
 electron_branches = cms.PSet(
@@ -262,46 +220,11 @@ tau_branches = cms.PSet(
 #    hcal = cms.string("reco.hcalTotOverPLead"),
 )
 
-# Define the tree producers
-process.isoTauEcalSeedEfficiency = cms.EDAnalyzer(
-    "EfficiencyTree",
-    recoSrc = cms.VInputTag("isoTaus"),
-    l1Src = cms.VInputTag(cms.InputTag("l1extraParticles", "Tau")),
-    l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "IsolatedTauEcalSeedUnpacked")),
-    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
-    # Max DR for RECO-trigger matching
-    maxDR = cms.double(0.5),
-    # Ntuple configuration
-    ntuple = cms.PSet(
-        common_ntuple_branches,
-        egtau_branches,
-        tau_branches,
-    )
-)
-
 process.isoTauEfficiency = cms.EDAnalyzer(
     "EfficiencyTree",
     recoSrc = cms.VInputTag("isoTaus"),
     l1Src = cms.VInputTag(cms.InputTag("l1extraParticles", "Tau")),
     l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "IsolatedTauUnpacked")),
-    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
-    # Max DR for RECO-trigger matching
-    maxDR = cms.double(0.5),
-    # Ntuple configuration
-    ntuple = cms.PSet(
-        common_ntuple_branches,
-        egtau_branches,
-        tau_branches,
-    )
-)
-
-
-# Define the tree producers
-process.rlxTauEcalSeedEfficiency = cms.EDAnalyzer(
-    "EfficiencyTree",
-    recoSrc = cms.VInputTag("recoTaus"),
-    l1Src = cms.VInputTag(cms.InputTag("l1extraParticles", "Tau")),
-    l1GSrc = cms.VInputTag(cms.InputTag("UCT2015Producer", "RelaxedTauEcalSeedUnpacked")),
     l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
     # Max DR for RECO-trigger matching
     maxDR = cms.double(0.5),
@@ -410,8 +333,6 @@ process.rlxUCTisoL1EGEfficiency = cms.EDAnalyzer(
 
 # Package all of the lepton efficiencies into one sequence
 process.leptonEfficiencies = cms.Sequence(
-    process.isoTauEcalSeedEfficiency *
-    process.rlxTauEcalSeedEfficiency *
 
     process.isoTauEfficiency *
     process.rlxTauEfficiency
@@ -517,26 +438,6 @@ process.printTPGs = cms.EDFilter(
     )
 )
 
-#process.hackHCALMIPs.src = "simHcalTriggerPrimitiveDigis"
-process.pionEfficiency = cms.EDAnalyzer(
-    "EfficiencyTree",
-    recoSrc = cms.VInputTag("highPtPF"),
-    l1Src = cms.VInputTag(
-        # Combine central jets + tau + forward jets
-        cms.InputTag("l1extraParticles", "Tau"),
-    ),
-    l1GSrc = cms.VInputTag(cms.InputTag("UCTStage1BProducer", "RelaxedTauUnpacked")),
-    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
-    # Max DR for RECO-trigger matching
-    maxDR = cms.double(0.5),
-    # Ntuple configuration
-    ntuple = cms.PSet(
-        common_ntuple_branches,
-        egtau_branches,
-        stage1b_branches
-    )
-)
-
 reco_object_step = process.recoObjects
 
 # Determine if we want truth matching or not.
@@ -563,27 +464,6 @@ process.p1 = cms.Path(
 if options.stage1:
     print "Building Stage1 trees"
     process.p1 += process.leptonEfficiencies
-
-if options.stage1B:
-    print "Building Stage1B trees"
-    # Make a copy of the lepton efficiency trees using stage 1B inputs.
-    from PhysicsTools.PatAlgos.tools.helpers import cloneProcessingSnippet
-    process.leptonEfficienciesStage1B = cloneProcessingSnippet(
-        process, process.leptonEfficiencies, 'Stage1B')
-    # Update input tags to the stage 1B producer
-    for stage1BTreeMaker in [#process.isoTauEfficiencyStage1B,
-                             process.rlxTauEfficiencyStage1B,
-                             #process.isoEGEfficiencyStage1B,
-                             process.rlxEGEfficiencyStage1B,
-                             process.rlxUCTisoL1EGEfficiencyStage1B]:
-        stage1BTreeMaker.l1GSrc[0].setModuleLabel("UCTStage1BProducer")
-        for branch in stage1b_branches.parameterNames_():
-            setattr(stage1BTreeMaker.ntuple, branch,
-                    getattr(stage1b_branches, branch))
-    # add the computation of stage1b trees
-    process.p1 += process.leptonEfficienciesStage1B
-
-
 
 ################################################################################
 ###  Semileptonic ttbar skim for sums ###########################################
@@ -613,7 +493,7 @@ process.load("RecoMET.METProducers.CaloMETSignif_cfi")
 process.metsignificance.noHF = True
 
 # Computing RECO level Sum ET and Sum HT
-process.load("L1Trigger.UCT2015.PFSumET_cfi")
+process.load("L1Trigger.UWTriggerTools.PFSumET_cfi")
 
 process.l1SumsEfficiency = cms.EDAnalyzer(
     "SumsEfficiencyTree",
