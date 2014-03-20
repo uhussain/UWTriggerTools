@@ -38,20 +38,6 @@ options.register(
     VarParsing.varType.float,
     "HCAL activity threshold")
 options.register(
-    "stage1B",
-    0,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.int,
-    "If 1, enable production of Stage1B trees"
-)
-options.register(
-    "stage1",
-    1,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.int,
-    "If 0, *disable* production of Stage1 trees"
-)
-options.register(
     'ecalCalib',
     'CALIB_V4',
     VarParsing.multiplicity.singleton,
@@ -95,6 +81,7 @@ else:
 # UNCOMMENT THIS LINE TO RUN ON SETTINGS FROM THE DATABASE
 # process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource', 'GlobalTag')
 
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 )
@@ -116,6 +103,9 @@ else:
     process.load("L1Trigger.UCT2015.emulationMC_cfi")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 
+process.load("L1Trigger.L1ExtraFromDigis.l1extraParticles_cfi")
+
+
 # Determine which calibration to use
 from L1Trigger.UCT2015.emulation_cfi import \
         eg_calib_v1, eg_calib_v3, eg_calib_v4
@@ -129,7 +119,6 @@ calib_map = {
 ecal_calibration = calib_map[options.ecalCalib]
 process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
 process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
-process.UCT2015EClusterProducer.ecalCalibration = ecal_calibration
 
 if options.eicCardHcalOnly:
     print "Disabling ECAL in Stage1 EGTau path"
@@ -236,44 +225,25 @@ process.sumsUCTRates = cms.EDAnalyzer(
 )
 
 process.uctHadronicRates = cms.Sequence(
-    #process.jetUCTRate *
-    process.corrjetUCTRate
-    #process.sumsUCTRates
+    process.jetUCTRate *
+    process.sumsUCTRates*
+    process.jetL1Rate
+    #process.sumsL1Rates  this breaks - why?
 )
 
 
 process.p1 = cms.Path(
+    process.l1extraParticles*
     process.emulationSequence *
     process.scalersRawToDigi *
     process.tauL1Rate *
     process.isoEGL1Rate *
-    process.rlxEGL1Rate *
-    process.jetL1Rate
-    #process.sumsL1Rates
+    process.rlxEGL1Rate 
 )
 
-if options.stage1:
-    print "Building stage1 trees"
-    process.p1 += process.uctLeptonRates
-    process.p1 += process.uctHadronicRates
-
-
-if options.stage1B:
-    print "Building Stage1B trees"
-    # Make a copy of the lepton efficiency trees using stage 1B inputs.
-    from PhysicsTools.PatAlgos.tools.helpers import cloneProcessingSnippet
-    process.uctLeptonRatesStage1B = cloneProcessingSnippet(
-        process, process.uctLeptonRates, 'Stage1B')
-    # Update input tags to the stage 1B producer
-    for stage1BTreeMaker in [process.rlxTauUCTRateStage1B,
-                             #process.isoTauUCTRateStage1B,
-                             process.rlxEGUCTRateStage1B,
-                             #process.isoEGUCTRateStage1B
-                            ]:
-        stage1BTreeMaker.src[0].setModuleLabel("UCTStage1BProducer")
-    # add the computation of stage1b trees
-    process.p1 += process.uctLeptonRatesStage1B
-
+print "Building stage1 trees"
+process.p1 += process.uctLeptonRates
+process.p1 += process.uctHadronicRates
 
 # Make the framework shut up.
 process.load("FWCore.MessageLogger.MessageLogger_cfi")

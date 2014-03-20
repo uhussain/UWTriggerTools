@@ -38,20 +38,6 @@ options.register(
     VarParsing.varType.float,
     "HCAL activity threshold")
 options.register(
-    "stage1B",
-    0,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.int,
-    "If 1, enable production of Stage1B trees"
-)
-options.register(
-    "stage1",
-    1,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.int,
-    "If 0, *disable* production of Stage1 trees"
-)
-options.register(
     'ecalCalib',
     'CALIB_V4',
     VarParsing.multiplicity.singleton,
@@ -461,9 +447,8 @@ process.p1 = cms.Path(
     #process.pionEfficiency *
 )
 
-if options.stage1:
-    print "Building Stage1 trees"
-    process.p1 += process.leptonEfficiencies
+print "Building Stage1 trees"
+process.p1 += process.leptonEfficiencies
 
 ################################################################################
 ###  Semileptonic ttbar skim for sums ###########################################
