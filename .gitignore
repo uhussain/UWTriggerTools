@@ -1,0 +1,7 @@
+*.root
+*.png
+*.log
+*.pyc
+*.json
+*.pdf
+CVS
