@@ -63,7 +63,7 @@ process = cms.Process("L1UCTRates")
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 # Load the correct global tag, based on the release
 if 'CMSSW_6' in os.environ['CMSSW_VERSION']:
-    process.GlobalTag.globaltag = 'POSTLS161_V12::All'
+    process.GlobalTag.globaltag = 'POSTLS161_V2::All'
     print "Using global tag for upgrade MC: %s" % process.GlobalTag.globaltag
     if not options.isMC:
         raise ValueError("There is no data in CMSSW 6, you must mean isMC=1")
@@ -104,27 +104,6 @@ else:
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 
 process.load("L1Trigger.L1ExtraFromDigis.l1extraParticles_cfi")
-
-
-# Determine which calibration to use
-from L1Trigger.UCT2015.emulation_cfi import \
-        eg_calib_v1, eg_calib_v3, eg_calib_v4
-
-calib_map = {
-    'CALIB_V1': eg_calib_v1,
-    'CALIB_V3': eg_calib_v3,
-    'CALIB_V4': eg_calib_v4
-}
-
-ecal_calibration = calib_map[options.ecalCalib]
-process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
-process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
-
-if options.eicCardHcalOnly:
-    print "Disabling ECAL in Stage1 EGTau path"
-    # Set all scale factors to 0.
-    process.RCTConfigProducers.eGammaECalScaleFactors = [
-        0.0 for _ in eg_calib_v1]
 
 # Read inst. lumi. info from the scalers
 process.load("EventFilter.ScalersRawToDigi.ScalersRawToDigi_cfi")
@@ -233,9 +212,9 @@ process.uctHadronicRates = cms.Sequence(
 
 
 process.p1 = cms.Path(
-    process.l1extraParticles*
     process.emulationSequence *
     process.scalersRawToDigi *
+    process.l1extraParticles*
     process.tauL1Rate *
     process.isoEGL1Rate *
     process.rlxEGL1Rate 
@@ -252,9 +231,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 # Spit out filter efficiency at the end.
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-eic = options.eicIsolationThreshold
-print "Setting EIC threshold to %i" % eic
-process.RCTConfigProducers.eicIsolationThreshold = eic
-hActivity = options.hActivityCut
-print "Setting hActivity threshold to %f" % hActivity
-process.RCTConfigProducers.hActivityCut = hActivity
+#eic = options.eicIsolationThreshold
+#print "Setting EIC threshold to %i" % eic
+#process.RCTConfigProducers.eicIsolationThreshold = eic
+#hActivity = options.hActivityCut
+#print "Setting hActivity threshold to %f" % hActivity
+#process.RCTConfigProducers.hActivityCut = hActivity

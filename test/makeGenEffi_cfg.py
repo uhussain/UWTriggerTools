@@ -14,19 +14,17 @@ process = cms.Process("ReRunningL1")
 
 process.source = cms.Source ("PoolSource",
                              fileNames = cms.untracked.vstring(
-#"/store/mc/Fall13dr/QCD_Pt-10to15_Tune4C_13TeV_pythia8/GEN-SIM-RAW/castor_tsg_PU40bx25_POSTLS162_V2-v3/00000/163B68E6-959E-E311-912A-003048C692D8.root",
-"/store/user/ldodd/TT_Tune4C_13TeV-pythia8-tauola/TT_Tune4C_13TeV-pythia8-tauola-tsg_PU40bx25_POSTLS162_V2-v1/fb508503c16d6e4b02bc25104d11f7c2/skim_109_1_e51.root"
-
-                             )   
+"/store/mc/Fall13dr/DYJetsToLL_M-50_13TeV-pythia6/GEN-SIM-RAW/tsg_PU40bx25_POSTLS162_V2-v1/00000/144FD0F7-BA75-E311-8A18-00266CFFB390.root",
+"/store/mc/Fall13dr/DYJetsToLL_M-50_13TeV-pythia6/GEN-SIM-RAW/tsg_PU40bx25_POSTLS162_V2-v1/00000/2A1BB24D-B075-E311-A5E9-003048F0E18C.root"
                              )
-
+)
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(20000)
+    input = cms.untracked.int32(1000)
 )
 
 # Tested on Monte Carlo, for a test with data edit ahead
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'POSTLS161_V12::All'
+process.GlobalTag.globaltag = 'POSTLS161_V2::All'
 
 # Load emulation and RECO sequences
 process.load("L1Trigger.UCT2015.emulationMC_cfi") 
@@ -62,7 +60,7 @@ process.l1ExtraTreeProducer = cms.EDAnalyzer("L1ExtraTreeProducer",
 
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('genEffis.root')
+    fileName = cms.string('genEffis2.root')
 )
 
 process.createGenParticlesEle =cms.EDProducer("FilterGenParticles",
@@ -108,6 +106,7 @@ common_ntuple_branches = cms.PSet(
     l1gDPhi = cms.string("? l1gMatch ? deltaPhi(l1g.phi, reco.phi) : -1"),
     l1gDEta = cms.string("? l1gMatch ? l1g.eta - reco.eta : -10"),
     l1gDR = cms.string("? l1gMatch ? deltaR(l1g.eta, l1g.phi, reco.eta, reco.phi) : -1"),
+
 )
 
 # Specific to EG tau objects
@@ -156,7 +155,76 @@ process.isoEGEfficiency = cms.EDAnalyzer(
     )
 )
 
+process.isoEGEfficiencyGENRLX = cms.EDAnalyzer(
+    "EfficiencyGenTree",
+    recoSrc = cms.VInputTag("createGenParticlesEle"),
+    l1Src = cms.VInputTag(
+        # These two collections
+        cms.InputTag("l1extraParticles", "Isolated"),
+    ),
+    l1GSrc = cms.VInputTag(cms.InputTag("l1extraParticlesUCT","Isolated")),
+    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
+    # Max DR for RECO-trigger matching
+    maxDR = cms.double(0.5),
+    # Ntuple configuration
+    ntuple = cms.PSet(
+        common_ntuple_branches#,egtau_branches
+    )
+)
 
+process.jetEfficiency = cms.EDAnalyzer(
+    "EfficiencyGenTree",
+    recoSrc = cms.VInputTag("cleanGenJets"),
+    l1Src = cms.VInputTag(
+        # Combine central jets + tau + forward jets
+        cms.InputTag("l1extraParticles", "Central"),
+        cms.InputTag("l1extraParticles", "Forward"),
+    ),
+    l1GSrc = cms.VInputTag(cms.InputTag("l1extraParticlesUCT", "Central"), cms.InputTag("l1extraParticlesUCT","Forward")),
+    l1GPUSrc = cms.InputTag("UCT2015Producer", "PULevel"),
+    # Max DR for RECO-trigger matching
+    maxDR = cms.double(0.5),
+    # Ntuple configuration
+    ntuple = cms.PSet(
+        common_ntuple_branches,
+    )
+)
+
+process.cleanGenJets = cms.EDProducer("GenJetClean")
+
+process.l1SumsEfficiency = cms.EDAnalyzer(
+    "SumsEfficiencyTree",
+    tree2015 =cms.bool(False),
+    l1MHTSrc = cms.InputTag("l1extraParticles", "MHT"),
+    l1METSrc = cms.InputTag("l1extraParticles", "MET"),
+    # Evan said change l1METSigSrc to match recoMETSigSrc
+    l1METSigSrc = cms.InputTag("UCT2015Producer", "METSIGUnpacked"),
+    #l1METSigSrc = cms.InputTag("metsignificance"),
+    # fixme
+    l1SHTSrc = cms.InputTag("l1extraParticles", "MHT"),
+    l1SETSrc = cms.InputTag("l1extraParticles", "MET"),
+    recoMHTSrc = cms.InputTag("genMetCalo"),
+    recoMETSrc = cms.InputTag("genMetCalo"), # calomet
+    recoMETSigSrc  = cms.InputTag("genMetCalo"),
+    recoSHTSrc = cms.InputTag("genMetCalo"),
+    recoSETSrc = cms.InputTag("genMetCalo"),
+    recoPFMETSrc = cms.InputTag("genMetTrue"), # pfmet
+)
+process.uctSumsEfficiency = cms.EDAnalyzer(
+    "SumsEfficiencyTree",
+    tree2015 =cms.bool(False),
+    l1MHTSrc = cms.InputTag("l1extraParticlesUCT", "MHT"),
+    l1METSrc = cms.InputTag("l1extraParticlesUCT", "MET"),
+    l1METSigSrc = cms.InputTag("UCT2015Producer", "METSIGUnpacked"),
+    l1SHTSrc = cms.InputTag("l1extraParticlesUCT", "MHT"),
+    l1SETSrc = cms.InputTag("l1extraParticlesUCT", "MET"),
+    recoMHTSrc = cms.InputTag("genMetCalo"),
+    recoMETSrc = cms.InputTag("genMetCalo"), # calomet
+    recoMETSigSrc  = cms.InputTag("genMetCalo"),
+    recoSHTSrc = cms.InputTag("genMetCalo"),
+    recoSETSrc = cms.InputTag("genMetCalo"),
+    recoPFMETSrc = cms.InputTag("genMetTrue"), # pfmet
+)
 
 process.p1 = cms.Path(
     process.emulationSequence *
@@ -167,7 +235,11 @@ process.p1 = cms.Path(
     *process.rlxEGEfficiency
     *process.createGenParticlesEleIso
     *process.isoEGEfficiency
-
+    *process.isoEGEfficiencyGENRLX
+    * process.cleanGenJets
+    *process.jetEfficiency            
+    #*process.uctSumsEfficiency
+    #*process.l1SumsEfficiency
 )
 
 # Make the framework shut up.
@@ -182,6 +254,6 @@ process.output = cms.OutputModule("PoolOutputModule",
           'keep *_l1extraParticles*_*_*') 
 )
 
-process.out = cms.EndPath(process.output)
+#process.out = cms.EndPath(process.output)
 
 

@@ -110,26 +110,6 @@ else:
    process.load("L1Trigger.UWTriggerTools.recoObjects53X_cfi")
 
 
-# Determine which calibration to use
-from L1Trigger.UCT2015.emulation_cfi import \
-        eg_calib_v1, eg_calib_v3, eg_calib_v4
-
-calib_map = {
-    'CALIB_V1': eg_calib_v1,
-    'CALIB_V3': eg_calib_v3,
-    'CALIB_V4': eg_calib_v4
-}
-
-ecal_calibration = calib_map[options.ecalCalib]
-process.RCTConfigProducers.eGammaECalScaleFactors = ecal_calibration
-process.RCTConfigProducers.jetMETECalScaleFactors = ecal_calibration
-
-if options.eicCardHcalOnly:
-    print "Disabling ECAL in Stage1 EGTau path"
-    # Set all scale factors to 0.
-    process.RCTConfigProducers.eGammaECalScaleFactors = [
-        0.0 for _ in eg_calib_v1]
-
 # Common branches to add to the ntuple
 common_ntuple_branches = cms.PSet(
     index = cms.string("index"), # Index of reco object in the event
@@ -567,13 +547,13 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Spit out filter efficiency at the end.
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
-eic = options.eicIsolationThreshold
-print "Setting EIC threshold to %i" % eic
-process.RCTConfigProducers.eicIsolationThreshold = eic
-hActivity = options.hActivityCut
-print "Setting hActivity threshold to %f" % hActivity
-process.RCTConfigProducers.hActivityCut = hActivity
+#eic = options.eicIsolationThreshold
+#print "Setting EIC threshold to %i" % eic
+#process.RCTConfigProducers.eicIsolationThreshold = eic
+#hActivity = options.hActivityCut
+#print "Setting hActivity threshold to %f" % hActivity
+#process.RCTConfigProducers.hActivityCut = hActivity
 
 
