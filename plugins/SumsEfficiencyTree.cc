@@ -47,6 +47,7 @@ class SumsEfficiencyTree : public edm::EDAnalyzer {
     void analyze(const edm::Event& evt, const edm::EventSetup& es);
   private:
     bool tree2015_;
+    bool recoFile_;
     edm::InputTag l1MHTSrc_;
     edm::InputTag l1METSrc_;
     edm::InputTag l1SHTSrc_;
@@ -114,7 +115,9 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   tree->Branch("recoSET", &recoSET_, "recoSET/F");
   tree->Branch("recoSET2", &recoSET2_, "recoSET2/F");
 
-  tree->Branch("pvs", &pvs_, "pvs/i");
+  if(recoFile_){
+        tree->Branch("pvs", &pvs_, "pvs/i");
+  }
   tree->Branch("run", &run_, "run/i");
   tree->Branch("lumi", &lumi_, "lumi/i");
   tree->Branch("evt", &event_, "evt/l");
@@ -126,6 +129,8 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   // Input things
 
   tree2015_  = pset.getParameter<bool>("tree2015");
+  recoFile_  = pset.getParameter<bool>("recoFile");
+
   l1MHTSrc_ = pset.getParameter<edm::InputTag>("l1MHTSrc");
   l1METSrc_ = pset.getParameter<edm::InputTag>("l1METSrc");
   l1SHTSrc_ = pset.getParameter<edm::InputTag>("l1SHTSrc");
@@ -137,7 +142,9 @@ SumsEfficiencyTree::SumsEfficiencyTree(const edm::ParameterSet& pset) {
   recoSETSrc_ = pset.getParameter<edm::InputTag>("recoSETSrc");
   recoPFMETSrc_ = pset.getParameter<edm::InputTag>("recoPFMETSrc");
 
-  pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<edm::InputTag>("pvSrc") : edm::InputTag("offlinePrimaryVertices");
+  if(recoFile_){
+        pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<edm::InputTag>("pvSrc") : edm::InputTag("offlinePrimaryVertices");
+  }      
 }
 
 SumsEfficiencyTree::~SumsEfficiencyTree() {}
@@ -211,8 +218,10 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   // Get PV collection
   edm::Handle<reco::VertexCollection> vertices;
-  evt.getByLabel(pvSrc_, vertices);
-  pvs_ = vertices->size();
+  if(recoFile_){
+          evt.getByLabel(pvSrc_, vertices);
+          pvs_ = vertices->size();
+  }
 
   Float_t dummyPhi;//, dummySum;
 
@@ -230,6 +239,8 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
   getSumEtL1(evt, l1SHTSrc_, l1SHT_,tree2015_);
   getSumEtL1(evt, l1SETSrc_, l1SET_,tree2015_);
 
+
+/*
   // Fill the L1 bit branches
   edm::Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;
   evt.getByLabel(edm::InputTag("gtDigis", "", "RECO"), l1GtReadoutRecord);
@@ -256,6 +267,8 @@ void SumsEfficiencyTree::analyze(const edm::Event& evt, const edm::EventSetup& e
     L1ETM50_ = -1;
   else
     L1ETM50_ = monitorL1Bit_passed;
+*/
+
 
   tree->Fill();
 }

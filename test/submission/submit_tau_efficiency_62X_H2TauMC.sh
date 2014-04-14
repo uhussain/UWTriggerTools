@@ -11,6 +11,6 @@ fi
 farmoutAnalysisJobs $1 \
   --infer-cmssw-path \
   --input-file-list=H2TauSkim13TeV.txt \
-  ../makeEfficiencyTree_cfg.py  stage1B=0 isMC=1 \
+  ../makeEfficiencyTree_cfg.py   isMC=1 \
   'inputFiles=$inputFileNames' 'outputFile=$outputFileName'\
   --skip-existing-jobs 
