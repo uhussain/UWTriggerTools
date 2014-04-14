@@ -20,5 +20,5 @@ farmoutAnalysisJobs $1-DPG \
   --infer-cmssw-path \
   --input-file-list=NeutrinoGun13_Pu4025ns.txt  \
   --input-files-per-job=5 \
-  ../runUCTToGTinterface.py  \
+  ../runUCTToGTinterfaceL1Tree.py \
   'inputFiles=$inputFileNames' 'outputFile=$outputFileName' 

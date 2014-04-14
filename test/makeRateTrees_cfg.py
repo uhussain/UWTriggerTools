@@ -204,6 +204,7 @@ process.sumsUCTRates = cms.EDAnalyzer(
 )
 
 process.uctHadronicRates = cms.Sequence(
+    process.corrjetUCTRate*
     process.jetUCTRate *
     process.sumsUCTRates*
     process.jetL1Rate

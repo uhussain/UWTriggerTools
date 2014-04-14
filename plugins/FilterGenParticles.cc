@@ -18,6 +18,7 @@ private:
   double minPtThreshold_;
   double maxEtaThreshold_;
   int genLevelSelect_;
+  int genLevelStatus_;
   double maxIsolation_;
   double isolationCone_;
 
@@ -47,6 +48,7 @@ FilterGenParticles::FilterGenParticles( const ParameterSet & cfg ) :
       minPtThreshold_(cfg.getUntrackedParameter<double> ("MinPtThreshold",5)),
       maxEtaThreshold_(cfg.getUntrackedParameter<double> ("MaxEtaThreshold",5)),
       genLevelSelect_(cfg.getUntrackedParameter<int> ("GenLevelSelect",11)),
+      genLevelStatus_(cfg.getUntrackedParameter<int> ("GenLevelStatus",1)),
       maxIsolation_(cfg.getUntrackedParameter<double> ("MaxIsolation",5)),
       isolationCone_(cfg.getUntrackedParameter<double> ("IsolationCone",0.4))
 {
@@ -80,11 +82,11 @@ void FilterGenParticles::produce (Event & ev, const EventSetup &) {
 
   for( size_t i = 0; i < pGenPart->size(); ++ i ) {
         const reco::GenParticle& genpart = (*pGenPart)[i];
-                //cout<<genpart.status()<<" "<<genpart.pt()<<"   "<<fabs(genpart.eta())<<"   "<<genpart.pdgId()<<endl;
-        if ( genpart.status()!=1) continue;
+        if ( fabs(genpart.pdgId())!=genLevelSelect_) continue;
+        //        cout<<" \t"<<genpart.status()<<" "<<genpart.pt()<<"   "<<fabs(genpart.eta())<<"   "<<genpart.pdgId()<<endl;
+        if ( genpart.status()!=genLevelStatus_) continue;
         if ( genpart.pt()<minPtThreshold_) continue;
         if ( fabs(genpart.eta())>maxEtaThreshold_) continue;
-        if ( fabs(genpart.pdgId())!=genLevelSelect_) continue;
 
         double sumPT=0;
         for( size_t j = 0; j < pGenPart->size(); ++ j ) {
