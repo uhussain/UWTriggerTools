@@ -1,0 +1,49 @@
+LIso = 3
+LSB = 50
+l1ptVal = 40
+recoPtVal = 0
+ISOTHRESHOLD = 0.1
+L1_CALIB_FACTOR = 1.0
+L1G_CALIB_FACTOR = 1.0
+ZEROBIAS_RATE = 29127140.0
+
+________________
+----- Rate -----
+
+File : uct_rate_tree_numEvent1000_Tau4x8_1.root
+---------------------------------
+UCT (4x8): Rlx (No Tau Veto)
+
+Tree: rlxTauUCTRate
+
+Cut: (eta[0] > -2.5 && eta[0] < 2.5)
+
+At pT = 40, Rate = 174762.84375
+
+---------------------------------
+UCT (4x8): Iso < 0.10
+
+Tree: rlxTauUCTRate
+
+Cut: (( pt[0]>=63 && (jetPt[0]-pt[0])/pt[0]<100)||(pt[0]<63&&(jetPt[0]-pt[0])/pt[0]<0.1))&&(eta[0] > -2.5 && eta[0] < 2.5)&&1
+
+At pT = 40, Rate = 174762.84375
+
+---------------------------------
+UCT (4x4): Rlx
+
+Tree: rlxTauUCTRate
+
+Cut: (eta[0] > -2.5 && eta[0] < 2.5)
+
+At pT = 40, Rate = 145635.703125
+
+---------------------------------
+UCT (4x4): Iso < 0.40
+
+Tree: rlxTauUCTRate
+
+Cut: (( pt[0]>=63 && (jetPt[0]-pt[0])/pt[0]<100)||(pt[0]<63&&(jetPt[0]-pt[0])/pt[0]<0.4))&&(eta[0] > -2.5 && eta[0] < 2.5)&&1
+
+At pT = 40, Rate = 116508.5625
+

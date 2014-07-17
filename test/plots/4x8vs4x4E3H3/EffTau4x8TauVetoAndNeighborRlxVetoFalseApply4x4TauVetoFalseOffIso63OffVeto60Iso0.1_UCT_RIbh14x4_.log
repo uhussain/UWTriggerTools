@@ -1,0 +1,22 @@
+LIso = 3
+LSB = 50
+l1ptVal = 40
+recoPtVal = 30
+ISOTHRESHOLD = 0.1
+L1_CALIB_FACTOR = 1.0
+L1G_CALIB_FACTOR = 1.0
+ZEROBIAS_RATE = 29127140.0
+
+_____________________________
+-------- Efficiency ---------
+
+Variable: recoPt
+
+Denominator Tree: rlxTauEfficiency
+---------------------------------
+UCT (4x8): Rlx (No Tau Veto)
+
+Tree: rlxTauEfficiency
+
+Cut: (recoPt >= 30)&&(l1gPt >= 40)&&l1gMatch
+
