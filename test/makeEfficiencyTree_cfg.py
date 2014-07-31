@@ -177,6 +177,7 @@ egtau_branches = cms.PSet(
     l1gJetPt = cms.string("? l1gMatch ? l1g.getFloat('associatedJetPt', -4) : -2"),
     l1gEllIso = cms.string("? l1gMatch ? l1g.getInt('ellIsolation', -4) : -2"),
     l1gTauVeto = cms.string("? l1gMatch ? l1g.getInt('tauVeto', -4) : -2"),
+    l1gTauVetoNeighbor = cms.string("? l1gMatch ? l1g.getInt('associated4x4Tau', -4) : -2"),
     l1gMIP = cms.string("? l1gMatch ? l1g.getInt('mipBit', -4) : -2"),
     l1gIsEle = cms.string("? l1gMatch ? l1g.getInt('isEle', -4) : -2"),
 )
